@@ -1,5 +1,5 @@
 // Happy Blocks — "New!" pop-ups: the first time a level uses something new, a card with a tiny
-// board that plays how it works on a loop (a finger drags the blocks), and an "OK, got it" button.
+// board that plays how it works on a loop, and an "OK, got it" button.
 const Intro = (() => {
   const SEEN = 'unblock_seen_intros';
   const seen = () => { try { return JSON.parse(localStorage.getItem(SEEN) || '[]'); } catch (e) { return []; } };
@@ -54,14 +54,8 @@ const Intro = (() => {
     return S;
   }
 
-  // The finger that shows the drags.
-  function finger(host) {
-    const f = document.createElement('div');
-    f.className = 'intro-finger';
-    f.textContent = '👆';
-    host.appendChild(f);
-    return f;
-  }
+  // Stand-in for a pointer: the drags move the blocks on their own (a drawn finger lagged behind them).
+  function finger() { return document.createElement('div'); }
 
   // Drag block d along cells [[r,c], …] with the finger, one smooth glide per step.
   async function drag(S, f, d, path, id) {

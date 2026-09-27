@@ -400,9 +400,19 @@ a.linkish { display: block; text-align: center; }
 .intro-card p { font-size: 0.98rem; line-height: 1.35; }
 #intro-board { position: relative; margin: 8px auto 14px; border-radius: 18px; background: linear-gradient(180deg, #5646b8, #3b2f8e 60%, #33287c);
   box-shadow: 0 9px 0 #211a57, 0 16px 30px rgba(0,0,0,0.4), inset 0 3px 0 rgba(255,255,255,0.22); pointer-events: none; overflow: visible; }
-.intro-finger { position: absolute; left: 0; top: 0; z-index: 70; font-size: 34px; line-height: 1; opacity: 0; margin: -4px 0 0 -12px; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.4)); pointer-events: none; }
-.intro-finger.press { scale: 0.85; }
 .intro-again { background: none; border: 0; color: var(--dim); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 2px 6px; }
 /* A beaver that ate its tree: a happy puff and gone */
 .block.full { transition: transform 0.3s ease-in, opacity 0.3s ease-in; opacity: 0; }
 .block.full .jelly { transform: scale(0.3) translateY(-30%); transition: transform 0.3s ease-in; }
+
+/* Home: the name chip and help pill keep their place while hidden (they show up a moment after the
+   page, once the server answers) so nothing jumps; they fade in. */
+#home .help-pill[hidden], #home .me-chip[hidden] { display: inline-block !important; visibility: hidden; }
+#home .help-pill, #home .me-chip { min-height: 2.4em; }
+#home .help-pill:not([hidden]), #home .me-chip:not([hidden]) { animation: fade 0.4s ease-out; }
+
+/* Levels: the top bar stays put while the list scrolls. */
+#levels .bar { position: sticky; top: 0; z-index: 6; max-width: none; margin-top: calc(-1 * env(safe-area-inset-top));
+  padding-top: calc(12px + env(safe-area-inset-top)); padding-bottom: 10px; justify-content: center;
+  background: rgba(34, 26, 96, 0.82); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 6px 18px rgba(0,0,0,0.25); }
+#levels .bar > * { max-width: 560px; }
