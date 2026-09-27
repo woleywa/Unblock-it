@@ -214,11 +214,12 @@ function makeLevel(st) {
     if (!n) return null;
   }
   if (st.prison) {
-    // 2–3 key blocks, then 1–2 other blocks locked for up to that many keys (any key fits any lock).
+    // 1–3 key blocks, then 1–2 other blocks whose padlock needs every one of those keys (each key that
+    // leaves opens one lock step on every prison), so no key is ever just decoration.
     const order = pieces.slice().sort(() => rand() - 0.5);
-    const keys = int(2, 3), jailed = int(1, 2);
+    const keys = int(1, 3), jailed = int(1, 2);
     order.slice(0, keys).forEach(p => { p.key = true; p.keyColor = 'gold'; });
-    order.slice(keys, keys + jailed).forEach(p => { p.lock = int(1, keys); p.lockColor = 'gold'; });
+    order.slice(keys, keys + jailed).forEach(p => { p.lock = keys; p.lockColor = 'gold'; });
     if (order.length < keys + jailed + 2) return null;
   }
   return { W, H, walls, tracks, pieces, gates, tickPerCell: false };
