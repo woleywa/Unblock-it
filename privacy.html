@@ -194,7 +194,7 @@
     if (!v) return;
     const app = window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform();
     const e = document.getElementById('ver');
-    e.textContent = `${app ? (Capacitor.getPlatform() === 'ios' ? 'iPhone app' : 'Android app') : 'Website'} · game version ${v.build}`;
+    e.textContent = `${app ? (Capacitor.getPlatform() === 'ios' ? 'iPhone app' : 'Android app') : 'Website'} · ${v.build ? `game version ${v.build}` : "game version 0 (built on your Mac, no update yet)"}`;
     e.hidden = false;
   }).catch(() => {});
   // Opened from the game: go back to where you were (same screen, no reload). Opened directly: go to the game.
