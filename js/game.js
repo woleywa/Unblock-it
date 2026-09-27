@@ -106,6 +106,7 @@ function begin(lv, title, hint) {
   $('hint').textContent = hint || '';
   $('win').hidden = true;
   $('clock').hidden = !chPlay;
+  $('ask-friend').hidden = !!chPlay;
   hintButton();
   show('game');
   layout();
@@ -120,7 +121,7 @@ function start(i) {
 function status() { $('moves').textContent = `${moves} move${moves === 1 ? '' : 's'} · par ${level.par}`; }
 
 function layout() {
-  const aw = Math.min(window.innerWidth, 560) - 24, ah = window.innerHeight - (chPlay ? 190 : 150);
+  const aw = Math.min(window.innerWidth, 560) - 24, ah = window.innerHeight - (chPlay ? 230 : 200);
   cs = Math.floor(Math.min(aw / (level.W + 1), ah / (level.H + 1), 72));
   gut = Math.round(cs * 0.5);
 }
@@ -535,6 +536,23 @@ window.addEventListener('online-ready', () => {
 // Signed in or out: a different account now.
 window.addEventListener('online-user', () => { meChip(); syncProgress(); hintButton(); });
 
+// ── Sharing a level: a link that opens it for anyone, even if they haven't got that far ──
+$('ask-friend').addEventListener('click', async () => {
+  const n = idx + 1, url = `${Native.webBase()}#level=${n}`;
+  const text = `Can you solve Level ${n} in Happy Blocks? Par is ${LEVELS[idx].par} moves — I'm stuck!`;
+  if (navigator.share) { try { await navigator.share({ title: `Happy Blocks — Level ${n}`, text, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+  try { await navigator.clipboard.writeText(`${text} ${url}`); $('hint').textContent = 'Link copied — paste it to your friends.'; }
+  catch (e) { window.prompt('Copy this link', url); }
+});
+function openLevelLink() {
+  const m = location.hash.match(/^#level=(\d{1,3})$/);
+  if (!m) return;
+  window.history.replaceState(null, '', location.pathname + location.search);
+  const i = +m[1] - 1;
+  if (i >= 0 && i < LEVELS.length) start(i);
+}
+window.addEventListener('hashchange', openLevelLink);
+
 // ── Buttons ──────────────────────────────────────────────────
 $('play').addEventListener('click', () => { Sound.unlock(); start(firstOpen()); });
 $('to-levels').addEventListener('click', levelList);
@@ -556,5 +574,6 @@ window.addEventListener('resize', () => { if (!$('game').hidden) { layout(); ren
 
 Art.defs();
 home();
+openLevelLink();
 // Offline cache for the web version; the apps carry their files already (and a cache could go stale).
 if ('serviceWorker' in navigator && !Native.app) navigator.serviceWorker.register('sw.js').catch(() => {});

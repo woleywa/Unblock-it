@@ -325,3 +325,4 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 30px; }
 .big.red { background: linear-gradient(180deg, #ff8a7e, #ff5a4e 50%, #e33a30); color: #fff; box-shadow: 0 6px 0 #a3241c, inset 0 2px 0 rgba(255,255,255,0.5); }
 .privacy-link { color: var(--dim); font-size: 0.8rem; opacity: 0.7; margin-top: -4px; }
 a.linkish { display: block; text-align: center; }
+#ask-friend { margin: 0 0 18px; }
