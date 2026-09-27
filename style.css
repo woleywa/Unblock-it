@@ -428,3 +428,16 @@ a.linkish { display: block; text-align: center; }
 #game .bar .icon { width: 42px; height: 42px; flex: none; }
 #game .bar .title h2 { white-space: nowrap; font-size: clamp(1.05rem, 5vw, 1.35rem); }
 #game .bar .title span { white-space: nowrap; font-size: clamp(0.72rem, 3.3vw, 0.85rem); }
+
+/* In-game dialog */
+#ask { z-index: 40; }
+.ask-card { max-width: min(340px, calc(100vw - 36px)); box-sizing: border-box; gap: 14px; }
+.ask-card p { color: #fff; font-size: 1.1rem; font-weight: 600; line-height: 1.35; }
+.ask-card input { width: 100%; box-sizing: border-box; font: inherit; font-weight: 600; font-size: 1.05rem; padding: 12px 14px; border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.2); background: rgba(10,6,40,0.35); color: #fff; text-align: center; }
+.ask-btns { display: flex; gap: 10px; width: 100%; }
+.ask-btns button { flex: 1; min-width: 0; padding-left: 10px; padding-right: 10px; }
+.ask-btns .big { font-size: 1.1rem; }
+.big.danger { background: linear-gradient(180deg, #ff7a82, #e8263a); color: #fff; box-shadow: 0 5px 0 #860a1b; }
+.ask-btns { flex-direction: column-reverse; }
+.ask-btns button { width: 100%; }

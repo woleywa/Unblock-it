@@ -16,7 +16,7 @@ const Social = (() => {
       try { await navigator.share({ title, text, url }); return; } catch (e) { if (e.name === 'AbortError') return; }
     }
     try { await navigator.clipboard.writeText(`${text} ${url}`); toast('Link copied — paste it to your friends'); }
-    catch (e) { window.prompt('Copy this link', url); }
+    catch (e) { ask('Copy this link and send it to your friends:', { input: url, copy: true, cancel: false, ok: 'Done' }); }
   }
   // Run `then` once the player is online with a nickname.
   async function needName(then) {
@@ -439,12 +439,12 @@ const Social = (() => {
       act('team-join', el => busyDo(el, 'team-err', () => o.joinTeam($('team-join-code').value, totals())));
       act('team-invite', () => share('Happy Blocks team', `Join my team “${o.team.name}” in Happy Blocks! Code ${o.team.code}.`, link('join', o.team.code)));
       act('team-chs', () => list());
-      act('team-rename', () => {
-        const n = window.prompt('New team name', o.team.name);
+      act('team-rename', async () => {
+        const n = await ask('New team name', { input: o.team.name, ok: 'Rename' });
         if (n == null || n.trim() === o.team.name) return;
         o.renameTeam(n).then(() => { toast('Team renamed'); team(); }).catch(e => toast(errText(e)));
       });
-      act('team-leave', el => { if (confirm(`Leave ${o.team.name}? Your stars leave with you.`)) busyDo(el.parentNode, null, () => o.leaveTeam(totals())); });
+      act('team-leave', async el => { if (await ask(`Leave ${o.team.name}? Your stars leave with you.`, { ok: 'Leave team', danger: true })) busyDo(el.parentNode, null, () => o.leaveTeam(totals())); });
     } catch (e) {
       console.warn(e);
       box.innerHTML = `<p class="note">${esc(errText(e))}<br><button class="ghost small" id="team-retry">Try again</button></p>`;
@@ -491,7 +491,7 @@ const Social = (() => {
 `;
 
       $('acct-out').addEventListener('click', async () => {
-        if (!confirm('Sign out? This device goes back to a fresh guest. Your account keeps everything.')) return;
+        if (!await ask('Sign out? This device goes back to a fresh guest. Your account keeps everything.', { ok: 'Sign out' })) return;
         try {
           progress = { stars: {}, moves: {} }; saveProgress();
           store = { known: [], runs: {} }; persist();
@@ -599,7 +599,7 @@ const Social = (() => {
       });
       $('fr-share').addEventListener('click', () => share('Happy Blocks', `Add me as a friend on Happy Blocks — I’m ${o.name}!`, link('f', o.uid)));
       list.querySelectorAll('.unfriend').forEach(b => b.addEventListener('click', async () => {
-        if (!confirm(`Remove ${b.dataset.name} from your friends?`)) return;
+        if (!await ask(`Remove ${b.dataset.name} from your friends?`, { ok: 'Remove', danger: true })) return;
         try { await o.removeFriend(b.dataset.uid); rankFriends(); } catch (e) { toast(errText(e)); }
       }));
     } catch (e) {
@@ -614,7 +614,7 @@ const Social = (() => {
       const o = on();
       if (f === o.uid) return;
       if (o.friends.includes(f)) { toast(`${name || 'They'} ${name ? 'is' : 'are'} already your friend`); return; }
-      if (!confirm(`Add ${name || 'this player'} as a friend?`)) return;
+      if (!await ask(`Add ${name || 'this player'} as a friend?`, { ok: 'Add friend' })) return;
       try { const n = await o.addFriendId(f); toast(`${n} added to your friends`); } catch (e) { toast(e.message || errText(e)); }
     });
   }
@@ -705,7 +705,7 @@ const Social = (() => {
       }));
       box.querySelectorAll('[data-hide]').forEach(b => b.addEventListener('click', () => { markDone(b.dataset.hide); boxBusy = false; helpBox(); }));
       box.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', async () => {
-        if (!confirm('Remove this help request? Any solutions in it go too.')) return;
+        if (!await ask('Remove this help request? Any solutions in it go too.', { ok: 'Remove', danger: true })) return;
         try { await o.closeHelp(b.dataset.close); } catch (e) { toast(errText(e)); }
         boxBusy = false; helpBox();
       }));

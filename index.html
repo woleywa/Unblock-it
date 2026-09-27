@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=33">
+  <link rel="stylesheet" href="style.css?v=34">
 </head>
 <body>
   <div class="sky" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
@@ -143,6 +143,14 @@
       <button class="big" id="settings-done">Done</button>
     </div>
   </div>
+  <div id="ask" class="overlay" hidden>
+    <form class="card ask-card" id="ask-form">
+      <h2 id="ask-title" hidden></h2>
+      <p id="ask-text"></p>
+      <input id="ask-input" hidden autocomplete="off" maxlength="40">
+      <div class="ask-btns"><button class="ghost" type="button" id="ask-no">Cancel</button><button class="big" type="submit" id="ask-yes">OK</button></div>
+    </form>
+  </div>
   <div id="intro" class="overlay" hidden>
     <div class="card intro-card">
       <span class="new-tag">NEW!</span>
@@ -225,15 +233,15 @@
   <button id="upd-banner" hidden>✨ New version ready · <b>Tap to update</b></button>
   <div id="toast" hidden></div>
 
-  <script src="js/native.js?v=33"></script>
-  <script src="js/engine.js?v=33"></script>
-  <script src="js/levels.js?v=33"></script>
-  <script src="js/audio.js?v=33"></script>
-  <script src="js/art.js?v=33"></script>
-  <script src="js/challenge-levels.js?v=33"></script>
-  <script src="js/intro.js?v=33"></script>
-  <script src="js/game.js?v=33"></script>
-  <script src="js/social.js?v=33"></script>
-  <script type="module" src="js/online.js?v=33"></script>
+  <script src="js/native.js?v=34"></script>
+  <script src="js/engine.js?v=34"></script>
+  <script src="js/levels.js?v=34"></script>
+  <script src="js/audio.js?v=34"></script>
+  <script src="js/art.js?v=34"></script>
+  <script src="js/challenge-levels.js?v=34"></script>
+  <script src="js/intro.js?v=34"></script>
+  <script src="js/game.js?v=34"></script>
+  <script src="js/social.js?v=34"></script>
+  <script type="module" src="js/online.js?v=34"></script>
 </body>
 </html>

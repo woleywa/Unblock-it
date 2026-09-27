@@ -722,7 +722,7 @@ async function shareLevel(i, helpId) {
   const text = `Can you solve Level ${n} in Happy Blocks? Par is ${LEVELS[i].par} moves — I'm stuck!`;
   if (navigator.share) { try { await navigator.share({ title: `Happy Blocks — Level ${n}`, text, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
   try { await navigator.clipboard.writeText(`${text} ${url}`); $('hint').textContent = 'Link copied — paste it to your friends.'; }
-  catch (e) { window.prompt('Copy this link', url); }
+  catch (e) { ask('Copy this link and send it to your friends:', { input: url, copy: true, cancel: false, ok: 'Done' }); }
 }
 function openLevelLink() {
   const q = new URLSearchParams(location.search), h = location.hash.match(/^#level=(\d{1,3})$/);
@@ -750,6 +750,27 @@ $('play').addEventListener('click', () => { Sound.unlock(); start(firstOpen()); 
 $('to-levels').addEventListener('click', levelList);
 $('levels-back').addEventListener('click', home);
 $('game-back').addEventListener('click', () => chPlay ? chPlay.back() : levelList());
+// ── In-game dialogs (instead of the browser's alert / confirm / prompt) ──
+// ask('Add Bearfi as a friend?', { ok: 'Add friend' }) → true / false
+// ask('New team name', { input: 'Old name' }) → the text, or null
+// ask('Copy this link', { input: url, copy: true, cancel: false }) → shows the link ready to copy
+function ask(text, o = {}) {
+  return new Promise(done => {
+    const inp = $('ask-input');
+    $('ask-title').hidden = !o.title; $('ask-title').textContent = o.title || '';
+    $('ask-text').textContent = text;
+    inp.hidden = o.input == null; inp.value = o.input ?? ''; inp.readOnly = !!o.copy;
+    $('ask-yes').textContent = o.ok || 'OK';
+    $('ask-yes').classList.toggle('danger', !!o.danger);
+    $('ask-no').hidden = o.cancel === false; $('ask-no').textContent = o.cancel || 'Cancel';
+    $('ask').hidden = false;
+    if (o.input != null) setTimeout(() => { inp.focus(); inp.select(); }, 60);
+    const finish = v => { $('ask').hidden = true; $('ask-form').onsubmit = $('ask-no').onclick = null; done(v); };
+    $('ask-form').onsubmit = e => { e.preventDefault(); finish(o.input != null && !o.copy ? inp.value : true); };
+    $('ask-no').onclick = () => finish(o.input != null && !o.copy ? null : false);
+  });
+}
+
 // ── Settings (from home and from a level) ───────────────────
 function settings() {
   $('set-sound').textContent = Sound.on ? '🔊 Sound: on' : '🔇 Sound: off';
