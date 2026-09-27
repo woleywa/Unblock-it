@@ -52,6 +52,8 @@ version.
   onto the tree (pointermove → finishDrag(null, way)); solution steps record it as `e: forestId`.
 - Arrow blocks (`axis` h/v): the generator only gives an arrow to a block already lined up with its
   door (else it could never leave). Drawn as two arrowheads at the block's ends (art.js).
+- Colour lanes (`level.tracks` [[r, c, colour]]): striped floor cells (Art.lane); the generator lays 1–2
+  straight lanes over empty cells or blocks of that colour only.
 - "New!" pop-ups: js/intro.js (`Intro.show(key, again)`), one looping mini-board scene per feature
   (basics, walls, ice, frozen, layered, fire, beaver) drawn with the real Art functions and a 👆 finger.
   start() shows it once per feature (localStorage `unblock_seen_intros`) and adds "▶ Show me" to the hint.

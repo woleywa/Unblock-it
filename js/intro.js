@@ -47,6 +47,11 @@ const Intro = (() => {
         return d;
       },
       redraw(d, p) { d._p = p; d.innerHTML = Art.blockSVG(p, CS); },
+      lane(r, c, col) {
+        const d = Art.lane(col, CS, { left: GUT + c * CS + 3 + 'px', top: GUT + r * CS + 3 + 'px', width: CS - 6 + 'px', height: CS - 6 + 'px', borderRadius: Math.round(CS * 0.2) + 'px' });
+        host.appendChild(d);
+        return d;
+      },
       fire(n, r, c) { const d = Art.fire(n, CS); d.dataset.h = 1; put(d, r, c); host.appendChild(d); return d; },
       forest(r, c) { const d = Art.forest(CS); d.dataset.h = 1; put(d, r, c); host.appendChild(d); return d; },
       put,
@@ -217,6 +222,28 @@ const Intro = (() => {
         fire.style.transition = 'opacity 0.4s, transform 0.4s'; fire.style.opacity = 0;
         await wait(500); fire.remove();
         await drag(S, f, red, [[1, 2], [1, 3]], id); if (id !== run) return;
+        await out(S, host, f, red, 'R', id);
+      },
+    },
+    lanes: {
+      title: 'Colour lanes',
+      text: 'Striped floor lanes let only blocks of their colour across. Everyone else has to go around.',
+      async play(host, id) {
+        const S = board(host, 4, 3);
+        S.lane(0, 2, 'green'); S.lane(1, 2, 'green');
+        S.door('R', 0, 1, 'green'); S.door('R', 1, 1, 'red');
+        const red = S.block({ w: 1, h: 1, color: 'red' }, 1, 0);
+        const g = S.block({ w: 1, h: 1, color: 'green' }, 0, 1);
+        const f = finger(host);
+        await wait(500);
+        // Red can't get onto the green lane…
+        await drag(S, f, red, [[1, 1], [1, 1.25]], id); if (id !== run) return;
+        S.put(red, 1, 1); red.classList.remove('dragging'); red.classList.add('shake'); await wait(350); red.classList.remove('shake');
+        // …green crosses it easily…
+        await drag(S, f, g, [[0, 2], [0, 3]], id); if (id !== run) return;
+        await out(S, host, f, g, 'R', id); if (id !== run) return;
+        // …and red goes around.
+        await drag(S, f, red, [[2, 1], [2, 2], [2, 3], [1, 3]], id); if (id !== run) return;
         await out(S, host, f, red, 'R', id);
       },
     },

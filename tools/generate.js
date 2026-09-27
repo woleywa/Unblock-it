@@ -50,6 +50,8 @@ const STAGES = [
   { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 0.6, beaver: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [3, 10], note: 'beaver' },
   // Arrow blocks: some blocks only slide ↔ or ↕ (toward their door).
   { n: 5, W: [6, 6], H: [7, 8], colors: 3, fill: 0.64, arrows: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [3, 10], note: 'arrows' },
+  // Colour lanes: floor strips only blocks of that colour may cross.
+  { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 0.6, lanes: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [3, 10], note: 'lanes' },
 ];
 
 function shapeBox(sh) { return { h: Math.max(...sh.map(q => q[0])) + 1, w: Math.max(...sh.map(q => q[1])) + 1 }; }
@@ -124,6 +126,24 @@ function makeLevel(st) {
     }
     if (pieces.filter(p => p.color === 'beaver').length < woods) return null;
   }
+  const tracks = [];
+  if (st.lanes) {
+    // 1–2 straight lanes of 3–5 cells, each in a colour on the board, over empty cells or blocks of
+    // that colour (a block of another colour must never start on one).
+    const cols = [...new Set(pieces.map(p => p.color))];
+    const n = int(1, 2);
+    for (let i = 0, tries = 0; i < n && tries < 200; tries++) {
+      const col = pick(cols), vert = rand() < 0.5, len = int(3, 5);
+      const r0 = int(0, vert ? H - len : H - 1), c0 = int(0, vert ? W - 1 : W - len);
+      const cells = [...Array(len).keys()].map(k => vert ? [r0 + k, c0] : [r0, c0 + k]);
+      const ok = cells.every(([r, c]) => { const v = occ[r][c]; return v === 0 || (v > 0 && pieces[v - 1].color === col); })
+        && cells.every(([r, c]) => !tracks.some(t => t[0] === r && t[1] === c));
+      if (!ok) continue;
+      cells.forEach(([r, c]) => tracks.push([r, c, col]));
+      i++;
+    }
+    if (!tracks.length) return null;
+  }
   const inUse = [...new Set(pieces.filter(p => !p.fire && p.color !== 'forest' && p.color !== 'beaver').map(p => p.color))];
   // One exit per colour, wide enough for every piece of that colour on the side it's on.
   const gates = [];
@@ -168,7 +188,7 @@ function makeLevel(st) {
     }
     if (pieces.filter(p => p.axis).length < 2) return null;
   }
-  return { W, H, walls, tracks: [], pieces, gates, tickPerCell: false };
+  return { W, H, walls, tracks, pieces, gates, tickPerCell: false };
 }
 
 function check(level, st) {
@@ -193,7 +213,7 @@ const levels = (APPEND || REDO.length) ? require(CHALLENGE ? '../js/challenge-le
 let skip = levels.length;
 if (APPEND) seed = (seed + levels.length * 7919) % 2147483648;
 // No two levels may be the same board (the old random generator can repeat itself).
-const keyOf = l => JSON.stringify([l.W, l.H, l.walls, l.pieces.map(p => [p.color, p.r, p.c, p.h, p.w, p.shape || 0, p.ice || 0, p.fire || 0, p.inner || 0, p.under || 0, p.axis || 0]), l.gates]);
+const keyOf = l => JSON.stringify([l.W, l.H, l.walls, l.pieces.map(p => [p.color, p.r, p.c, p.h, p.w, p.shape || 0, p.ice || 0, p.fire || 0, p.inner || 0, p.under || 0, p.axis || 0]), l.gates, l.tracks || []]);
 const keys = new Set(levels.filter((_, i) => !REDO.includes(i + 1)).map(keyOf));
 if (REDO.length) {
   seed = (seed * 31 + REDO.reduce((a, n) => a * 131 + n, 7)) % 2147483648;
