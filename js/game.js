@@ -17,7 +17,7 @@ const INTRO = {
   chains: 'New: chains. A chained block only goes as far as its chain reaches — the number on the post.',
   prison: 'New: prison! Locked blocks can’t move. Every 🔑 key block you drag out opens a lock.',
   lanes: 'New: colour lanes. Only blocks of that colour may cross them.',
-  arrows: 'New: arrow blocks. They only slide the way their arrows point.',
+  arrows: 'New: blocks on wheels! They only roll one way — wheels underneath ↔, wheels on the side ↕.',
   beaver: 'New: beavers! Pull one onto a tree and it eats it — something may be hiding inside.',
 };
 
@@ -88,7 +88,7 @@ function home() {
 const STAGES = [
   ['Warm-up', 'red'], ['Getting busy', 'orange'], ['Walls', 'purple'],
   ['On ice', 'sky'], ['Frosty doors', 'blue'], ['Layers', 'pink'], ['Fire', 'orange'],
-  ['Mixed bag', 'green'], ['Big boards', 'purple'], ['Expert', 'red'], ['Beaver woods', 'orange'], ['Arrows', 'sky'], ['Colour lanes', 'green'], ['Prison', 'yellow'], ['Chains', 'blue'], ['Packed', 'pink'], ['Ice, keys & arrows', 'sky'], ['Fire & lanes', 'orange'], ['Woods & chains', 'green'], ['Grand finale', 'purple'],
+  ['Mixed bag', 'green'], ['Big boards', 'purple'], ['Expert', 'red'], ['Beaver woods', 'orange'], ['On wheels', 'sky'], ['Colour lanes', 'green'], ['Prison', 'yellow'], ['Chains', 'blue'], ['Packed', 'pink'], ['Ice, keys & arrows', 'sky'], ['Fire & lanes', 'orange'], ['Woods & chains', 'green'], ['Grand finale', 'purple'],
 ];
 function levelList() {
   const g = $('level-grid');

@@ -321,8 +321,8 @@ const Intro = (() => {
       },
     },
     arrows: {
-      title: 'Arrow blocks',
-      text: 'Blocks with arrows only slide the way the arrows point — ↔ or ↕.',
+      title: 'Blocks on wheels',
+      text: 'Blocks on wheels only roll one way: wheels underneath roll ↔, wheels on the side roll ↕.',
       async play(host, id) {
         const S = board(host, 4, 3);
         S.door('R', 1, 1, 'blue'); S.door('T', 2, 1, 'green');

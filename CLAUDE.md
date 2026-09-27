@@ -51,7 +51,7 @@ version.
   fastSearch in `'eat'` mode (goal: beaver next to forest). In the game the beaver eats only when pulled
   onto the tree (pointermove → finishDrag(null, way)); solution steps record it as `e: forestId`.
 - Arrow blocks (`axis` h/v): the generator only gives an arrow to a block already lined up with its
-  door (else it could never leave). Drawn as two arrowheads at the block's ends (art.js).
+  door (else it could never leave). Drawn as little wheels (under it for ↔, on its right side for ↕) that spin while dragged (art.js).
 - Colour lanes (`level.tracks` [[r, c, colour]]): striped floor cells (Art.lane); the generator lays 1–2
   straight lanes over empty cells or blocks of that colour only.
 - Prison: `lock: n, lockColor: 'gold'` blocks (bars + padlock) and `key: true, keyColor: 'gold'` blocks

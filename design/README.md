@@ -13,7 +13,7 @@ other AIs can use them directly.
 | Folder | Contents |
 |---|---|
 | `blocks/` | Every block colour as a 1×1, a 2×1 bar and an L shape — SVG (vector, standalone) + PNG (transparent, 3×) |
-| `specials/` | Frozen (ice) block, layered block, key block, prison block, arrow blocks ↔ ↕, beaver, water block, fire, forest |
+| `specials/` | Frozen (ice) block, layered block, key block, prison block, one-way blocks on wheels (↔ wheels underneath, ↕ wheels on the side), beaver, water block, fire, forest |
 | `board/` | Logo (SVG + PNG), app icon, a door, a frozen door, a colour-lane cell |
 | `screens/` | Screenshots: home, level list, and one level of every type |
 | `palette.json` | The block colours: `light`, `base`, `dark`, `side` for each |
@@ -59,6 +59,6 @@ other AIs can use them directly.
 
 Drag every block out through the door of its colour. Walls block. Ice melts one step per block
 that leaves. Frozen doors open after that many blocks leave. Layered blocks leave their core
-behind. Water blocks put out fire as they leave. Beavers eat one tree each. Arrow blocks slide one
-way only. Colour lanes let only their colour across. Prison blocks open when every key block has
+behind. Water blocks put out fire as they leave. Beavers eat one tree each. Blocks on wheels roll one
+way only (↔ wheels underneath, ↕ wheels on the side). Colour lanes let only their colour across. Prison blocks open when every key block has
 left. Chained blocks only reach as far as their chain.

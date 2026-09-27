@@ -454,3 +454,6 @@ a.linkish { display: block; text-align: center; }
 .timed { position: absolute; top: -6px; right: -6px; font-style: normal; font-size: 0.8rem; width: 22px; height: 22px; display: grid; place-items: center;
   border-radius: 50%; background: #ffd54a; box-shadow: 0 2px 0 #b38400; }
 .lvl { position: relative; }
+/* One-way blocks: the wheels roll while dragged */
+.block.dragging .wheel, .block.leaving .wheel { animation: wheelspin 0.45s linear infinite; }
+@keyframes wheelspin { to { transform: rotate(360deg); } }

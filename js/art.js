@@ -167,22 +167,18 @@ const Art = (() => {
         + `<rect x="${x + cs * 0.005}" y="${y + cs * 0.15}" width="${cs * 0.065}" height="${cs * 0.11}" rx="${cs * 0.015}" fill="#fffdf2" stroke="#caa" stroke-width="${cs * 0.008}"/></g>`;
     }
     if (p.axis && !frozen) {
-      // Arrow block: a fat arrowhead just inside each end of the way it can slide (↔ or ↕).
-      const line = offs.filter(([r, c]) => !p.shape || (p.axis === 'h' ? r === hr : c === hc)).map(([r, c]) => p.axis === 'h' ? c : r);
-      const lo = Math.min(...line) * cs, hi = (Math.max(...line) + 1) * cs;
-      // On a block that's wider across than one cell, put them in the last row/column, clear of the face.
-      const across = p.axis === 'h' ? p.h : p.w;
-      const mid = (!p.shape && across >= 2 ? across - 0.5 : (p.axis === 'h' ? hr : hc) + 0.5) * cs;
-      // Soft double chevrons (like »), rounded and a little puffy, with a shadow under them.
-      const k = cs * 0.085, gap = cs * 0.085, inset = cs * 0.13;
-      const chev = (t, dir) => p.axis === 'h'
-        ? `M${t - dir * k},${mid - k * 1.25} L${t},${mid} L${t - dir * k},${mid + k * 1.25}`
-        : `M${mid - k * 1.25},${t - dir * k} L${mid},${t} L${mid + k * 1.25},${t - dir * k}`;
-      const pair = (t, dir) => chev(t, dir) + chev(t - dir * gap, dir);
-      const dd = pair(lo + inset, -1) + pair(hi - inset, 1);
-      s += `<g pointer-events="none" fill="none" stroke-linecap="round" stroke-linejoin="round">`
-        + `<path d="${dd}" stroke="${side}" stroke-width="${cs * 0.085}" opacity="0.45" transform="translate(0 ${cs * 0.025})"/>`
-        + `<path d="${dd}" stroke="#fff" stroke-width="${cs * 0.06}" opacity="0.92"/></g>`;
+      // One-way block: little wheels it rolls on — under it for ↔, on its right side for ↕ (like a lift).
+      // Drawn over its edge so they always show; they spin while it's dragged.
+      const r = cs * 0.15, h = p.axis === 'h';
+      const edge = h ? Math.max(...offs.map(q => q[0])) : Math.max(...offs.map(q => q[1]));
+      const line = offs.filter(q => (h ? q[0] : q[1]) === edge).map(q => h ? q[1] : q[0]);
+      const lo = Math.min(...line) * cs + cs * 0.28, hi = (Math.max(...line) + 1) * cs - cs * 0.28;
+      const at = (edge + 1) * cs - (h ? cs * 0.04 : cs * 0.1);
+      for (const t of lo === hi ? [lo] : [lo, hi]) {
+        const [x, y] = h ? [t, at] : [at, t];
+        s += `<g class="wheel" style="transform-origin:${x}px ${y}px"><circle cx="${x}" cy="${y + r * 0.18}" r="${r}" fill="#0b0624" opacity="0.35"/><circle cx="${x}" cy="${y}" r="${r}" fill="#2a2440"/><circle cx="${x}" cy="${y}" r="${r * 0.58}" fill="#e6e9f7"/>`
+          + `<path d="M${x - r * 0.42},${y} H${x + r * 0.42} M${x},${y - r * 0.42} V${y + r * 0.42}" stroke="#9aa0bf" stroke-width="${r * 0.16}"/><circle cx="${x}" cy="${y}" r="${r * 0.2}" fill="#2a2440"/></g>`;
+      }
     }
     if (p.key && !frozen) {
       // Key block: a golden key lying on it (below the face).
