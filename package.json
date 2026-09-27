@@ -2,11 +2,13 @@
   "name": "happy-blocks",
   "version": "1.0.0",
   "private": true,
-  "description": "Happy Blocks — the web game plus its iOS and Android apps (Capacitor).",
+  "description": "Happy Blocks \u2014 the web game plus its iOS and Android apps (Capacitor).",
   "scripts": {
     "build:web": "node tools/build-web.js",
     "sync": "npm run build:web && npx cap sync",
-    "icons": "npx @capacitor/assets generate --iconBackgroundColor '#2a1f73' --iconBackgroundColorDark '#2a1f73' --splashBackgroundColor '#1b2458' --splashBackgroundColorDark '#1b2458'"
+    "icons": "npx @capacitor/assets generate --iconBackgroundColor '#2a1f73' --iconBackgroundColorDark '#2a1f73' --splashBackgroundColor '#1b2458' --splashBackgroundColorDark '#1b2458'",
+    "ios": "npm run sync && npx cap open ios",
+    "android": "npm run sync && npx cap open android"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
