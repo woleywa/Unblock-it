@@ -55,7 +55,7 @@ const Native = (() => {
       if ((+info.build || 1) < u.minNative) return note({ mine: mine.build, latest: u.build, state: 'Needs a newer app from the store' });
       const version = String(u.build);
       const have = ((await U.list()).bundles || []).find(b => b.version === version && b.status !== 'error');
-      const bundle = have || await U.download({ url: u.url, version });
+      const bundle = have || await U.download({ url: u.url, version, checksum: u.checksum || '' });
       if (now) { note({ mine: mine.build, latest: u.build, state: 'Restarting with the new version…' }); await U.set({ id: bundle.id }); return; }
       await U.next({ id: bundle.id });
       ready = bundle.id;

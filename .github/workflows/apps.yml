@@ -55,7 +55,9 @@ jobs:
         run: |
           (cd www && zip -qr "../bundle-$N.zip" .)
           URL="https://github.com/${{ github.repository }}/releases/download/app-web/bundle-$N.zip"
-          node -e "const v=require('./www/version.json'); console.log(JSON.stringify({ ...v, url: process.argv[1] }))" "$URL" > update.json
+          # The updater plugin refuses a download without the zip's SHA-256.
+          SUM=$(sha256sum "bundle-$N.zip" | cut -d' ' -f1)
+          node -e "const v=require('./www/version.json'); console.log(JSON.stringify({ ...v, url: process.argv[1], checksum: process.argv[2] }))" "$URL" "$SUM" > update.json
           cat update.json
           gh release view app-web >/dev/null 2>&1 || gh release create app-web --prerelease \
             --title "App live updates" --notes "Game files the iOS/Android apps download as live updates. Managed by the Apps workflow — don't edit."
