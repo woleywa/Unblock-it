@@ -8,10 +8,12 @@
 //   levels/{level}/runs/{uid}     { name, moves, updated }              — each player's best per level
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import { getAuth, signInAnonymously, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+// Firestore Lite: plain one-off requests, no live stream (nothing for a cache or a sleeping phone
+// to hold open), and a much smaller download.
 import {
   getFirestore, doc, getDoc, writeBatch, setDoc, collection, query, orderBy, limit, getDocs,
-  where, getCountFromServer, serverTimestamp,
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+  where, getCount, serverTimestamp,
+} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-lite.js';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyAgZBn0sOd4E34DuygOHt1KhslHIsUz1eA',
@@ -38,6 +40,9 @@ const ready = new Promise(resolve => {
     resolve(true);
   });
 });
+
+// Every call gives up after a while instead of hanging (e.g. a flaky connection).
+const timed = (p, ms = 12000) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(Object.assign(new Error('timeout'), { code: 'timeout' })), ms))]);
 
 const clean = n => (n || '').trim().replace(/\s+/g, ' ');
 
@@ -82,7 +87,7 @@ async function top(n = 50) {
 async function myRank() {
   await ready;
   if (!me) return null;
-  const c = await getCountFromServer(query(collection(db, 'players'), where('score', '>', me.score)));
+  const c = await getCount(query(collection(db, 'players'), where('score', '>', me.score)));
   return c.data().count + 1;
 }
 
@@ -92,5 +97,10 @@ async function levelTop(level, n = 3) {
   return snap.docs.map(d => ({ ...d.data(), mine: d.id === uid }));
 }
 
-window.Online = { ready, setName, submit, top, myRank, levelTop, get name() { return me && me.name; } };
+window.Online = {
+  ready: timed(ready, 15000).catch(() => false),
+  setName: (n, t) => timed(setName(n, t)), submit: (l, m, t) => timed(submit(l, m, t)),
+  top: n => timed(top(n)), myRank: () => timed(myRank()), levelTop: (l, n) => timed(levelTop(l, n)),
+  get name() { return me && me.name; },
+};
 window.dispatchEvent(new Event('online-ready'));

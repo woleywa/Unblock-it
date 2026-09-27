@@ -351,7 +351,8 @@ async function ranks() {
       : '<p class="note">No one yet — be the first!</p>';
   } catch (e) {
     console.warn(e);
-    meBox.innerHTML = `<p class="note">${e.code === 'permission-denied' ? 'The leaderboard isn’t set up yet.' : 'Couldn’t load the leaderboard — check your connection.'}</p>`;
+    meBox.innerHTML = `<p class="note">${e.code === 'permission-denied' ? 'The leaderboard isn’t set up yet.' : 'Couldn’t load the leaderboard — check your connection.'}<br><button class="ghost small" id="rank-retry">Try again</button></p>`;
+    $('rank-retry').addEventListener('click', ranks);
   }
 }
 $('to-board').addEventListener('click', ranks);

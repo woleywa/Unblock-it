@@ -1,6 +1,6 @@
 // Offline support: serve the app from the cache, refresh it in the background.
-const CACHE = 'unblock-it-v4';
-const FILES = ['./', 'index.html', 'style.css?v=4', 'js/engine.js?v=4', 'js/levels.js?v=4', 'js/audio.js?v=4', 'js/art.js?v=4', 'js/game.js?v=4', 'js/online.js?v=4',
+const CACHE = 'unblock-it-v5';
+const FILES = ['./', 'index.html', 'style.css?v=5', 'js/engine.js?v=5', 'js/levels.js?v=5', 'js/audio.js?v=5', 'js/art.js?v=5', 'js/game.js?v=5', 'js/online.js?v=5',
   'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', e => {

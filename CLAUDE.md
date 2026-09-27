@@ -41,7 +41,9 @@ version.
   nickname claims `names/{lowercase}`. Collections and rules: see the header of online.js and
   `firestore.rules` (pasted into the console by hand — keep the file and console in sync).
 - Leaderboard sorts on `score = stars × 100000 − moves` (one field, no composite index needed).
-- online.js is an ES module loaded from gstatic; game.js works without it (`window.Online` absent).
+- online.js is an ES module loaded from gstatic using **Firestore Lite** (plain requests, no live
+  stream — the full SDK hung reading on iPhone while writes worked). Every call has a timeout.
+  game.js works without it (`window.Online` absent).
 - The service worker never caches Firestore/auth traffic (only own files, fonts, the SDK).
 - Local test: serve the SDK from `npm pack firebase@10.14.1` by routing gstatic URLs in Playwright,
   and launch Chromium with the sandbox proxy + ignoreHTTPSErrors.
