@@ -220,6 +220,27 @@ const Intro = (() => {
         await out(S, host, f, red, 'R', id);
       },
     },
+    arrows: {
+      title: 'Arrow blocks',
+      text: 'Blocks with arrows only slide the way the arrows point — ↔ or ↕.',
+      async play(host, id) {
+        const S = board(host, 4, 3);
+        S.door('R', 1, 1, 'blue'); S.door('T', 0, 1, 'green');
+        const a = S.block({ w: 1, h: 1, color: 'blue', axis: 'h' }, 1, 0);
+        const g = S.block({ w: 1, h: 1, color: 'green' }, 1, 2);
+        const f = finger(host);
+        await wait(500);
+        // Up doesn't work: it only goes sideways.
+        await drag(S, f, a, [[0.8, 0]], id); if (id !== run) return;
+        S.put(a, 1, 0); a.classList.add('shake'); await wait(350); a.classList.remove('shake');
+        await drag(S, f, a, [[1, 1]], id); if (id !== run) return;
+        a.classList.remove('dragging'); a.classList.add('shake'); await wait(350); a.classList.remove('shake');
+        await drag(S, f, g, [[0, 2]], id); if (id !== run) return;
+        await out(S, host, f, g, 'T', id); if (id !== run) return;
+        await drag(S, f, a, [[1, 2], [1, 3]], id); if (id !== run) return;
+        await out(S, host, f, a, 'R', id);
+      },
+    },
     beaver: {
       title: 'Beavers!',
       text: 'Pull a beaver onto a tree and it eats it — something may be hiding inside. Each beaver eats one tree, and every tree must go.',

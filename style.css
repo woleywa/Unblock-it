@@ -441,3 +441,7 @@ a.linkish { display: block; text-align: center; }
 .big.danger { background: linear-gradient(180deg, #ff7a82, #e8263a); color: #fff; box-shadow: 0 5px 0 #860a1b; }
 .ask-btns { flex-direction: column-reverse; }
 .ask-btns button { width: 100%; }
+
+/* Colour lane cells */
+.lane { position: absolute; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--b) 55%, #1c1547) 0 7px, color-mix(in srgb, var(--b) 30%, #1c1547) 7px 14px);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--l) 70%, transparent), inset 0 4px 6px rgba(0,0,0,0.35); opacity: 0.95; }

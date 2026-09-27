@@ -166,6 +166,19 @@ const Art = (() => {
       s += `<g class="teeth"><rect x="${x - cs * 0.07}" y="${y + cs * 0.15}" width="${cs * 0.065}" height="${cs * 0.11}" rx="${cs * 0.015}" fill="#fffdf2" stroke="#caa" stroke-width="${cs * 0.008}"/>`
         + `<rect x="${x + cs * 0.005}" y="${y + cs * 0.15}" width="${cs * 0.065}" height="${cs * 0.11}" rx="${cs * 0.015}" fill="#fffdf2" stroke="#caa" stroke-width="${cs * 0.008}"/></g>`;
     }
+    if (p.axis && !frozen) {
+      // Arrow block: a fat arrowhead just inside each end of the way it can slide (↔ or ↕).
+      const line = offs.filter(([r, c]) => !p.shape || (p.axis === 'h' ? r === hr : c === hc)).map(([r, c]) => p.axis === 'h' ? c : r);
+      const lo = Math.min(...line) * cs, hi = (Math.max(...line) + 1) * cs;
+      // On a block that's wider across than one cell, put them in the last row/column, clear of the face.
+      const across = p.axis === 'h' ? p.h : p.w;
+      const mid = (!p.shape && across >= 2 ? across - 0.5 : (p.axis === 'h' ? hr : hc) + 0.5) * cs;
+      const k = cs * 0.14, tip = cs * 0.1;
+      const head = (t, dir) => p.axis === 'h'
+        ? `M${t},${mid} L${t - dir * k * 1.3},${mid - k} L${t - dir * k * 1.3},${mid + k} Z`
+        : `M${mid},${t} L${mid - k},${t - dir * k * 1.3} L${mid + k},${t - dir * k * 1.3} Z`;
+      s += `<path d="${head(lo + tip, -1)}${head(hi - tip, 1)}" transform="translate(0 ${-cs * 0.02})" fill="#fff" stroke="${side}" stroke-width="${cs * 0.04}" stroke-linejoin="round" paint-order="stroke" pointer-events="none"/>`;
+    }
     if (p.ice) {
       s += `<g pointer-events="none"><path d="${shape}" fill="url(#ice)" opacity="0.6"/>`;
       // Frost cracks and sparkles.
@@ -276,6 +289,16 @@ const Art = (() => {
     return dEl;
   }
 
+  // A colour lane: a floor cell striped in its colour; only blocks of that colour may cross it.
+  function lane(color, cs, box) {
+    const [l, b] = PAL[color] || PAL.blue;
+    const d = document.createElement('div');
+    d.className = 'lane';
+    Object.assign(d.style, box);
+    d.style.setProperty('--l', l); d.style.setProperty('--b', b);
+    return d;
+  }
+
   // Sparks bursting from where a block went out.
   function burst(host, x, y, color, dir) {
     const [l, b] = color === 'ice' ? ['#ffffff', '#cdeeff'] : color === 'wood' ? ['#f2d29b', '#a0692f'] : color === 'leaf' ? ['#a6e98a', '#2e8b3a'] : PAL[color] || PAL.blue;
@@ -309,5 +332,5 @@ const Art = (() => {
     }
   }
 
-  return { PAL, defs, blockSVG, door, burst, confetti, fire, sprinkle, steam, forest };
+  return { PAL, defs, blockSVG, door, lane, burst, confetti, fire, sprinkle, steam, forest };
 })();

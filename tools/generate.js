@@ -10,7 +10,7 @@ const CHALLENGE = process.argv[2] === 'challenge';
 // the existing levels, and everyone's stars for them, stay exactly as they are).
 const APPEND = process.argv.includes('--append');
 // --redo 38,39,40: replace those levels (1-based) with new, different boards from the same stage.
-const REDO = (process.argv[process.argv.indexOf('--redo') + 1] || '').split(',').filter(Boolean).map(Number);
+const REDO = process.argv.includes('--redo') ? (process.argv[process.argv.indexOf('--redo') + 1] || '').split(',').filter(Boolean).map(Number) : [];
 if (process.argv.includes('--redo') && !REDO.length) throw new Error('--redo needs level numbers, e.g. --redo 38,39');
 let seed = +(/^\d+$/.test(process.argv[CHALLENGE ? 3 : 2] || '') ? process.argv[CHALLENGE ? 3 : 2] : (CHALLENGE ? 7331 : 2026));
 // The original generator (kept so a full rebuild gives the same levels). It loses precision and repeats
@@ -48,6 +48,8 @@ const STAGES = [
   { n: 5, W: [7, 8], H: [9, 10], colors: 5, fill: 0.76, ice: true, frozen: true, walls: true, layered: true, shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z', 'big'], extra: [12, 22] },
   // Beaver woods: forests block cells and hide blocks; each beaver hops onto one forest and eats it.
   { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 0.6, beaver: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [3, 10], note: 'beaver' },
+  // Arrow blocks: some blocks only slide ↔ or ↕ (toward their door).
+  { n: 5, W: [6, 6], H: [7, 8], colors: 3, fill: 0.64, arrows: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [3, 10], note: 'arrows' },
 ];
 
 function shapeBox(sh) { return { h: Math.max(...sh.map(q => q[0])) + 1, w: Math.max(...sh.map(q => q[1])) + 1 }; }
@@ -151,6 +153,21 @@ function makeLevel(st) {
     const other = inUse.filter(c => c !== p.color);
     if (other.length) p.inner = pick(other);
   }
+  if (st.arrows) {
+    // Arrows point the way to the block's own door, so it can still get out. Bars get one more often.
+    for (const p of pieces) {
+      const gt = gates.find(g => g.color === p.color);
+      if (!gt || p.inner || p.fire || p.color === 'water') continue;
+      const ax = gt.side === 'L' || gt.side === 'R' ? 'h' : 'v';
+      // It can only get out if it already lines up with the door (rows for ↔, columns for ↕).
+      const cells = p.shape ? p.shape.map(([a, b]) => [p.r + a, p.c + b]) : [...Array(p.h * p.w).keys()].map(k => [p.r + Math.floor(k / p.w), p.c + k % p.w]);
+      const inDoor = cells.every(([r, c]) => { const k = ax === 'h' ? r : c; return k >= gt.start && k < gt.start + gt.len; });
+      if (!inDoor) continue;
+      const bar = ax === 'h' ? p.w > p.h : p.h > p.w;
+      if (rand() < (bar ? 0.8 : 0.5)) p.axis = ax;
+    }
+    if (pieces.filter(p => p.axis).length < 2) return null;
+  }
   return { W, H, walls, tracks: [], pieces, gates, tickPerCell: false };
 }
 
@@ -176,7 +193,7 @@ const levels = (APPEND || REDO.length) ? require(CHALLENGE ? '../js/challenge-le
 let skip = levels.length;
 if (APPEND) seed = (seed + levels.length * 7919) % 2147483648;
 // No two levels may be the same board (the old random generator can repeat itself).
-const keyOf = l => JSON.stringify([l.W, l.H, l.walls, l.pieces.map(p => [p.color, p.r, p.c, p.h, p.w, p.shape || 0, p.ice || 0, p.fire || 0, p.inner || 0, p.under || 0]), l.gates]);
+const keyOf = l => JSON.stringify([l.W, l.H, l.walls, l.pieces.map(p => [p.color, p.r, p.c, p.h, p.w, p.shape || 0, p.ice || 0, p.fire || 0, p.inner || 0, p.under || 0, p.axis || 0]), l.gates]);
 const keys = new Set(levels.filter((_, i) => !REDO.includes(i + 1)).map(keyOf));
 if (REDO.length) {
   seed = (seed * 31 + REDO.reduce((a, n) => a * 131 + n, 7)) % 2147483648;

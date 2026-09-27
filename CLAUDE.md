@@ -50,6 +50,8 @@ version.
   already next to trees — in the game it can sit there unfed), and findUnblock's first stage is a
   fastSearch in `'eat'` mode (goal: beaver next to forest). In the game the beaver eats only when pulled
   onto the tree (pointermove → finishDrag(null, way)); solution steps record it as `e: forestId`.
+- Arrow blocks (`axis` h/v): the generator only gives an arrow to a block already lined up with its
+  door (else it could never leave). Drawn as two arrowheads at the block's ends (art.js).
 - "New!" pop-ups: js/intro.js (`Intro.show(key, again)`), one looping mini-board scene per feature
   (basics, walls, ice, frozen, layered, fire, beaver) drawn with the real Art functions and a 👆 finger.
   start() shows it once per feature (localStorage `unblock_seen_intros`) and adds "▶ Show me" to the hint.

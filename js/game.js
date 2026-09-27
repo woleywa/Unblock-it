@@ -13,6 +13,8 @@ const INTRO = {
   frozen: 'New: frozen doors. They open after that many blocks leave.',
   layered: 'New: layered blocks. The outside leaves, the core stays behind.',
   fire: 'New: fire! Each water block you drag out sprays every fire once. Out fire, open road.',
+  lanes: 'New: colour lanes. Only blocks of that colour may cross them.',
+  arrows: 'New: arrow blocks. They only slide the way their arrows point.',
   beaver: 'New: beavers! Pull one onto a tree and it eats it — something may be hiding inside.',
 };
 
@@ -82,7 +84,7 @@ function home() {
 const STAGES = [
   ['Warm-up', 'red'], ['Getting busy', 'orange'], ['Walls', 'purple'],
   ['On ice', 'sky'], ['Frosty doors', 'blue'], ['Layers', 'pink'], ['Fire', 'orange'],
-  ['Mixed bag', 'green'], ['Big boards', 'purple'], ['Expert', 'red'], ['Beaver woods', 'orange'],
+  ['Mixed bag', 'green'], ['Big boards', 'purple'], ['Expert', 'red'], ['Beaver woods', 'orange'], ['Arrows', 'sky'],
 ];
 function levelList() {
   const g = $('level-grid');
@@ -216,6 +218,11 @@ function render() {
     const [x, y] = px(r, c);
     b.appendChild(el(walls.has(r + ',' + c) ? 'wall' : 'cell', { left: x + 3 + 'px', top: y + 3 + 'px', width: cs - 6 + 'px', height: cs - 6 + 'px', borderRadius: Math.round(cs * 0.2) + 'px' }));
   }
+  // Colour lanes: floor cells only blocks of that colour may cross.
+  for (const [r, c, col] of level.tracks || []) {
+    const [x, y] = px(r, c);
+    b.appendChild(Art.lane(col, cs, { left: x + 3 + 'px', top: y + 3 + 'px', width: cs - 6 + 'px', height: cs - 6 + 'px', borderRadius: Math.round(cs * 0.2) + 'px' }));
+  }
   for (const gt of st.gates) b.appendChild(Art.door(gt, doorBox(gt), gut));
   for (const p of st.pieces) b.appendChild(p.fire ? fireEl(p) : p.color === 'forest' ? forestEl(p) : blockEl(p));
   status();
@@ -230,6 +237,8 @@ function exitFor(p, r, c, side) {
   const cells = Engine.cellsOf(p, r, c);
   for (const gt of st.gates) {
     if (gt.frozen || gt.color !== p.color || (side && gt.side !== side)) continue;
+    // Arrow blocks leave only along their arrow.
+    if ((p.axis === 'h' && (gt.side === 'T' || gt.side === 'B')) || (p.axis === 'v' && (gt.side === 'L' || gt.side === 'R'))) continue;
     const lane = Engine.laneOf(level, gt, cells);
     if (lane && lane.every(([y, x]) => { const v = g[y * level.W + x]; return v === -1 || v === p.id; })) return { gt, lane };
   }
@@ -257,8 +266,8 @@ $('board').addEventListener('pointermove', e => {
   for (let k = 0; k < 40; k++) {
     const dr = tr - drag.r, dc = tc - drag.c;
     const steps = [];
-    if (Math.abs(dr) >= 0.5) steps.push([Math.sign(dr), 0, Math.abs(dr)]);
-    if (Math.abs(dc) >= 0.5) steps.push([0, Math.sign(dc), Math.abs(dc)]);
+    if (Math.abs(dr) >= 0.5 && p.axis !== 'h') steps.push([Math.sign(dr), 0, Math.abs(dr)]);
+    if (Math.abs(dc) >= 0.5 && p.axis !== 'v') steps.push([0, Math.sign(dc), Math.abs(dc)]);
     steps.sort((a, b) => b[2] - a[2]);
     const ok = steps.find(([sr, sc]) => Engine.fits(level, drag.g, p, drag.r + sr, drag.c + sc));
     if (!ok) break;
@@ -285,7 +294,7 @@ $('board').addEventListener('pointermove', e => {
   const give = v => Math.sign(v) * Math.min(0.05, Math.abs(v) * 0.2);
   const lean = (v, free) => free ? Math.max(-0.49, Math.min(0.49, v)) : give(v);
   const dr = tr - drag.r, dc = tc - drag.c;
-  let fr = lean(dr, Math.abs(dr) > 0.01 && fits(Math.sign(dr), 0)), fc = lean(dc, Math.abs(dc) > 0.01 && fits(0, Math.sign(dc)));
+  let fr = p.axis === 'h' ? 0 : lean(dr, Math.abs(dr) > 0.01 && fits(Math.sign(dr), 0)), fc = p.axis === 'v' ? 0 : lean(dc, Math.abs(dc) > 0.01 && fits(0, Math.sign(dc)));
   // Both ways at once only if the diagonal cell is free too; otherwise the stronger pull wins.
   if (Math.abs(fr) > 0.05 && Math.abs(fc) > 0.05 && !fits(Math.sign(fr), Math.sign(fc))) {
     if (Math.abs(fr) > Math.abs(fc)) fc = give(dc); else fr = give(dr);
