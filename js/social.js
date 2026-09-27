@@ -562,6 +562,8 @@ const Social = (() => {
     }
     body.insertAdjacentHTML('beforeend', '<a class="linkish" href="privacy.html">Privacy policy</a>');
     $('acct').hidden = false;
+    // Say so instead of silently waiting when the server can't be reached.
+    o.ready.then(ok => { if (!ok && $('acct-err')) $('acct-err').textContent = 'Can’t reach the server right now — check your connection and try again.'; });
   }
   $('acct-close').addEventListener('click', () => { $('acct').hidden = true; });
   $('acct-rename').addEventListener('click', () => { $('acct').hidden = true; askName(account); });

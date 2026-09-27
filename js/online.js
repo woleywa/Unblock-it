@@ -14,7 +14,7 @@
 //   challenges/{code}/entries/{uid} { name, team, teamName, started, updated, stars, moves, solved, score, runs }
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import {
-  getAuth, signInAnonymously, onAuthStateChanged, EmailAuthProvider, linkWithCredential,
+  initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence, signInAnonymously, onAuthStateChanged, EmailAuthProvider, linkWithCredential,
   signInWithEmailAndPassword, sendPasswordResetEmail, signOut, reauthenticateWithCredential, deleteUser,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 // Firestore Lite: plain one-off requests, no live stream (nothing for a cache or a sleeping phone
@@ -34,7 +34,10 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+// initializeAuth, not getAuth: getAuth also loads Google's pop-up/redirect helper (an iframe from the
+// auth domain), which never finishes inside the iOS app's web view — sign-in then hangs forever. We only
+// use guest and email/password sign-in, which don't need it.
+const auth = initializeAuth(app, { persistence: [indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence] });
 const db = getFirestore(app);
 
 // Letters of any language, numbers, emoji, spaces and punctuation; counted as the characters you see.

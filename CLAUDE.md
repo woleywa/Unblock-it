@@ -11,6 +11,9 @@ version.
 - Capacitor 8 wraps the same files: `npm run build:web` copies them to `www/` (gitignored), `npm run sync`
   also copies into `ios/` and `android/`. App id `com.woleywa.happyblocks`. `.github/workflows/apps.yml`
   builds an Android debug APK (artifact) and an unsigned iOS simulator build on every push to main.
+- Firebase Auth uses `initializeAuth` (not `getAuth`): getAuth loads the popup/redirect iframe, which never
+  loads in the iOS web view, so sign-in hung in the app. The apps bundle the SDK: build-web copies
+  node_modules/firebase's CDN builds to www/vendor/firebase and rewrites the gstatic imports.
 - `js/native.js`: `Native.app`, `Native.buzz()` (haptics), `Native.webBase()` (invite links must use the
   public web URL, not capacitor://), status bar, Android back button. No service worker in the apps.
 - Icons/splash: source art in `assets/` (rendered from Art.blockSVG), `npm run icons` makes every size.
