@@ -4,10 +4,10 @@ const Art = (() => {
   const PAL = {
     red:    ['#ff7a82', '#e8263a', '#c0142a', '#860a1b'],
     blue:   ['#8db8ff', '#3d7bff', '#2a5fe3', '#1c42ad'],
-    yellow: ['#ffe68a', '#ffc933', '#f2a900', '#c78300'],
+    yellow: ['#fff5a0', '#ffe22e', '#f2c800', '#b08f00'],
     green:  ['#8ff2b0', '#2fcf6f', '#1dab56', '#12803f'],
     purple: ['#d8b0ff', '#a45cff', '#8439e8', '#6124b6'],
-    orange: ['#ffd38a', '#ff9a1a', '#f58300', '#b85f00'],
+    orange: ['#ffb07a', '#ff7417', '#e85d00', '#a13d00'],
     pink:   ['#ffb0da', '#ff5fb2', '#ea3a92', '#b52470'],
     sky:    ['#a6eeff', '#3fd0ff', '#18aeee', '#0b83bc'],
     water:  ['#a8fff4', '#1fd6c6', '#0fb0a8', '#0a7d80'],
