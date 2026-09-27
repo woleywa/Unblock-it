@@ -646,6 +646,8 @@ const Social = (() => {
       $('help-send').hidden = !rows.length;
     } catch (e) { console.warn(e); $('help-friends').innerHTML = `<p class="note small">${esc(errText(e))}</p>`; }
   }
+  $('help-pill').addEventListener('click', () => { $('help-sheet').hidden = false; helpBox(); });
+  $('help-sheet-close').addEventListener('click', () => { $('help-sheet').hidden = true; });
   $('help-cancel').addEventListener('click', () => { $('help-ask').hidden = true; asking = null; });
   $('help-send').addEventListener('click', async () => {
     const to = picked();
@@ -669,7 +671,7 @@ const Social = (() => {
   let boxBusy = false;
   async function helpBox() {
     const box = $('help-box'), o = on();
-    if (!o || !o.name) { box.innerHTML = ''; return; }
+    if (!o || !o.name) { box.innerHTML = ''; $('help-pill').hidden = true; return; }
     if (boxBusy || !(await o.ready)) return;
     boxBusy = true;
     try {
@@ -684,7 +686,14 @@ const Social = (() => {
         if (!h.answers.length) cards.push(`<div class="help-card wait"><span>⏳ Waiting for help on <b>Level ${h.level + 1}</b></span>
           <button class="hc-x" data-close="${h.id}" aria-label="Cancel">✕</button></div>`);
       }
-      box.innerHTML = cards.slice(0, 5).join('');
+      box.innerHTML = cards.join('') || '<p class="note small">Nothing here right now.</p>';
+      // On the home screen: one small line for the most useful thing, the rest in the Help sheet.
+      const asks = inc.filter(h => !done.has(h.id)), sols = mine.flatMap(h => h.answers.map(a => ({ h, a }))), waiting = mine.filter(h => !h.answers.length);
+      const more = asks.length + sols.length + waiting.length - 1;
+      const top = sols.length ? `💡 ${esc(sols[0].a.name)} sent a solution` : asks.length ? `🆘 ${esc(asks[0].fromName)} needs help` : waiting.length ? `⏳ Waiting for help · Level ${waiting[0].level + 1}` : '';
+      $('help-pill').innerHTML = top ? `${top}${more > 0 ? ` <i>+${more}</i>` : ''}` : '';
+      $('help-pill').hidden = !top;
+      $('help-pill').classList.toggle('quiet', !sols.length && !asks.length);
       box.querySelectorAll('[data-help]').forEach(b => b.addEventListener('click', () => {
         const h = inc.find(x => x.id === b.dataset.help);
         start(h.level, { help: { id: h.id, from: h.from, fromName: h.fromName } });
@@ -694,7 +703,7 @@ const Social = (() => {
         start(h.level, { answer: { name: a.name, steps: a.steps } });
         $('hint').textContent = `Follow ${a.name}’s moves with 💡 Next move, or ▶ Watch them all.`;
       }));
-      box.querySelectorAll('[data-hide]').forEach(b => b.addEventListener('click', () => { markDone(b.dataset.hide); b.closest('.help-card').remove(); }));
+      box.querySelectorAll('[data-hide]').forEach(b => b.addEventListener('click', () => { markDone(b.dataset.hide); boxBusy = false; helpBox(); }));
       box.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', async () => {
         if (!confirm('Remove this help request? Any solutions in it go too.')) return;
         try { await o.closeHelp(b.dataset.close); } catch (e) { toast(errText(e)); }

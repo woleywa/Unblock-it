@@ -41,14 +41,14 @@ body {
 button { font: inherit; color: inherit; border: 0; cursor: pointer; background: none; }
 
 /* ── Home ─────────────────────────────────────────────── */
-#home { justify-content: center; gap: 14px; padding: 24px; text-align: center; }
-.logo { display: grid; grid-template-columns: repeat(2, 64px); gap: 4px; transform: rotate(-8deg); margin-bottom: 8px; }
-.logo-block { width: 64px; height: 70px; animation: bob 2.6s ease-in-out infinite; animation-delay: calc(var(--i) * -0.6s); }
+#home { justify-content: center; gap: clamp(7px, 1.5vh, 14px); padding: 16px 24px; text-align: center; position: relative; }
+.logo { --b: clamp(40px, 7.4vh, 64px); display: grid; grid-template-columns: repeat(2, var(--b)); gap: 4px; transform: rotate(-8deg); margin-bottom: clamp(0px, 0.8vh, 8px); }
+.logo-block { width: var(--b); height: calc(var(--b) * 1.09); animation: bob 2.6s ease-in-out infinite; animation-delay: calc(var(--i) * -0.6s); }
 @keyframes bob { 50% { transform: translateY(-7px) rotate(3deg); } }
-h1 { font-size: min(3.4rem, 11.5vw); font-weight: 700; letter-spacing: -0.01em; line-height: 1;
+h1 { font-size: min(3.4rem, 11.5vw, 6.6vh); font-weight: 700; letter-spacing: -0.01em; line-height: 1;
   background: linear-gradient(180deg, #fff 30%, #ffe3a8); -webkit-background-clip: text; background-clip: text; color: transparent;
   filter: drop-shadow(0 4px 0 rgba(20,10,60,0.55)); }
-.tag { color: var(--dim); max-width: 280px; line-height: 1.4; margin-bottom: 14px; font-weight: 500; }
+.tag { color: var(--dim); max-width: 280px; line-height: 1.35; margin-bottom: clamp(2px, 1vh, 14px); font-weight: 500; }
 .big {
   position: relative; overflow: hidden;
   background: linear-gradient(180deg, #ffe680, var(--accent) 50%, #ffc21a); color: #4a2c00; font-weight: 700; font-size: 1.35rem;
@@ -352,3 +352,19 @@ a.linkish { display: block; text-align: center; }
 .card.form label.pick { justify-content: flex-start; margin-top: 0; font-size: 1rem; }
 #ans-bar { width: calc(100% - 24px); }
 .ver { color: var(--dim); font-size: 0.7rem; opacity: 0.55; margin-top: -8px; }
+
+/* Home extras: sound in the corner, help as one small line, name + stars, a tiny footer. */
+#home .big { padding-top: clamp(10px, 1.75vh, 15px); padding-bottom: clamp(10px, 1.75vh, 15px); }
+#home .ghost, #home .pair .ghost { padding-top: clamp(8px, 1.5vh, 13px); padding-bottom: clamp(8px, 1.5vh, 13px); }
+.sound-btn { position: absolute; top: 12px; right: 14px; font-size: 1.15rem; }
+.help-pill { max-width: min(340px, 92vw); padding: 8px 16px; border-radius: 999px; font-weight: 700; font-size: 0.9rem;
+  background: linear-gradient(180deg, rgba(255,95,178,0.3), rgba(255,95,178,0.14)); border: 1px solid rgba(255,95,178,0.55);
+  animation: nextup 2.2s ease-in-out infinite; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.help-pill i { font-style: normal; opacity: 0.75; margin-left: 4px; }
+.help-pill.quiet { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.14); color: var(--dim); font-weight: 600; animation: none; }
+.me-row { display: flex; align-items: center; gap: 10px; justify-content: center; }
+.me-row .me-chip { margin-top: 0; }
+.me-row .stars-total { min-height: 0; }
+.home-foot { position: absolute; bottom: 10px; left: 0; right: 0; font-size: 0.72rem; color: var(--dim); opacity: 0.65; display: flex; gap: 10px; justify-content: center; }
+.home-foot a { color: inherit; }
+#help-sheet #help-box { max-height: 60vh; overflow-y: auto; max-width: none; }

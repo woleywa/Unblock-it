@@ -51,6 +51,7 @@ function show(id) {
   ['home', 'levels', 'ranks', 'game', 'chs', 'ch', 'team'].forEach(s => $(s).hidden = s !== id);
   // Leaving the board (e.g. an invite link opened mid-game) closes its cards and challenge play.
   if (id !== 'game') { $('win').hidden = true; $('timeup').hidden = true; chPlay = null; }
+  $('help-sheet').hidden = true;
 }
 function logo() {
   const box = document.querySelector('.logo');
@@ -68,9 +69,10 @@ function logo() {
 function home() {
   logo();
   const total = Object.values(progress.stars).reduce((a, b) => a + b, 0);
-  $('stars-total').textContent = total ? `★ ${total} / ${LEVELS.length * 3}` : '';
+  $('stars-total').textContent = total ? `★ ${total}/${LEVELS.length * 3}` : '';
   $('play').textContent = total ? 'Continue' : 'Play';
-  $('sound').textContent = Sound.on ? '🔊 Sound on' : '🔇 Sound off';
+  $('sound').textContent = Sound.on ? '🔊' : '🔇';
+  $('sound').setAttribute('aria-label', Sound.on ? 'Sound on' : 'Sound off');
   meChip();
   show('home');
   if (typeof Social !== 'undefined') Social.helpBox();
@@ -679,7 +681,7 @@ Art.defs();
 home();
 // Which version of the game this is (the build number from the GitHub build; hidden when unknown).
 fetch('version.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : null)
-  .then(v => { if (v) $('ver').textContent = `Game version ${v.build}`; }).catch(() => {});
+  .then(v => { if (v) $('ver').textContent = `version ${v.build}`; }).catch(() => {});
 openLevelLink();
 // Offline cache for the web version; the apps carry their files already (and a cache could go stale).
 if ('serviceWorker' in navigator && !Native.app) navigator.serviceWorker.register('sw.js').catch(() => {});
