@@ -16,6 +16,10 @@ version.
   node_modules/firebase's CDN builds to www/vendor/firebase and rewrites the gstatic imports.
 - `js/native.js`: `Native.app`, `Native.buzz()` (haptics), `Native.webBase()` (invite links must use the
   public web URL, not capacitor://), status bar, Android back button. No service worker in the apps.
+- Live updates: job `web-update` publishes www as `bundle-<run>.zip` + `update.json` on release
+  `app-web`; native.js `checkForUpdate` downloads a newer build via @capgo/capacitor-updater (manual
+  mode, stats off) and applies it next launch. `www/version.json` = { build: GITHUB_RUN_NUMBER (0 local),
+  minNative }. Native-code changes: bump app build numbers + MIN_NATIVE_BUILD in tools/build-web.js.
 - Icons/splash: source art in `assets/` (rendered from Art.blockSVG), `npm run icons` makes every size.
 - Account deletion (Apple requirement): online.js `deleteAccount` (re-auth with password, leave team,
   delete runs/player/name/save, then the auth user).

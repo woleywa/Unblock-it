@@ -10,6 +10,37 @@ on:
   workflow_dispatch:
 
 jobs:
+  # Live updates: the game files as a zip + update.json on the "app-web" release. The apps check it at
+  # start-up, download a newer game in the background and use it from the next launch.
+  web-update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build:web
+      - name: Publish the game for live updates
+        env:
+          GH_TOKEN: ${{ github.token }}
+          N: ${{ github.run_number }}
+        run: |
+          (cd www && zip -qr "../bundle-$N.zip" .)
+          URL="https://github.com/${{ github.repository }}/releases/download/app-web/bundle-$N.zip"
+          node -e "const v=require('./www/version.json'); console.log(JSON.stringify({ ...v, url: process.argv[1] }))" "$URL" > update.json
+          cat update.json
+          gh release view app-web >/dev/null 2>&1 || gh release create app-web --prerelease \
+            --title "App live updates" --notes "Game files the iOS/Android apps download as live updates. Managed by the Apps workflow — don't edit."
+          gh release upload app-web "bundle-$N.zip" --clobber
+          gh release upload app-web update.json --clobber
+          # Keep the newest 3 bundles.
+          gh release view app-web --json assets -q '.assets[].name' | grep '^bundle-' | sort -t- -k2 -n | head -n -3 \
+            | xargs -r -I{} gh release delete-asset app-web {} -y
+
   android:
     runs-on: ubuntu-latest
     steps:

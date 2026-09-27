@@ -18,6 +18,20 @@ website, iPhone/iPad and Android. App ID (bundle id): **`com.woleywa.happyblocks
 
 After changing the game: `npm run sync` (copies it into both apps). The GitHub build does this itself.
 
+## Live updates (no rebuild for game changes)
+Every push to `main` also publishes the game files as `bundle-N.zip` plus `update.json` on the
+**app-web** release (job `web-update` in `.github/workflows/apps.yml`). At start-up the app
+(`js/native.js` → `checkForUpdate`) compares `update.json` with its own `version.json`; if newer, it
+downloads the zip in the background ([@capgo/capacitor-updater](https://github.com/Cap-go/capacitor-updater),
+self-hosted, no Capgo account, stats off) and uses it **from the next launch**. If a new game copy fails
+to start, the app rolls back to the last good one.
+
+- Covered: everything in `index.html`, `style.css`, `js/`, levels, look, online features.
+- Still needs a new app build (Xcode/store): new native plugins, icons/splash, app name, permissions.
+  Then bump the app build number **and** `MIN_NATIVE_BUILD` in `tools/build-web.js`, so older apps
+  don't get game files that need the new native code.
+- A store update of the app discards downloaded game copies (`resetWhenUpdate`).
+
 ## Try it now
 
 - **Android**: open the latest *Apps* run under the repo's **Actions** tab → *Artifacts* →
