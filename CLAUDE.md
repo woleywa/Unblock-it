@@ -74,7 +74,9 @@ version.
 - online.js is an ES module loaded from gstatic using **Firestore Lite** (plain requests, no live
   stream — the full SDK hung reading on iPhone while writes worked). Every call has a timeout.
   game.js works without it (`window.Online` absent).
-- The service worker never caches Firestore/auth traffic (only own files, fonts, the SDK).
+- The service worker never caches Firestore/auth traffic (only own files, fonts, the SDK). The page and
+  unversioned files are network-first (fetched with cache: 'no-cache', 4 s timeout → cached copy), so
+  links like #level=N run the newest code on the first load; ?v=N files, fonts and the SDK are cache-first.
 - Teams (`teams/{code}`): `stars` = members' stars added up, `members` ≤ 20. The rules check both sides:
   a player's stars change only together with their team's total (`increment`), joining/leaving moves
   members ±1 and exactly that player's stars. online.js `writePlayer`/`moveTo` batch these; `retry`
