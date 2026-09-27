@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # The website on Firebase Hosting (https://unblock-it-913f7.web.app). Needs the repository secret
+  # The website on Firebase Hosting (https://happyblocks-game.web.app). Needs the repository secret
   # FIREBASE_SERVICE_ACCOUNT (the service-account JSON); without it this job just says so and skips.
   hosting:
     runs-on: ubuntu-latest

@@ -5,12 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
   <title>Happy Blocks</title>
   <script>
-    // The game moved to Firebase Hosting: the old GitHub Pages address forwards there (keeping the link's
-    // ?level=…/#… part) and carries this browser's progress along, since saved progress is per address.
-    if (location.hostname === 'woleywa.github.io') {
+    // The game lives at happyblocks-game.web.app: older addresses forward there (keeping the link's
+    // ?level=…/#… part) and carry this browser's progress along, since saved progress is per address.
+    if (['woleywa.github.io', 'unblock-it-913f7.web.app', 'unblock-it-913f7.firebaseapp.com'].indexOf(location.hostname) >= 0) {
       var q = new URLSearchParams(location.search);
       try { var p = localStorage.getItem('unblock_progress_v1'); if (p) q.set('carry', btoa(p)); } catch (e) {}
-      location.replace('https://unblock-it-913f7.web.app/' + (q.toString() ? '?' + q : '') + location.hash);
+      location.replace('https://happyblocks-game.web.app/' + (q.toString() ? '?' + q : '') + location.hash);
     }
   </script>
   <meta name="description" content="Slide the blocks out through the doors of their colour.">
@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=19">
+  <link rel="stylesheet" href="style.css?v=20">
 </head>
 <body>
   <div class="sky" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
@@ -199,14 +199,14 @@
 
   <div id="toast" hidden></div>
 
-  <script src="js/native.js?v=19"></script>
-  <script src="js/engine.js?v=19"></script>
-  <script src="js/levels.js?v=19"></script>
-  <script src="js/audio.js?v=19"></script>
-  <script src="js/art.js?v=19"></script>
-  <script src="js/challenge-levels.js?v=19"></script>
-  <script src="js/game.js?v=19"></script>
-  <script src="js/social.js?v=19"></script>
-  <script type="module" src="js/online.js?v=19"></script>
+  <script src="js/native.js?v=20"></script>
+  <script src="js/engine.js?v=20"></script>
+  <script src="js/levels.js?v=20"></script>
+  <script src="js/audio.js?v=20"></script>
+  <script src="js/art.js?v=20"></script>
+  <script src="js/challenge-levels.js?v=20"></script>
+  <script src="js/game.js?v=20"></script>
+  <script src="js/social.js?v=20"></script>
+  <script type="module" src="js/online.js?v=20"></script>
 </body>
 </html>

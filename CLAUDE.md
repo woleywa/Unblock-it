@@ -3,10 +3,10 @@
 The app was renamed "Happy Blocks"; the repo, URL, localStorage keys (`unblock_*`) and Firebase project keep
 the old name on purpose (changing them would lose progress / break links).
 
-Vanilla JS, no build step for the game. **Website: Firebase Hosting** https://unblock-it-913f7.web.app, published
+Vanilla JS, no build step for the game. **Website: Firebase Hosting** https://happyblocks-game.web.app, published
 from `www/` (npm run build:web) by the `hosting` job in apps.yml (secret FIREBASE_SERVICE_ACCOUNT; or
 `firebase deploy --only hosting` with the service-account key). GitHub Pages (woleywa.github.io/Unblock-it)
-only forwards there: index.html's first script redirects, carrying localStorage progress as ?carry= (merged
+and the project's default site unblock-it-913f7.web.app (same files, second entry in firebase.json) only forward there: index.html's first script redirects, carrying localStorage progress as ?carry= (merged
 by game.js). Custom domain: not yet — when added, update native.js WEB, authorized domains, privacy.html. Bump `?v=N` on the script/style tags
 in `index.html` AND the `CACHE` name + file list in `sw.js` on every change, or phones keep the old
 version.

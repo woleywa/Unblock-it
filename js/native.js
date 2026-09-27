@@ -4,7 +4,7 @@ const Native = (() => {
   const C = window.Capacitor;
   const app = !!(C && C.isNativePlatform && C.isNativePlatform());
   const P = (app && C.Plugins) || {};
-  const WEB = 'https://unblock-it-913f7.web.app/';
+  const WEB = 'https://happyblocks-game.web.app/';
   // Live updates: the newest game files, published by the GitHub build (see APPS.md).
   const UPDATE = 'https://github.com/woleywa/Unblock-it/releases/download/app-web/update.json';
   const quiet = pr => pr && pr.catch && pr.catch(() => {});
