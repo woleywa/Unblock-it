@@ -58,6 +58,11 @@ const STAGES = [
   { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 0.6, chains: true, shapes: ['dot', 'bar2h', 'bar2v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [3, 10], note: 'chains' },
   // Packed: the whole board full; get a few blocks out first, then wiggle the rest free.
   { n: 5, W: [5, 6], H: [6, 7], colors: 3, fill: 1, packed: true, holes: [0, 2], shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z'], extra: [3, 14], note: 'packed' },
+  // Mixes: several specials on one (well-filled) board.
+  { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 0.82, packed: true, holes: [3, 6], ice: true, prison: true, arrows: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [4, 14], timeAt: 2 },
+  { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 0.7, fire: true, lanes: true, frozen: true, walls: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [4, 14], timeAt: 3 },
+  { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 0.66, beaver: true, chains: true, layered: true, shapes: ['dot', 'bar2h', 'bar2v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [4, 14], timeAt: 1 },
+  { n: 5, W: [6, 7], H: [8, 9], colors: 4, fill: 1, packed: true, holes: [1, 3], prison: true, arrows: true, frozen: true, shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z'], extra: [6, 18], timeAt: 4 },
 ];
 
 function shapeBox(sh) { return { h: Math.max(...sh.map(q => q[0])) + 1, w: Math.max(...sh.map(q => q[1])) + 1 }; }
@@ -306,6 +311,8 @@ for (const st of PLAN) {
     if (!par) continue;
     lv.par = par;
     if (st.note && made === 0) lv.intro = st.note;
+    // Time challenge: about 5 s a move plus half a minute, in 10 s steps.
+    if (st.timeAt === made) lv.time = Math.ceil((par * 5 + 30) / 10) * 10;
     levels.push(lv); keys.add(keyOf(lv));
     made++;
     process.stderr.write(`level ${levels.length}: ${lv.W}×${lv.H}, ${lv.pieces.length} blocks, par ${par} (${tries} tries)\n`);

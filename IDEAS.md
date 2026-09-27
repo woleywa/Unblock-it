@@ -23,6 +23,7 @@ A running list of ideas for the game. ✅ = built, 🔨 = in progress, 💡 = id
 - 💡 **Level editor** — build a board, the solver checks it can be solved and sets par, share it with friends.
 - 💡 **Time attack (solo)** — as many stars as possible in 5 minutes.
 - ✅ Challenges (timed, for 1–20 players), teams, friends, help requests.
+- ✅ Packed boards, levels mixing several specials, and ⏱ time-challenge levels.
 
 ## Progress and rewards
 - 💡 **Medals / achievements** — e.g. "10 levels at par", "helped 5 friends", "no undo".

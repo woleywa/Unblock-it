@@ -59,6 +59,10 @@ version.
 - Chains (`tether: { r, c, len }`): the post is a wall cell; `Engine.inReach` limits where the block may
   sit (fits + fastSearch footprints) and `Engine.reachesDoor` which doors it can use. game.js drawChains()
   draws posts (with the reach number) and chains, live while dragging.
+- Packed boards (`packed: true, holes: [a, b]` in a stage): the generator tiles the whole board cell by
+  cell. Stages may combine any specials (the mixes, levels 81-100).
+- Time challenges: `level.time` seconds (generator: `timeAt: n` in a stage marks its n-th level). game.js
+  startClock() starts on the first drag; at 0 an ask() card offers Try again / Levels. ⏱ badge in the list.
 - "New!" pop-ups: js/intro.js (`Intro.show(key, again)`), one looping mini-board scene per feature
   (basics, walls, ice, frozen, layered, fire, beaver) drawn with the real Art functions and a 👆 finger.
   start() shows it once per feature (localStorage `unblock_seen_intros`) and adds "▶ Show me" to the hint.

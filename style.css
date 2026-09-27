@@ -449,3 +449,8 @@ a.linkish { display: block; text-align: center; }
 /* Chains: the post's cell and the chain layer (above the floor, below the blocks) */
 .cell.post { background: linear-gradient(180deg, #2a2160, #2f2668); }
 #chains { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 0; }
+
+/* Time challenge badge on the level list */
+.timed { position: absolute; top: -6px; right: -6px; font-style: normal; font-size: 0.8rem; width: 22px; height: 22px; display: grid; place-items: center;
+  border-radius: 50%; background: #ffd54a; box-shadow: 0 2px 0 #b38400; }
+.lvl { position: relative; }

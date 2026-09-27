@@ -59,6 +59,7 @@ function show(id) {
   ['home', 'levels', 'ranks', 'game', 'chs', 'ch', 'team'].forEach(s => $(s).hidden = s !== id);
   updBanner();
   // Leaving the board (e.g. an invite link opened mid-game) closes its cards and challenge play.
+  if (id !== 'game') stopClock();
   if (id !== 'game') { $('win').hidden = true; $('timeup').hidden = true; chPlay = null; }
   $('help-sheet').hidden = true;
 }
@@ -87,7 +88,7 @@ function home() {
 const STAGES = [
   ['Warm-up', 'red'], ['Getting busy', 'orange'], ['Walls', 'purple'],
   ['On ice', 'sky'], ['Frosty doors', 'blue'], ['Layers', 'pink'], ['Fire', 'orange'],
-  ['Mixed bag', 'green'], ['Big boards', 'purple'], ['Expert', 'red'], ['Beaver woods', 'orange'], ['Arrows', 'sky'], ['Colour lanes', 'green'], ['Prison', 'yellow'], ['Chains', 'blue'], ['Packed', 'pink'],
+  ['Mixed bag', 'green'], ['Big boards', 'purple'], ['Expert', 'red'], ['Beaver woods', 'orange'], ['Arrows', 'sky'], ['Colour lanes', 'green'], ['Prison', 'yellow'], ['Chains', 'blue'], ['Packed', 'pink'], ['Ice, keys & arrows', 'sky'], ['Fire & lanes', 'orange'], ['Woods & chains', 'green'], ['Grand finale', 'purple'],
 ];
 function levelList() {
   const g = $('level-grid');
@@ -108,6 +109,7 @@ function levelList() {
     if (unlocked(i)) b.style.setProperty('--c', Art.PAL[color][1]), b.style.setProperty('--l', Art.PAL[color][0]), b.style.setProperty('--d', Art.PAL[color][3]);
     const st3 = [1, 2, 3].map(k => `<i class="${k <= starsOf(i) ? 'on' : ''}">★</i>`).join('');
     b.innerHTML = unlocked(i) ? `<b>${i + 1}</b><small>${st3}</small>` : '<b>🔒</b>';
+    if (LEVELS[i].time) b.insertAdjacentHTML('beforeend', '<i class="timed">⏱</i>');
     b.addEventListener('click', () => unlocked(i) && start(i));
     g.appendChild(b);
   });
@@ -135,6 +137,7 @@ function begin(lv, title, hint) {
   $('hint').textContent = hint || '';
   $('win').hidden = true;
   $('clock').hidden = !chPlay;
+  lvClock();
   $('ask-friend').hidden = !!chPlay || !!answer;
   ansBar();
   hintButton();
@@ -293,6 +296,7 @@ $('board').addEventListener('pointerdown', e => {
   const p = st.pieces.find(x => x.id === +d.dataset.id);
   if (p.ice || p.lock) { d.classList.remove('shake'); void d.offsetWidth; d.classList.add('shake'); Sound.bump(); return; }
   clearHint();
+  startClock();
   drag = { p, d, x0: e.clientX, y0: e.clientY, r0: p.r, c0: p.c, r: p.r, c: p.c, g: Engine.grid(level, st.pieces), trail: [] };
   d.classList.add('dragging');
   $('board').setPointerCapture(e.pointerId);
@@ -628,6 +632,7 @@ $('ans-watch').addEventListener('click', () => {
 // ── Win ──────────────────────────────────────────────────────
 function starsFor(m, par) { return m <= par ? 3 : m <= Math.ceil(par * 1.4) ? 2 : 1; }
 function win() {
+  stopClock();
   const s = starsFor(moves, level.par);
   Sound.win();
   $('win-stars').innerHTML = [1, 2, 3].map(k => `<span class="star ${k <= s ? 'on' : 'off'}" style="--k:${k}"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8z"/></svg></span>`).join('');
@@ -828,6 +833,35 @@ function ask(text, o = {}) {
     $('ask-form').onsubmit = e => { e.preventDefault(); finish(o.input != null && !o.copy ? inp.value : true); };
     $('ask-no').onclick = () => finish(o.input != null && !o.copy ? null : false);
   });
+}
+
+// ── Time challenge levels (level.time seconds; the clock starts with the first move) ──
+let lvTimer = null;
+const mmss = s => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+function stopClock() { clearInterval(lvTimer); lvTimer = null; $('clock').classList.remove('hurry'); }
+function lvClock() {
+  stopClock();
+  if (chPlay) return;
+  const t = level && level.time && !watching;
+  $('clock').hidden = !t;
+  if (t) $('clock').textContent = `⏱ ${mmss(level.time)} · starts with your first move`;
+}
+function startClock() {
+  if (chPlay || lvTimer || !level.time || watching || moves) return;
+  const end = Date.now() + level.time * 1000;
+  const tick = () => {
+    const left = Math.max(0, Math.ceil((end - Date.now()) / 1000));
+    $('clock').textContent = `⏱ ${mmss(left)}`;
+    $('clock').classList.toggle('hurry', left <= 15);
+    if (left > 0) return;
+    stopClock();
+    busy = true;
+    Sound.bump();
+    ask('⏰ Time’s up! Want another go?', { title: 'Too slow!', ok: 'Try again', cancel: 'Levels' })
+      .then(again => { busy = false; again ? start(idx) : levelList(); });
+  };
+  lvTimer = setInterval(tick, 250);
+  tick();
 }
 
 // ── Settings (from home and from a level) ───────────────────

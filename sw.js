@@ -1,8 +1,8 @@
 // Offline support. The page itself (and any unversioned file) comes from the network first, so an
 // update shows up straight away — the cache is only the fallback when offline. Files with ?v=N in
 // their name never change, so they (and fonts/the Firebase SDK) come from the cache first.
-const CACHE = 'unblock-it-v42';
-const FILES = ['./', 'index.html', 'style.css?v=42', 'js/native.js?v=42', 'js/engine.js?v=42', 'js/levels.js?v=42', 'js/audio.js?v=42', 'js/art.js?v=42', 'js/challenge-levels.js?v=42', 'js/intro.js?v=42', 'js/game.js?v=42', 'js/social.js?v=42', 'js/online.js?v=42',
+const CACHE = 'unblock-it-v43';
+const FILES = ['./', 'index.html', 'style.css?v=43', 'js/native.js?v=43', 'js/engine.js?v=43', 'js/levels.js?v=43', 'js/audio.js?v=43', 'js/art.js?v=43', 'js/challenge-levels.js?v=43', 'js/intro.js?v=43', 'js/game.js?v=43', 'js/social.js?v=43', 'js/online.js?v=43',
   'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', e => {
