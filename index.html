@@ -3,27 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
-  <title>Unblock It</title>
+  <title>Happy Blocks</title>
   <meta name="description" content="Slide the blocks out through the doors of their colour.">
-  <meta name="theme-color" content="#1a1538">
+  <meta name="theme-color" content="#2a1f73">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Unblock It">
+  <meta name="apple-mobile-web-app-title" content="Happy Blocks">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
   <div class="sky" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
   <main id="home" class="screen">
     <div class="logo" aria-hidden="true">
     </div>
-    <h1>Unblock&nbsp;It</h1>
+    <h1>Happy&nbsp;Blocks</h1>
     <p class="tag">Slide every block out through the door of its colour.</p>
     <button class="big" id="play">Play</button>
     <button class="ghost" id="to-levels">Levels</button>
@@ -101,6 +101,7 @@
     <header class="bar">
       <button class="icon" id="game-back" aria-label="Levels">‹</button>
       <div class="title"><h2 id="level-name">Level 1</h2><span id="moves">0 moves · par 5</span></div>
+      <button class="icon" id="hint-btn" aria-label="Hint" hidden>💡</button>
       <button class="icon" id="undo" aria-label="Undo">↶</button>
       <button class="icon" id="restart" aria-label="Restart">↻</button>
     </header>
@@ -171,13 +172,13 @@
 
   <div id="toast" hidden></div>
 
-  <script src="js/engine.js?v=8"></script>
-  <script src="js/levels.js?v=8"></script>
-  <script src="js/audio.js?v=8"></script>
-  <script src="js/art.js?v=8"></script>
-  <script src="js/challenge-levels.js?v=8"></script>
-  <script src="js/game.js?v=8"></script>
-  <script src="js/social.js?v=8"></script>
-  <script type="module" src="js/online.js?v=8"></script>
+  <script src="js/engine.js?v=9"></script>
+  <script src="js/levels.js?v=9"></script>
+  <script src="js/audio.js?v=9"></script>
+  <script src="js/art.js?v=9"></script>
+  <script src="js/challenge-levels.js?v=9"></script>
+  <script src="js/game.js?v=9"></script>
+  <script src="js/social.js?v=9"></script>
+  <script type="module" src="js/online.js?v=9"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-// Unblock It — drawing: jelly blocks (one SVG shape per block), doors, sparks, confetti.
+// Happy Blocks — drawing: jelly blocks (one SVG shape per block), doors, sparks, confetti.
 const Art = (() => {
   // light, base, dark, side (the block's visible thickness)
   const PAL = {

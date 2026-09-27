@@ -1,4 +1,7 @@
-# Unblock It — notes for Claude
+# Happy Blocks (was Unblock It) — notes for Claude
+
+The app was renamed "Happy Blocks"; the repo, URL, localStorage keys (`unblock_*`) and Firebase project keep
+the old name on purpose (changing them would lose progress / break links).
 
 Vanilla JS, no build. Deployed by GitHub Pages from `main` (root). Bump `?v=N` on the script/style tags
 in `index.html` AND the `CACHE` name + file list in `sw.js` on every change, or phones keep the old
@@ -72,6 +75,13 @@ version.
   by tapping a player on the Players tab, or with a friend link `#f=UID`.
 - Names/teams allow emoji and any letters (2–16 / 2–20 characters, counted with Intl.Segmenter); rules
   only refuse slashes, control characters and blanks. Any team member can rename the team.
+- Hints (💡 in the game bar): only for registered players listed in `config/hints { uids }` (public
+  read, no client writes — set it with the service account, scratchpad `sethints.cjs`-style PATCH).
+  Never in challenges. The whole solution is cached; while the board matches the next step's start,
+  the next hint is that step (so following hints wins at par).
+- Exits: at its door with the way clear, a pull of ~0.18 cell toward it sends a block out; letting go
+  at the door, or one cell away after moving toward it, or a flick (≥ 4 cells/s) from ≤ 4 cells away,
+  does too. The leave animation starts from where the block is (no snap back).
 - Links: `#join=CODE` (team), `#c=CODE` (challenge), `#f=UID` (friend). On iPhone a link opens Safari, which is a different
   account from the home-screen app — so codes can be typed in too.
 - Note: game.js has a global `history` (undo stack) — use `window.history` for the browser's.

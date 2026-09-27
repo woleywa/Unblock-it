@@ -1,4 +1,4 @@
-# Unblock It
+# Happy Blocks (formerly Unblock It)
 
 A sliding-block colour puzzle. Drag every block out through the door of its colour.
 

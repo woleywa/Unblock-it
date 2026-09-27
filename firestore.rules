@@ -25,6 +25,13 @@ service cloud.firestore {
     }
     function challenge(c) { return get(/databases/$(database)/documents/challenges/$(c)).data; }
 
+    // Settings only the owner changes (with the admin key), e.g. config/hints { uids: [...] } —
+    // the registered players who get the hint button.
+    match /config/{doc} {
+      allow read: if true;
+      allow write: if false;
+    }
+
     // One owner per nickname (the document id is the nickname in lower case).
     match /names/{key} {
       allow read: if true;

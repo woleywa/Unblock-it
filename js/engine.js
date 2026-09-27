@@ -1,4 +1,4 @@
-// Unblock It — rules + solver. Pure functions, no DOM. (Started from the Block Out solver.)
+// Happy Blocks — rules + solver. Pure functions, no DOM. (Started from the Block Out solver.)
 // piece: { id, color, r, c, h, w, shape?, key, keyColor?, lock, lockColor?, chain?, ice, inner?, crate? }
 //   keyColor = the key's gem colour; lockColor = a chained piece's padlock badge colour
 //   shape = [[dr, dc], …] cell offsets for non-rectangular pieces (absent = full h×w rectangle)

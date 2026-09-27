@@ -1,4 +1,4 @@
-// Unblock It — teams and challenges (screens). Data goes through window.Online (online.js).
+// Happy Blocks — teams and challenges (screens). Data goes through window.Online (online.js).
 // Uses game.js globals: $, show, esc, askName, totals, starsFor, begin, chPlay, home, ranks.
 const Social = (() => {
   const on = () => window.Online;
@@ -262,7 +262,7 @@ const Social = (() => {
     scores();
     tick();
   }
-  const invitePlayers = ch => share('Unblock It challenge', `Join my Unblock It challenge! Code ${ch.code}.`, link('c', ch.code));
+  const invitePlayers = ch => share('Happy Blocks challenge', `Join my Happy Blocks challenge! Code ${ch.code}.`, link('c', ch.code));
   $('ch-share').addEventListener('click', () => cur && invitePlayers(cur.ch));
 
   async function startCh() {
@@ -437,7 +437,7 @@ const Social = (() => {
       act('inv-no', () => team());
       act('team-new', el => busyDo(el, 'team-err', () => o.createTeam($('team-new-name').value, totals())));
       act('team-join', el => busyDo(el, 'team-err', () => o.joinTeam($('team-join-code').value, totals())));
-      act('team-invite', () => share('Unblock It team', `Join my team “${o.team.name}” in Unblock It! Code ${o.team.code}.`, link('join', o.team.code)));
+      act('team-invite', () => share('Happy Blocks team', `Join my team “${o.team.name}” in Happy Blocks! Code ${o.team.code}.`, link('join', o.team.code)));
       act('team-chs', () => list());
       act('team-rename', () => {
         const n = window.prompt('New team name', o.team.name);
@@ -571,7 +571,7 @@ const Social = (() => {
         try { const n = await o.addFriend($('fr-name').value); toast(`${n} added`); rankFriends(); }
         catch (err) { $('fr-err').textContent = err.message || errText(err); }
       });
-      $('fr-share').addEventListener('click', () => share('Unblock It', `Add me as a friend on Unblock It — I’m ${o.name}!`, link('f', o.uid)));
+      $('fr-share').addEventListener('click', () => share('Happy Blocks', `Add me as a friend on Happy Blocks — I’m ${o.name}!`, link('f', o.uid)));
       list.querySelectorAll('.unfriend').forEach(b => b.addEventListener('click', async () => {
         if (!confirm(`Remove ${b.dataset.name} from your friends?`)) return;
         try { await o.removeFriend(b.dataset.uid); rankFriends(); } catch (e) { toast(errText(e)); }

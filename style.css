@@ -12,8 +12,9 @@
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 [hidden] { display: none !important; }
 html, body { height: 100%; }
+html { background: #1b2458; }
 body {
-  background: var(--bg);
+  background: transparent;
   color: var(--text);
   font-family: var(--font); font-weight: 600;
   overscroll-behavior: none; touch-action: manipulation; user-select: none; -webkit-user-select: none;
@@ -22,7 +23,10 @@ body {
 }
 
 /* Dreamy sky: a deep gradient with slow drifting glows. */
-.sky { position: fixed; inset: 0; z-index: -1; overflow: hidden;
+.sky { position: fixed; top: 0; left: 0; right: 0; z-index: -1; overflow: hidden;
+  /* Past every edge: the home-indicator strip and behind Safari's bars too. */
+  height: calc(100vh + env(safe-area-inset-top) + env(safe-area-inset-bottom) + 120px);
+  height: calc(100lvh + env(safe-area-inset-top) + env(safe-area-inset-bottom) + 120px);
   background: radial-gradient(120% 70% at 50% -10%, #3b2a8f 0%, #22185a 45%, #120c2e 100%); }
 .sky i { position: absolute; border-radius: 50%; filter: blur(60px); opacity: 0.45; animation: drift 24s ease-in-out infinite alternate; }
 .sky i:nth-child(1) { width: 60vmax; height: 60vmax; left: -20vmax; top: -10vmax; background: #7b3cff; }
@@ -41,7 +45,7 @@ button { font: inherit; color: inherit; border: 0; cursor: pointer; background: 
 .logo { display: grid; grid-template-columns: repeat(2, 64px); gap: 4px; transform: rotate(-8deg); margin-bottom: 8px; }
 .logo-block { width: 64px; height: 70px; animation: bob 2.6s ease-in-out infinite; animation-delay: calc(var(--i) * -0.6s); }
 @keyframes bob { 50% { transform: translateY(-7px) rotate(3deg); } }
-h1 { font-size: 3.4rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1;
+h1 { font-size: min(3.4rem, 11.5vw); font-weight: 700; letter-spacing: -0.01em; line-height: 1;
   background: linear-gradient(180deg, #fff 30%, #ffe3a8); -webkit-background-clip: text; background-clip: text; color: transparent;
   filter: drop-shadow(0 4px 0 rgba(20,10,60,0.55)); }
 .tag { color: var(--dim); max-width: 280px; line-height: 1.4; margin-bottom: 14px; font-weight: 500; }
@@ -148,7 +152,8 @@ h1 { font-size: 3.4rem; font-weight: 700; letter-spacing: -0.01em; line-height: 
 @keyframes settle { 0% { transform: scale(1.06, 0.94); } 50% { transform: scale(0.97, 1.03); } }
 .block.thawed .jelly { animation: thaw 0.6s cubic-bezier(.3,1.8,.5,1); }
 @keyframes thaw { 0% { transform: scale(0.85); filter: brightness(2.2) saturate(0.3); } 60% { transform: scale(1.08); } }
-.block.leaving { transition: transform 300ms cubic-bezier(.5,0,.8,.4), opacity 300ms ease-in; opacity: 0; z-index: 40; }
+.block.leaving { transition: transform 210ms cubic-bezier(.5,0,.9,.55), opacity 150ms ease-in 60ms; opacity: 0; z-index: 40; }
+.block.leaving .jelly { transform: scale(0.82); transition: transform 210ms ease-in; }
 .block.shake .jelly { animation: shake 0.3s; }
 @keyframes shake { 20% { transform: translateX(-4px) rotate(-2deg); } 60% { transform: translateX(4px) rotate(2deg); } }
 
@@ -305,3 +310,13 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 30px; }
 #rank-list li.tap { cursor: pointer; }
 .unfriend { width: 30px; height: 30px; border-radius: 10px; color: var(--dim); background: rgba(255,255,255,0.08); }
 .card.form .big { padding: 14px 20px; }
+/* Hint: a dotted route with an arrow, a ghost where the block goes, a glow on the block. */
+.hint-path { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 45; overflow: visible; }
+.hint-path .route { fill: none; stroke: #fff; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 0.1 14; opacity: 0.9;
+  filter: drop-shadow(0 0 4px rgba(255,213,74,0.9)); animation: march-dots 0.8s linear infinite; }
+.hint-path .route.head { stroke-dasharray: none; animation: none; }
+@keyframes march-dots { to { stroke-dashoffset: -14.1; } }
+.block.ghost { opacity: 0.35; z-index: 44; filter: saturate(0.6) brightness(1.3); pointer-events: none; }
+.block.ghost .jelly * { pointer-events: none !important; }
+.hint-glow { position: absolute; inset: -4px; border-radius: 22%; box-shadow: 0 0 0 3px #ffd54a, 0 0 18px 4px rgba(255,213,74,0.7); animation: nextup 1s ease-in-out infinite; pointer-events: none; }
+#hint-btn:disabled { opacity: 0.5; }

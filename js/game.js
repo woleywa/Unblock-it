@@ -1,4 +1,4 @@
-// Unblock It — screens, board drawing, dragging, exits, stars and saved progress.
+// Happy Blocks — screens, board drawing, dragging, exits, stars and saved progress.
 const $ = id => document.getElementById(id);
 const clone = o => JSON.parse(JSON.stringify(o));
 
@@ -106,6 +106,7 @@ function begin(lv, title, hint) {
   $('hint').textContent = hint || '';
   $('win').hidden = true;
   $('clock').hidden = !chPlay;
+  hintButton();
   show('game');
   layout();
   render();
@@ -194,7 +195,8 @@ $('board').addEventListener('pointerdown', e => {
   if (!d) return;
   const p = st.pieces.find(x => x.id === +d.dataset.id);
   if (p.ice) { d.classList.remove('shake'); void d.offsetWidth; d.classList.add('shake'); Sound.bump(); return; }
-  drag = { p, d, x0: e.clientX, y0: e.clientY, r0: p.r, c0: p.c, r: p.r, c: p.c, g: Engine.grid(level, st.pieces) };
+  clearHint();
+  drag = { p, d, x0: e.clientX, y0: e.clientY, r0: p.r, c0: p.c, r: p.r, c: p.c, g: Engine.grid(level, st.pieces), trail: [] };
   d.classList.add('dragging');
   $('board').setPointerCapture(e.pointerId);
 });
@@ -215,14 +217,14 @@ $('board').addEventListener('pointermove', e => {
     drag.r += ok[0]; drag.c += ok[1];
     Sound.tick();
   }
-  // Pushed past the board edge through a door of its colour: out it goes.
-  const cells = Engine.cellsOf(p, 0, 0);
-  const minR = Math.min(...cells.map(q => q[0])), maxR = Math.max(...cells.map(q => q[0]));
-  const minC = Math.min(...cells.map(q => q[1])), maxC = Math.max(...cells.map(q => q[1]));
-  const push = tc + minC < -0.45 ? 'L' : tc + maxC > level.W - 0.55 ? 'R' : tr + minR < -0.45 ? 'T' : tr + maxR > level.H - 0.55 ? 'B' : null;
-  if (push) {
-    const out = exitFor(p, drag.r, drag.c, push);
-    if (out) { finishDrag(out); return; }
+  // Recent finger positions, for flicks.
+  const now = performance.now();
+  drag.trail.push([now, tr, tc]);
+  while (drag.trail.length > 2 && now - drag.trail[0][0] > 100) drag.trail.shift();
+  drag.tr = tr; drag.tc = tc;
+  // At its door with the way clear, a light pull toward it is enough: in it goes.
+  for (const out of exits(p, drag.r, drag.c)) {
+    if (gapTo(out.gt.side, p, drag.r, drag.c) === 0 && pullTo(out.gt.side, tr - drag.r, tc - drag.c) > 0.18) { finishDrag(out); return; }
   }
   // Glide with the finger between cells wherever there's room (the snapped cell moves on at half a
   // cell); against something, give just a little, like pressing on jelly.
@@ -244,11 +246,30 @@ $('board').addEventListener('pointermove', e => {
   });
 });
 
+const SIDE_DIR = { L: [0, -1], R: [0, 1], T: [-1, 0], B: [1, 0] };
+// How far (dr, dc) points toward a side of the board.
+const pullTo = (side, dr, dc) => SIDE_DIR[side][0] * dr + SIDE_DIR[side][1] * dc;
+// Free rows/columns between the block at (r, c) and that edge.
+function gapTo(side, p, r, c) {
+  const cells = Engine.cellsOf(p, r, c), ys = cells.map(q => q[0]), xs = cells.map(q => q[1]);
+  return side === 'L' ? Math.min(...xs) : side === 'R' ? level.W - 1 - Math.max(...xs) : side === 'T' ? Math.min(...ys) : level.H - 1 - Math.max(...ys);
+}
+// Every door this block could leave through from (r, c) right now.
+const exits = (p, r, c) => ['L', 'R', 'T', 'B'].map(sd => exitFor(p, r, c, sd)).filter(Boolean);
+
 const endDrag = () => {
   if (!drag) return;
-  // Dropped touching a door of its colour: it leaves too.
-  const out = exitFor(drag.p, drag.r, drag.c);
-  finishDrag(out && out.lane.length === 0 ? out : null);
+  const { p, r, c, r0, c0, trail } = drag;
+  // Finger speed over the last moment, in cells per millisecond.
+  const [a, b] = [trail[0], trail[trail.length - 1]];
+  const dt = a && b ? Math.max(16, b[0] - a[0]) : 1;
+  const vr = a && b ? (b[1] - a[1]) / dt : 0, vc = a && b ? (b[2] - a[2]) / dt : 0;
+  // Let go near its door (one cell away at most) or flicked toward it: it leaves.
+  const out = exits(p, r, c).find(o => {
+    const gap = gapTo(o.gt.side, p, r, c), speed = pullTo(o.gt.side, vr, vc);
+    return gap === 0 || (gap === 1 && pullTo(o.gt.side, r - r0, c - c0) > 0) || (gap <= 4 && speed > 0.004);
+  });
+  finishDrag(out || null);
 };
 $('board').addEventListener('pointerup', endDrag);
 $('board').addEventListener('pointercancel', endDrag);
@@ -274,7 +295,7 @@ function leave(id, d, gt, r, c) {
   Sound.exit();
   const p = st.pieces.find(x => x.id === id);
   const far = gt.side === 'L' ? [r, -p.w - 1] : gt.side === 'R' ? [r, level.W + 1] : gt.side === 'T' ? [-p.h - 1, c] : [level.H + 1, c];
-  place(d, r, c);
+  // From wherever it is under the finger, straight into the door.
   requestAnimationFrame(() => { d.classList.add('leaving'); place(d, ...far); });
   const door = document.querySelector(`[data-gate="${gt.id}"]`);
   if (door) {
@@ -317,8 +338,64 @@ function leave(id, d, gt, r, c) {
     }
     if (fires.length) Sound.sizzle(out);
     if (Engine.done(st)) win();
-  }, fires.length ? 560 : 280);
+  }, fires.length ? 560 : 220);
 }
+
+// ── Hint (registered players on the hint list; not in challenges) ─────────
+function hintButton() { $('hint-btn').hidden = !(window.Online && window.Online.canHint) || !!chPlay; }
+window.addEventListener('online-hints', hintButton);
+let hintPlan = null;
+function clearHint() {
+  document.querySelectorAll('.hint-mark').forEach(e => e.remove());
+  if ($('hint').textContent.startsWith('Hint') || $('hint').textContent.startsWith('No hint')) $('hint').textContent = '';
+}
+$('hint-btn').addEventListener('click', () => {
+  if (busy || drag) return;
+  clearHint();
+  $('hint-btn').disabled = true;
+  // Let the button show it's thinking before the solver runs.
+  setTimeout(() => {
+    // Keep the whole solution: while the board matches the next step's start, just show that step.
+    const key = x => JSON.stringify([x.pieces.map(q => [q.id, q.r, q.c, q.color, q.ice || 0, q.fire || 0, q.lock || 0]).sort((u, v) => u[0] - v[0]), x.gates.map(g => g.frozen)]);
+    if (!hintPlan || hintPlan.level !== level || !hintPlan.steps.length || key(hintPlan.steps[0].before) !== key(st)) {
+      const res = Engine.solve(clone({ ...level, pieces: st.pieces, gates: st.gates }), 4000);
+      hintPlan = { level, steps: res.ok ? res.steps.slice() : [] };
+    }
+    $('hint-btn').disabled = false;
+    const s = hintPlan.steps.shift();
+    if (!s) { $('hint').textContent = 'No hint found from here — try undo or restart.'; return; }
+    const p = st.pieces.find(x => x.id === s.pieceId);
+    const route = Engine.path(level, s.before, s.pieceId, s.r, s.c);
+    const b = $('board');
+    const W = level.W * cs + 2 * gut, H = level.H * cs + 2 * gut;
+    // Where the finger goes: the block's heart cell along the route, then out through the door.
+    const [hr, hc] = Engine.cellsOf(p, 0, 0)[0];
+    const pts = route.map(([r, c]) => px(r + hr + 0.5, c + hc + 0.5));
+    if (s.kind === 'exit') {
+      const side = s.before.gates.find(g => g.id === s.gateId).side, [dr, dc] = SIDE_DIR[side], last = route[route.length - 1];
+      pts.push(px(last[0] + hr + 0.5 + dr * (gapTo(side, p, ...last) + 1), last[1] + hc + 0.5 + dc * (gapTo(side, p, ...last) + 1)));
+    }
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('class', 'hint-mark hint-path');
+    svg.setAttribute('width', W); svg.setAttribute('height', H);
+    const d = pts.map(([x, y], i) => (i ? 'L' : 'M') + x + ',' + y).join(' ');
+    const [ex, ey] = pts[pts.length - 1], [fx, fy] = pts[pts.length - 2] || pts[0];
+    const ang = Math.atan2(ey - fy, ex - fx), a = cs * 0.28;
+    const head = `M${ex - a * Math.cos(ang - 0.5)},${ey - a * Math.sin(ang - 0.5)} L${ex},${ey} L${ex - a * Math.cos(ang + 0.5)},${ey - a * Math.sin(ang + 0.5)}`;
+    svg.innerHTML = `<path d="${d}" class="route" stroke-width="${cs * 0.12}"/><path d="${head}" class="route head" stroke-width="${cs * 0.12}"/>`;
+    b.appendChild(svg);
+    // Where the block ends up (a ghost), unless it goes straight out.
+    if (s.kind === 'move') {
+      const ghost = blockEl({ ...p, r: s.r, c: s.c });
+      ghost.classList.add('hint-mark', 'ghost');
+      delete ghost.dataset.id;
+      b.appendChild(ghost);
+    }
+    const blk = b.querySelector(`.block[data-id="${p.id}"]`);
+    if (blk) { const m = el('hint-mark hint-glow'); blk.appendChild(m); }
+    $('hint').textContent = s.kind === 'exit' ? 'Hint: this block can go out now.' : 'Hint: move this block here.';
+  }, 30);
+});
 
 // ── Win ──────────────────────────────────────────────────────
 function starsFor(m, par) { return m <= par ? 3 : m <= Math.ceil(par * 1.4) ? 2 : 1; }
@@ -456,7 +533,7 @@ window.addEventListener('online-ready', () => {
   window.Online.ready.then(ok => { meChip(); if (ok) syncProgress(); });
 });
 // Signed in or out: a different account now.
-window.addEventListener('online-user', () => { meChip(); syncProgress(); });
+window.addEventListener('online-user', () => { meChip(); syncProgress(); hintButton(); });
 
 // ── Buttons ──────────────────────────────────────────────────
 $('play').addEventListener('click', () => { Sound.unlock(); start(firstOpen()); });

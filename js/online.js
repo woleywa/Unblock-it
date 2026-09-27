@@ -1,4 +1,4 @@
-// Unblock It — online: nickname sign-in (Firebase anonymous auth) and leaderboards (Firestore).
+// Happy Blocks — online: nickname sign-in (Firebase anonymous auth) and leaderboards (Firestore).
 // The game works without this; window.Online appears once Firebase has loaded.
 //
 // Data (see firestore.rules):
@@ -45,15 +45,20 @@ let uid = null, me = null; // me = this player's doc (or null before a nickname 
 // Everyone starts signed in anonymously (a guest account on this device). Adding an email and password
 // keeps the same account; signing in with one on another device switches to that account, and the
 // game hears 'online-user' to reload what belongs to it.
-let account = null, save = null, loading = Promise.resolve(), resolveReady, started = false;
+let account = null, canHint = false, save = null, loading = Promise.resolve(), resolveReady, started = false;
 const ready = new Promise(r => { resolveReady = r; });
 onAuthStateChanged(auth, user => {
   if (!user) { signInAnonymously(auth).catch(e => { console.warn('sign-in failed', e); resolveReady(false); }); return; }
   uid = user.uid;
   account = user.isAnonymous ? null : user.email;
-  me = null; myTeam = null; save = null;
+  me = null; myTeam = null; save = null; canHint = false;
   loading = (async () => {
     try {
+      // Hints: registered players on the list in config/hints only.
+      if (!user.isAnonymous) getDoc(doc(db, 'config', 'hints')).then(h => {
+        canHint = uid === user.uid && h.exists() && (h.data().uids || []).includes(user.uid);
+        window.dispatchEvent(new Event('online-hints'));
+      }).catch(e => console.warn(e));
       const [p, v] = await Promise.all([getDoc(doc(db, 'players', uid)), getDoc(doc(db, 'saves', uid))]);
       me = p.exists() ? p.data() : null;
       save = v.exists() ? v.data() : null;
@@ -378,6 +383,7 @@ window.Online = {
   addFriend: n => timed(addFriend(n)), addFriendId: f => timed(addFriendId(f)), removeFriend: f => timed(removeFriend(f)), getFriendName: f => timed(getFriendName(f)),
   friendsBoard: () => timed(friendsBoard()),
   get account() { return account; },
+  get canHint() { return canHint; },
   get uid() { return uid; },
   get friends() { return (save && save.friends) || []; },
   get name() { return me && me.name; },
