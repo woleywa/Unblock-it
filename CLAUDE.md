@@ -21,6 +21,15 @@ version.
 - Only a block's tiles take pointer events (the block div covers its bounding box).
 - Stars: ≤ par ★★★, ≤ ceil(par × 1.4) ★★, else ★. Progress in localStorage `unblock_progress_v1`.
 
+## Look (art.js + style.css)
+- Blocks are one SVG each (`Art.blockSVG`): the polyomino's true outline (edge tracing, inset, rounded
+  outer corners, softer inner corners), a darker copy below for thickness, a drop shadow, a vertical
+  gradient face, gloss and per-cell shines, a blinking face (an "o" mouth while dragged), a jewel core
+  for layered blocks, frosted ice with cracks and a count. Only the `.hit` face path takes touches.
+- Doors glow in their colour with marching chevrons; frozen doors are frosted with ❄ and a count.
+- Exits burst sparks; drops settle with a squash; wins pop stars in one by one plus confetti.
+- Font: Fredoka (Google Fonts), falls back to system rounded.
+
 ## Levels
 - `node tools/generate.js 2026` (~45 s). Candidate boards are kept when the solver clears them with a
   number of non-exit moves inside the stage's `extra` range; par = solver move count.

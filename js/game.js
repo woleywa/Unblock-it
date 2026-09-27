@@ -25,25 +25,56 @@ const firstOpen = () => { const i = LEVELS.findIndex((_, k) => !starsOf(k)); ret
 
 // ── Screens ──────────────────────────────────────────────────
 function show(id) { ['home', 'levels', 'game'].forEach(s => $(s).hidden = s !== id); }
+function logo() {
+  const box = document.querySelector('.logo');
+  if (box.dataset.done) return;
+  box.dataset.done = 1;
+  box.innerHTML = '';
+  [['red', 0, 0], ['blue', 0, 1], ['yellow', 1, 0], ['green', 1, 1]].forEach(([color, r, c], i) => {
+    const d = document.createElement('div');
+    d.className = 'logo-block';
+    d.style.setProperty('--i', i);
+    d.innerHTML = Art.blockSVG({ color, r: 0, c: 0, h: 1, w: 1 }, 64);
+    box.appendChild(d);
+  });
+}
 function home() {
+  logo();
   const total = Object.values(progress.stars).reduce((a, b) => a + b, 0);
   $('stars-total').textContent = total ? `★ ${total} / ${LEVELS.length * 3}` : '';
   $('play').textContent = total ? 'Continue' : 'Play';
   $('sound').textContent = Sound.on ? '🔊 Sound on' : '🔇 Sound off';
   show('home');
 }
+const STAGES = [
+  ['Warm-up', 'red'], ['Getting busy', 'orange'], ['Walls', 'purple'],
+  ['On ice', 'sky'], ['Frosty doors', 'blue'], ['Layers', 'pink'],
+];
 function levelList() {
   const g = $('level-grid');
   g.innerHTML = '';
   const next = firstOpen();
   LEVELS.forEach((_, i) => {
+    if (i % 5 === 0) {
+      const [name] = STAGES[Math.floor(i / 5)] || ['More'];
+      const got = [0, 1, 2, 3, 4].reduce((a, k) => a + starsOf(i + k), 0);
+      const h = document.createElement('h3');
+      h.className = 'stage';
+      h.innerHTML = `<span>${name}</span><small>★ ${got} / 15</small>`;
+      g.appendChild(h);
+    }
+    const color = (STAGES[Math.floor(i / 5)] || STAGES[0])[1];
     const b = document.createElement('button');
     b.className = 'lvl' + (unlocked(i) ? '' : ' locked') + (i === next && !starsOf(i) ? ' next' : '');
-    b.innerHTML = `${i + 1}<small>${'★'.repeat(starsOf(i)) || (unlocked(i) ? '' : '🔒')}</small>`;
+    if (unlocked(i)) b.style.setProperty('--c', Art.PAL[color][1]), b.style.setProperty('--l', Art.PAL[color][0]), b.style.setProperty('--d', Art.PAL[color][3]);
+    const st3 = [1, 2, 3].map(k => `<i class="${k <= starsOf(i) ? 'on' : ''}">★</i>`).join('');
+    b.innerHTML = unlocked(i) ? `<b>${i + 1}</b><small>${st3}</small>` : '<b>🔒</b>';
     b.addEventListener('click', () => unlocked(i) && start(i));
     g.appendChild(b);
   });
   show('levels');
+  const cur = g.querySelector('.next');
+  if (cur) cur.scrollIntoView({ block: 'center' });
 }
 
 // ── Game state ───────────────────────────────────────────────
@@ -75,44 +106,17 @@ const px = (r, c) => [gut + c * cs, gut + r * cs];
 const el = (cls, css) => { const d = document.createElement('div'); d.className = cls; Object.assign(d.style, css || {}); return d; };
 
 function doorBox(gt) {
-  const along = gut + gt.start * cs + 3, len = gt.len * cs - 6, t = gut - 8;
-  if (gt.side === 'L') return { left: '4px', top: along + 'px', width: t + 'px', height: len + 'px' };
-  if (gt.side === 'R') return { left: (gut + level.W * cs + 4) + 'px', top: along + 'px', width: t + 'px', height: len + 'px' };
-  if (gt.side === 'T') return { top: '4px', left: along + 'px', height: t + 'px', width: len + 'px' };
-  return { top: (gut + level.H * cs + 4) + 'px', left: along + 'px', height: t + 'px', width: len + 'px' };
+  const along = gut + gt.start * cs + 4, len = gt.len * cs - 8, t = gut - 10;
+  if (gt.side === 'L') return { left: '5px', top: along + 'px', width: t + 'px', height: len + 'px' };
+  if (gt.side === 'R') return { left: (gut + level.W * cs + 5) + 'px', top: along + 'px', width: t + 'px', height: len + 'px' };
+  if (gt.side === 'T') return { top: '5px', left: along + 'px', height: t + 'px', width: len + 'px' };
+  return { top: (gut + level.H * cs + 5) + 'px', left: along + 'px', height: t + 'px', width: len + 'px' };
 }
 
 function blockEl(p) {
   const d = el('block', { width: p.w * cs + 'px', height: p.h * cs + 'px' });
   d.dataset.id = p.id;
-  const offs = Engine.cellsOf(p, 0, 0);
-  const has = new Set(offs.map(([r, c]) => r + ',' + c));
-  const pad = 3;
-  for (const [r, c] of offs) {
-    const open = (dr, dc) => !has.has((r + dr) + ',' + (c + dc));
-    const T = open(-1, 0) ? pad : 0, B = open(1, 0) ? pad : 0, L = open(0, -1) ? pad : 0, R = open(0, 1) ? pad : 0;
-    const t = el('tile', {
-      left: c * cs + L + 'px', top: r * cs + T + 'px', width: cs - L - R + 'px', height: cs - T - B + 'px',
-      background: COLORS[p.color],
-      borderRadius: [T && L, T && R, B && R, B && L].map(v => v ? '10px' : '2px').join(' '),
-    });
-    if (offs.length > 1) t.style.boxShadow = `inset 0 ${B ? -5 : 0}px 0 rgba(0,0,0,0.22), inset 0 ${T ? 4 : 0}px 0 rgba(255,255,255,0.32)`;
-    if (p.inner) {
-      const k = Math.round(cs * 0.26);
-      t.appendChild(el('core', { left: k - L + 'px', top: k - T + 'px', right: k - R + 'px', bottom: k - B + 'px', background: COLORS[p.inner] }));
-    }
-    if (p.ice) t.appendChild(el('ice'));
-    d.appendChild(t);
-  }
-  if (p.ice) {
-    // The count sits on the cell nearest the block's middle.
-    const mr = offs.reduce((a, q) => a + q[0], 0) / offs.length, mc = offs.reduce((a, q) => a + q[1], 0) / offs.length;
-    const whole = !p.shape;
-    const [lr, lc] = whole ? [mr, mc] : offs.reduce((b, q) => Math.hypot(q[0] - mr, q[1] - mc) < Math.hypot(b[0] - mr, b[1] - mc) ? q : b);
-    const n = el('ice-num', { left: lc * cs + 'px', top: lr * cs + 'px', width: cs + 'px', height: cs + 'px', fontSize: Math.round(cs * 0.36) + 'px' });
-    n.textContent = '❄' + p.ice;
-    d.appendChild(n);
-  }
+  d.innerHTML = Art.blockSVG(p, cs);
   place(d, p.r, p.c);
   return d;
 }
@@ -126,17 +130,9 @@ function render() {
   const walls = new Set((level.walls || []).map(([r, c]) => r + ',' + c));
   for (let r = 0; r < level.H; r++) for (let c = 0; c < level.W; c++) {
     const [x, y] = px(r, c);
-    b.appendChild(el(walls.has(r + ',' + c) ? 'wall' : 'cell', { left: x + 2 + 'px', top: y + 2 + 'px', width: cs - 4 + 'px', height: cs - 4 + 'px' }));
+    b.appendChild(el(walls.has(r + ',' + c) ? 'wall' : 'cell', { left: x + 3 + 'px', top: y + 3 + 'px', width: cs - 6 + 'px', height: cs - 6 + 'px', borderRadius: Math.round(cs * 0.2) + 'px' }));
   }
-  for (const gt of st.gates) {
-    const d = el('door' + (gt.frozen ? ' frozen' : ''), { ...doorBox(gt), background: COLORS[gt.color] });
-    d.dataset.gate = gt.id;
-    d.textContent = gt.frozen ? String(gt.frozen) : ARROW[gt.side];
-    d.style.fontSize = Math.max(10, Math.round(gut * 0.62)) + 'px';
-    // Frozen: ice over the door, its colour showing faintly through.
-    if (gt.frozen) d.style.background = `linear-gradient(135deg, rgba(236,249,255,0.9), rgba(176,224,255,0.78)), ${COLORS[gt.color]}`;
-    b.appendChild(d);
-  }
+  for (const gt of st.gates) b.appendChild(Art.door(gt, doorBox(gt), gut));
   for (const p of st.pieces) b.appendChild(blockEl(p));
   status();
 }
@@ -214,13 +210,15 @@ function finishDrag(out) {
   drag = null;
   d.classList.remove('dragging');
   const movedAtAll = out || r !== r0 || c !== c0;
-  if (!movedAtAll) { place(d, r0, c0); return; }
+  if (!movedAtAll) { place(d, r0, c0); settle(d); return; }
   history.push({ st: clone(st), moves });
   moves++;
   st.pieces = st.pieces.map(x => x.id === p.id ? { ...x, r, c } : x);
-  if (!out) { place(d, r, c); status(); return; }
+  if (!out) { place(d, r, c); settle(d); status(); return; }
   leave(p.id, d, out.gt, r, c);
 }
+
+function settle(d) { d.classList.remove('settle'); void d.offsetWidth; d.classList.add('settle'); }
 
 function leave(id, d, gt, r, c) {
   busy = true;
@@ -230,7 +228,12 @@ function leave(id, d, gt, r, c) {
   place(d, r, c);
   requestAnimationFrame(() => { d.classList.add('leaving'); place(d, ...far); });
   const door = document.querySelector(`[data-gate="${gt.id}"]`);
-  if (door) { door.classList.remove('pulse'); void door.offsetWidth; door.classList.add('pulse'); }
+  if (door) {
+    door.classList.remove('pulse'); void door.offsetWidth; door.classList.add('pulse');
+    const dir = { L: [-1, 0], R: [1, 0], T: [0, -1], B: [0, 1] }[gt.side];
+    Art.burst($('board'), door.offsetLeft + door.offsetWidth / 2, door.offsetTop + door.offsetHeight / 2, p.color, dir);
+  }
+  if (navigator.vibrate) navigator.vibrate(12);
   const before = st.gates.filter(g => g.frozen).length, iced = st.pieces.filter(q => q.ice).length;
   Engine.applyExit(level, st, id, r, c, gt);
   setTimeout(() => {
@@ -248,19 +251,11 @@ function win() {
   progress.stars[idx] = Math.max(starsOf(idx), s);
   saveProgress();
   Sound.win();
-  $('win-stars').innerHTML = [1, 2, 3].map(k => `<span class="${k <= s ? '' : 'off'}">★</span>`).join('');
+  $('win-stars').innerHTML = [1, 2, 3].map(k => `<span class="star ${k <= s ? 'on' : 'off'}" style="--k:${k}"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8z"/></svg></span>`).join('');
   $('win-text').textContent = s === 3 ? `${moves} moves — perfect!` : `${moves} moves · ${level.par} for three stars`;
   $('next').hidden = idx >= LEVELS.length - 1;
   $('win').hidden = false;
-  confetti();
-}
-function confetti() {
-  const cols = Object.values(COLORS);
-  for (let i = 0; i < 40; i++) {
-    const c = el('confetti', { left: Math.random() * 100 + 'vw', background: cols[i % cols.length], animationDuration: 1.2 + Math.random() * 1.2 + 's', animationDelay: Math.random() * 0.3 + 's' });
-    document.body.appendChild(c);
-    setTimeout(() => c.remove(), 3000);
-  }
+  Art.confetti();
 }
 
 // ── Buttons ──────────────────────────────────────────────────
@@ -280,5 +275,6 @@ $('next').addEventListener('click', () => start(idx + 1));
 $('replay').addEventListener('click', () => start(idx));
 window.addEventListener('resize', () => { if (!$('game').hidden) { layout(); render(); } });
 
+Art.defs();
 home();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
