@@ -2,15 +2,16 @@
 const Art = (() => {
   // light, base, dark, side (the block's visible thickness)
   const PAL = {
-    red:    ['#ff9a8c', '#ff5a4e', '#e33a30', '#b5261f'],
+    red:    ['#ff7a82', '#e8263a', '#c0142a', '#860a1b'],
     blue:   ['#8db8ff', '#3d7bff', '#2a5fe3', '#1c42ad'],
     yellow: ['#ffe68a', '#ffc933', '#f2a900', '#c78300'],
     green:  ['#8ff2b0', '#2fcf6f', '#1dab56', '#12803f'],
     purple: ['#d8b0ff', '#a45cff', '#8439e8', '#6124b6'],
-    orange: ['#ffc58a', '#ff8a2b', '#ee6a12', '#bd4e07'],
+    orange: ['#ffd38a', '#ff9a1a', '#f58300', '#b85f00'],
     pink:   ['#ffb0da', '#ff5fb2', '#ea3a92', '#b52470'],
     sky:    ['#a6eeff', '#3fd0ff', '#18aeee', '#0b83bc'],
     water:  ['#a8fff4', '#1fd6c6', '#0fb0a8', '#0a7d80'],
+    beaver: ['#e2ae78', '#a86a38', '#834f26', '#5c3416'],
   };
   // Frozen blocks are ice all the way through: their colour stays hidden until they thaw.
   const ICE = ['#ffffff', '#dff4ff', '#b6e0fa', '#8cc3e6'];
@@ -128,6 +129,11 @@ const Art = (() => {
     s += `<defs><clipPath id="${uid}"><path d="${shape}"/></clipPath></defs>`;
     s += `<g transform="translate(0 ${(-depth / 2).toFixed(2)})">`;
     s += `<path class="shadow" d="${shape}" transform="translate(0 ${depth * 1.35})" fill="#0b0624" opacity="0.3"/>`;
+    if (p.color === 'beaver' && !frozen) {
+      // Round ears peeking over the top edge.
+      const [er, ec] = heart(offs, !p.shape);
+      for (const dx of [-0.24, 0.24]) s += `<circle cx="${(ec + 0.5 + dx) * cs}" cy="${(er + 0.1) * cs}" r="${cs * 0.12}" fill="${side}"/><circle cx="${(ec + 0.5 + dx) * cs}" cy="${(er + 0.1) * cs}" r="${cs * 0.06}" fill="#e9b98c"/>`;
+    }
     s += `<path d="${shape}" transform="translate(0 ${depth})" fill="${side}"/>`;
     s += `<path class="hit" d="${shape}" fill="url(#face-${faceFill})"/>`;
     s += `<g clip-path="url(#${uid})" pointer-events="none">`;
@@ -153,6 +159,13 @@ const Art = (() => {
     }
     const [hr, hc] = heart(offs, !p.shape);
     if (faceOn && !p.inner && !frozen) s += face((hc + 0.5) * cs, (hr + 0.5) * cs, cs);
+    if (p.color === 'beaver' && !frozen) {
+      // Buck teeth and a little nose.
+      const x = (hc + 0.5) * cs, y = (hr + 0.5) * cs;
+      s += `<ellipse cx="${x}" cy="${y + cs * 0.04}" rx="${cs * 0.06}" ry="${cs * 0.04}" fill="#3a1f0c"/>`;
+      s += `<g class="teeth"><rect x="${x - cs * 0.07}" y="${y + cs * 0.15}" width="${cs * 0.065}" height="${cs * 0.11}" rx="${cs * 0.015}" fill="#fffdf2" stroke="#caa" stroke-width="${cs * 0.008}"/>`
+        + `<rect x="${x + cs * 0.005}" y="${y + cs * 0.15}" width="${cs * 0.065}" height="${cs * 0.11}" rx="${cs * 0.015}" fill="#fffdf2" stroke="#caa" stroke-width="${cs * 0.008}"/></g>`;
+    }
     if (p.ice) {
       s += `<g pointer-events="none"><path d="${shape}" fill="url(#ice)" opacity="0.6"/>`;
       // Frost cracks and sparkles.
@@ -184,6 +197,23 @@ const Art = (() => {
     s += '</svg>';
     s += `<b class="fire-count">${n}</b>`;
     d.innerHTML = s;
+    d.style.width = d.style.height = cs + 'px';
+    return d;
+  }
+
+  // A forest on one cell: grass, three trees that sway, a bit of shade. What's hidden stays hidden.
+  function forest(cs) {
+    const d = document.createElement('div');
+    d.className = 'forest';
+    const tree = (x, y, k, dark, light, i) => `<g class="tree" style="--i:${i};transform-origin:${x}px ${y + 30 * k}px">
+      <rect x="${x - 3 * k}" y="${y + 18 * k}" width="${6 * k}" height="${12 * k}" rx="${2 * k}" fill="#7a4a24"/>
+      <path d="M${x},${y - 22 * k} L${x + 17 * k},${y + 4 * k} L${x + 10 * k},${y + 4 * k} L${x + 20 * k},${y + 20 * k} L${x - 20 * k},${y + 20 * k} L${x - 10 * k},${y + 4 * k} L${x - 17 * k},${y + 4 * k} Z" fill="${dark}"/>
+      <path d="M${x},${y - 22 * k} L${x + 17 * k},${y + 4 * k} L${x},${y + 4 * k} Z" fill="${light}" opacity="0.55"/></g>`;
+    d.innerHTML = `<svg viewBox="0 0 100 100" width="${cs}" height="${cs}" overflow="visible">
+      <rect x="4" y="4" width="92" height="92" rx="22" fill="#2f7a3a"/><rect x="4" y="4" width="92" height="46" rx="22" fill="#3c9447" opacity="0.6"/>
+      <ellipse cx="50" cy="86" rx="40" ry="8" fill="#1f5a28" opacity="0.6"/>
+      ${tree(28, 44, 0.95, '#1e6b33', '#7fd989', 0)}${tree(72, 40, 1.05, '#23803c', '#8fe39a', 1)}${tree(50, 58, 1.15, '#1a5e2d', '#79d383', 2)}
+    </svg>`;
     d.style.width = d.style.height = cs + 'px';
     return d;
   }
@@ -248,7 +278,7 @@ const Art = (() => {
 
   // Sparks bursting from where a block went out.
   function burst(host, x, y, color, dir) {
-    const [l, b] = color === 'ice' ? ['#ffffff', '#cdeeff'] : PAL[color] || PAL.blue;
+    const [l, b] = color === 'ice' ? ['#ffffff', '#cdeeff'] : color === 'wood' ? ['#f2d29b', '#a0692f'] : color === 'leaf' ? ['#a6e98a', '#2e8b3a'] : PAL[color] || PAL.blue;
     for (let i = 0; i < 18; i++) {
       const s = document.createElement('i');
       s.className = 'spark';
@@ -279,5 +309,5 @@ const Art = (() => {
     }
   }
 
-  return { PAL, defs, blockSVG, door, burst, confetti, fire, sprinkle, steam };
+  return { PAL, defs, blockSVG, door, burst, confetti, fire, sprinkle, steam, forest };
 })();

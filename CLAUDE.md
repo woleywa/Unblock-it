@@ -43,6 +43,15 @@ version.
   (`Engine.done`). Fire levels (stage 7) leave out sky/blue (water is teal). The generator only keeps
   fire levels where some move crosses a burning cell.
 
+- Forest (colour 'forest', 1×1, `under`: hidden colour or null) and beaver (colour 'beaver'): a beaver that
+  ends a drag next to forest eats it (`Engine.eatAround`, same id → the hidden block). The solver keeps
+  beavers while forest hides blocks (findExit skips them), tries `findEat`, and findUnblock's first stage is
+  a fastSearch in `'eat'` mode (goal: beaver next to forest). In the game a hungry beaver only leaves when
+  pushed into its door (no near-door drop/flick exit).
+- Generator: `--append` makes only the stages after the existing levels; `--redo 38,39` replaces levels;
+  both use mulberry32 (the original LCG repeats itself — it made identical levels) and every board is
+  checked against the others for duplicates. A full rebuild still uses the LCG (same levels as before).
+
 ## Game (game.js)
 - Drag: the block slides cell by cell toward the finger (greedy, larger axis first), stopping at
   obstacles. Pushed past the board edge with a clear lane to a door of its colour → it leaves. Dropped

@@ -7,3 +7,6 @@ serviceAccount*.json
 
 # Apps: built copy of the web game (npm run build:web)
 www/
+
+# Firebase CLI cache
+.firebase/

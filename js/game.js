@@ -3,8 +3,8 @@ const $ = id => document.getElementById(id);
 const clone = o => JSON.parse(JSON.stringify(o));
 
 const COLORS = {
-  red: '#ff5a4e', blue: '#3d7bff', yellow: '#ffc933', green: '#2fcf6f',
-  purple: '#a45cff', orange: '#ff8a2b', pink: '#ff5fb2', sky: '#3fd0ff',
+  red: '#e8263a', blue: '#3d7bff', yellow: '#ffc933', green: '#2fcf6f',
+  purple: '#a45cff', orange: '#ff9a1a', pink: '#ff5fb2', sky: '#3fd0ff',
 };
 const ARROW = { L: '◀', R: '▶', T: '▲', B: '▼' };
 const INTRO = {
@@ -13,6 +13,7 @@ const INTRO = {
   frozen: 'New: frozen doors. They open after that many blocks leave.',
   layered: 'New: layered blocks. The outside leaves, the core stays behind.',
   fire: 'New: fire! Each water block you drag out sprays every fire once. Out fire, open road.',
+  beaver: 'New: the beaver! Drop it next to trees and it eats them — something may be hiding inside.',
 };
 
 // ── Progress ─────────────────────────────────────────────────
@@ -80,7 +81,7 @@ function home() {
 const STAGES = [
   ['Warm-up', 'red'], ['Getting busy', 'orange'], ['Walls', 'purple'],
   ['On ice', 'sky'], ['Frosty doors', 'blue'], ['Layers', 'pink'], ['Fire', 'orange'],
-  ['Mixed bag', 'green'], ['Big boards', 'purple'], ['Expert', 'red'],
+  ['Mixed bag', 'green'], ['Big boards', 'purple'], ['Expert', 'red'], ['Beaver woods', 'orange'],
 ];
 function levelList() {
   const g = $('level-grid');
@@ -173,6 +174,14 @@ function blockEl(p) {
   return d;
 }
 // Blocks lower on the board are drawn on top, so a block's side and shadow tuck behind the one below.
+function forestEl(p) {
+  const d = Art.forest(cs);
+  d.dataset.forest = p.id;
+  d.dataset.r = p.r; d.dataset.c = p.c;
+  d.dataset.h = 1;
+  place(d, p.r, p.c);
+  return d;
+}
 function fireEl(p) {
   const d = Art.fire(p.fire, cs);
   d.dataset.fire = p.id;
@@ -197,7 +206,7 @@ function render() {
     b.appendChild(el(walls.has(r + ',' + c) ? 'wall' : 'cell', { left: x + 3 + 'px', top: y + 3 + 'px', width: cs - 6 + 'px', height: cs - 6 + 'px', borderRadius: Math.round(cs * 0.2) + 'px' }));
   }
   for (const gt of st.gates) b.appendChild(Art.door(gt, doorBox(gt), gut));
-  for (const p of st.pieces) b.appendChild(p.fire ? fireEl(p) : blockEl(p));
+  for (const p of st.pieces) b.appendChild(p.fire ? fireEl(p) : p.color === 'forest' ? forestEl(p) : blockEl(p));
   status();
 }
 
@@ -295,6 +304,9 @@ const endDrag = () => {
   // Let go near its door (one cell away at most) or flicked toward it: it leaves.
   const out = exits(p, r, c).find(o => {
     const gap = gapTo(o.gt.side, p, r, c), speed = pullTo(o.gt.side, vr, vc);
+    // A beaver with trees still to eat only leaves when really pushed in (no near-door drop or flick),
+    // so it doesn't slip out by accident.
+    if (p.color === 'beaver' && st.pieces.some(q => q.color === 'forest' && q.under)) return false;
     return gap === 0 || (gap === 1 && pullTo(o.gt.side, r - r0, c - c0) > 0) || (gap <= 4 && speed > 0.004);
   });
   finishDrag(out || null);
@@ -313,7 +325,7 @@ function finishDrag(out) {
   moves++;
   sol.push({ p: p.id, r, c, g: out ? out.gt.id : 0 });
   st.pieces = st.pieces.map(x => x.id === p.id ? { ...x, r, c } : x);
-  if (!out) { place(d, r, c); settle(d); status(); return; }
+  if (!out) { place(d, r, c); settle(d); status(); beaverEat(p.id, d); return; }
   leave(p.id, d, out.gt, r, c);
 }
 
@@ -368,6 +380,31 @@ function leave(id, d, gt, r, c) {
     if (fires.length) Sound.sizzle(out);
     if (Engine.done(st)) win();
   }, fires.length ? 560 : 220);
+}
+
+// The beaver was dropped: chomp the trees next to it; anything hidden inside pops out.
+function beaverEat(id, d) {
+  const eaten = Engine.eatAround(level, st, id);
+  if (!eaten.length) return;
+  busy = true;
+  Sound.munch();
+  Native.buzz();
+  d.classList.remove('chomp'); void d.offsetWidth; d.classList.add('chomp');
+  for (const f of eaten) {
+    const e = document.querySelector(`[data-forest="${f}"]`);
+    if (!e) continue;
+    e.classList.add('eaten');
+    const q = st.pieces.find(p => p.id === f) || { r: +e.dataset.r, c: +e.dataset.c };
+    const [cx, cy] = px((q.r ?? 0) + 0.5, (q.c ?? 0) + 0.5);
+    [0, 160, 320].forEach(t => setTimeout(() => { Art.burst($('board'), cx, cy, 'wood', [0, -1]); Art.burst($('board'), cx, cy, 'leaf', [0, 1]); }, t));
+  }
+  setTimeout(() => {
+    busy = false;
+    render();
+    // What was under the trees pops out.
+    for (const f of eaten) { const e = document.querySelector(`.block[data-id="${f}"]`); if (e) e.classList.add('thawed'); }
+    if (Engine.done(st)) win();
+  }, 620);
 }
 
 // ── Hint (registered players on the hint list; not in challenges) ─────────
@@ -442,6 +479,7 @@ function replayTo(steps, n) {
     if (!p) return null;
     s2.pieces = s2.pieces.map(x => x.id === m.p ? { ...x, r: m.r, c: m.c } : x);
     if (m.g) { const gt = s2.gates.find(g => g.id === m.g); if (!gt) return null; Engine.applyExit(level, s2, m.p, m.r, m.c, gt); }
+    else Engine.eatAround(level, s2, m.p);
   }
   return s2;
 }
@@ -478,6 +516,7 @@ $('ans-watch').addEventListener('click', () => {
     moves++;
     st.pieces = st.pieces.map(x => x.id === m.p ? { ...x, r: m.r, c: m.c } : x);
     place(d, m.r, m.c); settle(d); status(); Sound.tick();
+    if (!m.g) setTimeout(() => beaverEat(m.p, d), 180);
     if (m.g) setTimeout(() => leave(m.p, d, st.gates.find(g => g.id === m.g), m.r, m.c), 260);
     setTimeout(step, m.g ? 700 : 520);
   };

@@ -2,8 +2,8 @@
 
 A sliding-block colour puzzle. Drag every block out through the door of its colour.
 
-- 50 levels in ten stages: basics, bigger boards, walls, ice, frozen doors, layered blocks, fire,
-  mixed bag, big boards, expert
+- 55 levels in eleven stages: basics, bigger boards, walls, ice, frozen doors, layered blocks, fire,
+  mixed bag, big boards, expert, beaver woods
   (water blocks put the fires out)
 - Every level was generated and checked by the built-in solver; its move count is the par (★★★)
 - Undo, restart, saved progress and stars, sound effects (synthesized, no audio files)

@@ -42,6 +42,8 @@ const Sound = (() => {
     exit: () => { tone(660, 0.12, { type: 'triangle', vol: 0.12 }); tone(990, 0.16, { type: 'triangle', vol: 0.1, delay: 0.07 }); },
     splash: () => { tone(420, 0.1, { type: 'sine', vol: 0.08, slide: 1.8 }); tone(640, 0.1, { type: 'sine', vol: 0.06, delay: 0.06, slide: 1.6 }); },
     sizzle: (out) => { hiss(out ? 0.7 : 0.35, { vol: out ? 0.14 : 0.09 }); if (out) tone(220, 0.35, { type: 'sine', vol: 0.05, delay: 0.1, slide: 0.5 }); },
+    // Crunch, crunch, crunch — and a happy little pop.
+    munch: () => { for (let i = 0; i < 3; i++) { hiss(0.07, { vol: 0.12, delay: i * 0.13, freq: 900 }); tone(180 - i * 20, 0.06, { type: 'square', vol: 0.04, delay: i * 0.13 }); } tone(700, 0.12, { type: 'sine', vol: 0.08, delay: 0.45, slide: 1.6 }); },
     thaw: () => tone(1300, 0.18, { type: 'sine', vol: 0.06, slide: 1.4 }),
     win: () => [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.22, { type: 'triangle', vol: 0.13, delay: i * 0.11 })),
   };

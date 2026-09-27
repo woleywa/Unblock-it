@@ -14,10 +14,13 @@
 // Fire (fire: n) is a 1×1 piece that never moves and blocks its cell; every water piece (color
 // 'water') that leaves sprays all fires once, and a fire at 0 goes out (the cell is free). A level is
 // done when every block has left; fires still burning then don't matter.
+// Forest (colour 'forest', 1×1, under: colour or null) blocks its cell and may hide a block. A beaver
+// (colour 'beaver') that ends a drag next to forest eats it: the forest goes, a hidden block appears in
+// its place (same id). Forest with nothing under it doesn't have to be eaten.
 const Engine = (() => {
   const clone = s => JSON.parse(JSON.stringify(s));
-  const movable = p => !p.ice && !p.lock && !p.fire && p.color !== '?';
-  const done = st => !st.pieces.some(p => p.color !== '?' && !p.fire);
+  const movable = p => !p.ice && !p.lock && !p.fire && p.color !== '?' && p.color !== 'forest';
+  const done = st => !st.pieces.some(p => p.color !== '?' && !p.fire && !(p.color === 'forest' && !p.under));
 
   const rects = new Map();
   function offsets(p) {
@@ -114,8 +117,10 @@ const Engine = (() => {
 
   function findExit(level, st) {
     const g = grid(level, st.pieces);
+    // Beavers stay until every forest hiding a block has been eaten (a beaver that left can't eat).
+    const hungry = st.pieces.some(q => q.color === 'forest' && q.under);
     for (const p of st.pieces) {
-      if (!movable(p)) continue;
+      if (!movable(p) || (hungry && p.color === 'beaver')) continue;
       for (const [r, c] of reachable(level, g, p)) {
         const gt = gateFor(level, g, st.gates, p, r, c);
         if (gt) return { pieceId: p.id, r, c, gateId: gt.id };
@@ -146,6 +151,34 @@ const Engine = (() => {
       if (p.key && q.lock && (q.lockColor ? (p.keyColor || p.color) === q.lockColor : q.color === p.color)) q.lock--;
     }
     st.gates = st.gates.map(gt => gt.frozen ? { ...gt, frozen: gt.frozen - 1 } : gt);
+  }
+
+  // A beaver that has just been dragged eats the forest next to it. Returns the eaten forests' ids.
+  function eatAround(level, st, id) {
+    const b = st.pieces.find(x => x.id === id);
+    if (!b || b.color !== 'beaver') return [];
+    const near = new Set();
+    for (const [r, c] of cellsOf(b)) for (const [dr, dc] of ALL) near.add((r + dr) + ',' + (c + dc));
+    const eaten = st.pieces.filter(q => q.color === 'forest' && cellsOf(q).some(([r, c]) => near.has(r + ',' + c)));
+    if (!eaten.length) return [];
+    st.pieces = st.pieces.filter(q => !eaten.includes(q))
+      .concat(eaten.filter(q => q.under).map(q => { const n = { ...q, color: q.under }; delete n.under; return n; }));
+    return eaten.map(q => q.id);
+  }
+  // A beaver that can reach a spot next to forest (not where it already is): { pieceId, r, c } or null.
+  function findEat(level, st) {
+    if (!st.pieces.some(p => p.color === 'forest')) return null;
+    const g = grid(level, st.pieces);
+    const woods = new Set();
+    for (const q of st.pieces) if (q.color === 'forest') for (const [r, c] of cellsOf(q)) woods.add(r + ',' + c);
+    for (const p of st.pieces) {
+      if (p.color !== 'beaver' || !movable(p)) continue;
+      for (const [r, c] of reachable(level, g, p)) {
+        if (r === p.r && c === p.c) continue;
+        if (cellsOf(p, r, c).some(([y, x]) => ALL.some(([dy, dx]) => woods.has((y + dy) + ',' + (x + dx))))) return { pieceId: p.id, r, c };
+      }
+    }
+    return null;
   }
 
   const moveTo = (st, id, r, c) => ({ pieces: st.pieces.map(x => x.id === id ? { ...x, r, c } : x), gates: st.gates });
@@ -311,7 +344,11 @@ const Engine = (() => {
     // Goal: leave through a gate, or (park) sit entirely on tracks of its colour, where no other
     // piece can come, ready for the next stage.
     const onTrack = a => foot[T][a] && foot[T][a].every(i => tr.get(i) === P.color);
-    const canLeave = park ? (anchors => anchors.some(onTrack))
+    // Eat mode (park === 'eat'): the goal is a beaver dropped next to forest.
+    const woods = new Set();
+    if (park === 'eat') for (const q of st.pieces) if (q.color === 'forest') for (const [r, c] of cellsOf(q)) woods.add(r * W + c);
+    const byWoods = a => foot[T][a] && foot[T][a].some(i => woods.has(i - W) || woods.has(i + W) || (i % W > 0 && woods.has(i - 1)) || (i % W < W - 1 && woods.has(i + 1)));
+    const canLeave = park === 'eat' ? (anchors => anchors.some(byWoods)) : park ? (anchors => anchors.some(onTrack))
       : (anchors => anchors.some(a => (lanes[a] || []).some(l => l.every(i => occ[i] === -1 || occ[i] === T))));
     // Guided mode: how many occupied cells lie on the target's cheapest way out (route + lane).
     const hcost = () => {
@@ -373,8 +410,11 @@ const Engine = (() => {
       let pos = stateAt(h);
       fill(pos);
       const got = reach(T, pos);
-      if (canLeave(got)) {
-        if (park && !onTrack(pos[T])) {
+      if (park === 'eat' ? got.some(a => a !== pos[T] && byWoods(a)) : canLeave(got)) {
+        if (park === 'eat') {
+          const a = got.find(x => x !== pos[T] && byWoods(x));
+          h = push(pos.map((v, k) => k === T ? a : v), h, T, pos[T]);
+        } else if (park && !onTrack(pos[T])) {
           const a = got.find(onTrack);
           h = push(pos.map((v, k) => k === T ? a : v), h, T, pos[T]);
         }
@@ -449,7 +489,11 @@ const Engine = (() => {
       const T = st.pieces.find(p => p.id === t.id);
       return [...t.b.cells].some(i => tr.get(i) === T.color) && !cellsOf(T).every(([y, x]) => tr.get(y * W + x) === T.color);
     };
+    // Hungry beavers first: clear a way for one to get next to the forest.
+    const hungry = st.pieces.some(q => q.color === 'forest' && q.under);
+    const beavers = hungry ? all.filter(p => p.color === 'beaver') : [];
     const stages = [
+      ...beavers.map(b => () => fastSearch(level, st, b.id, new Set(all.map(p => p.id)), 300000, deadline, progress, 'eat')),
       ...targets.map(t => () => bfs(t.id, new Set(all.filter(p => p.id === t.id || near(p, t.b.cells, 1)).map(p => p.id)), 100000)),
       ...targets.filter(trackBound).map(t => () => fastSearch(level, st, t.id, compartment(st.pieces.find(p => p.id === t.id)), 1500000, deadline, progress, true)),
       ...targets.map(t => () => bfs(t.id, new Set(all.filter(p => p.id === t.id || near(p, t.b.cells, 2)).map(p => p.id)), 400000)),
@@ -479,11 +523,20 @@ const Engine = (() => {
         applyExit(level, st, p.id, ex.r, ex.c, st.gates.find(g => g.id === ex.gateId));
         continue;
       }
+      // A beaver that can get to the forest: eating only frees room (or reveals a block where the tree was).
+      const eat = findEat(level, st);
+      if (eat) {
+        steps.push({ kind: 'move', before: clone(st), ...eat });
+        st = moveTo(st, eat.pieceId, eat.r, eat.c);
+        eatAround(level, st, eat.pieceId);
+        continue;
+      }
       const un = findUnblock(level, st, deadline, progress);
       if (!un) return { ok: false, steps, final: st };
       for (const mv of un.moves) {
         steps.push({ kind: 'move', before: clone(st), ...mv });
         st = moveTo(st, mv.pieceId, mv.r, mv.c);
+        eatAround(level, st, mv.pieceId);
       }
     }
   }
@@ -509,7 +562,7 @@ const Engine = (() => {
     return out;
   }
 
-  return { solve, movable, done, path, cellsOf, fastSearch, grid, reachable, fits, gateFor, laneOf, applyExit };
+  return { solve, movable, done, eatAround, path, cellsOf, fastSearch, grid, reachable, fits, gateFor, laneOf, applyExit };
 })();
 
 if (typeof module !== 'undefined') module.exports = Engine;
