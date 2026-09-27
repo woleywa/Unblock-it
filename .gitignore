@@ -4,3 +4,6 @@ node_modules/
 # Secrets: never commit service-account keys
 *adminsdk*.json
 serviceAccount*.json
+
+# Apps: built copy of the web game (npm run build:web)
+www/

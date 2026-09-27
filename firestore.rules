@@ -51,7 +51,7 @@ service cloud.firestore {
         && (!('stars' in request.resource.data) || (request.resource.data.stars is map && request.resource.data.stars.size() <= 1000))
         && (!('moves' in request.resource.data) || (request.resource.data.moves is map && request.resource.data.moves.size() <= 1000))
         && (!('friends' in request.resource.data) || (request.resource.data.friends is list && request.resource.data.friends.size() <= 200));
-      allow delete: if false;
+      allow delete: if signedIn() && me() == uid;
     }
 
     // A player's totals; score = stars × 100000 − moves so the board sorts on one field.
@@ -78,7 +78,18 @@ service cloud.firestore {
     match /players/{uid} {
       allow read: if true;
       allow create, update: if signedIn() && me() == uid && validPlayer(request.resource.data) && teamSynced();
-      allow delete: if false;
+      // Deleting your account: only once you've left your team (so team totals stay right).
+      allow delete: if signedIn() && me() == uid && teamOf(resource.data) == null;
+    }
+
+    // Each player's best run per level.
+    match /levels/{level}/runs/{uid} {
+      allow read: if true;
+      allow create, update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['name', 'moves', 'updated'])
+        && request.resource.data.moves is int && request.resource.data.moves >= 1 && request.resource.data.moves <= 999
+        && get(/databases/$(database)/documents/players/$(uid)).data.name == request.resource.data.name;
+      allow delete: if signedIn() && request.auth.uid == uid;
     }
 
     // Teams: the document id is the invite code. members ≤ 20; stars = the members' stars added up.

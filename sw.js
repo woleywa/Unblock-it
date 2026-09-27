@@ -1,7 +1,7 @@
 // Offline support: serve the app from the cache, refresh it in the background.
-const CACHE = 'unblock-it-v9';
-const FILES = ['./', 'index.html', 'style.css?v=9', 'js/engine.js?v=9', 'js/levels.js?v=9', 'js/audio.js?v=9', 'js/art.js?v=9', 'js/challenge-levels.js?v=9', 'js/game.js?v=9', 'js/social.js?v=9', 'js/online.js?v=9',
-  'manifest.webmanifest', 'icons/icon.svg', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
+const CACHE = 'unblock-it-v10';
+const FILES = ['./', 'index.html', 'style.css?v=10', 'js/native.js?v=10', 'js/engine.js?v=10', 'js/levels.js?v=10', 'js/audio.js?v=10', 'js/art.js?v=10', 'js/challenge-levels.js?v=10', 'js/game.js?v=10', 'js/social.js?v=10', 'js/online.js?v=10',
+  'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))));

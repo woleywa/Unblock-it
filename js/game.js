@@ -303,7 +303,7 @@ function leave(id, d, gt, r, c) {
     const dir = { L: [-1, 0], R: [1, 0], T: [0, -1], B: [0, 1] }[gt.side];
     Art.burst($('board'), door.offsetLeft + door.offsetWidth / 2, door.offsetTop + door.offsetHeight / 2, p.color, dir);
   }
-  if (navigator.vibrate) navigator.vibrate(12);
+  Native.buzz();
   const before = st.gates.filter(g => g.frozen).length, iced = st.pieces.filter(q => q.ice).length;
   const icedIds = st.pieces.filter(q => q.ice).map(q => q.id);
   // Water: drops fly from the door onto every fire.
@@ -556,4 +556,5 @@ window.addEventListener('resize', () => { if (!$('game').hidden) { layout(); ren
 
 Art.defs();
 home();
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+// Offline cache for the web version; the apps carry their files already (and a cache could go stale).
+if ('serviceWorker' in navigator && !Native.app) navigator.serviceWorker.register('sw.js').catch(() => {});

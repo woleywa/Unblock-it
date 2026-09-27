@@ -1,0 +1,21 @@
+{
+  "appId": "com.woleywa.happyblocks",
+  "appName": "Happy Blocks",
+  "webDir": "www",
+  "backgroundColor": "#1b2458",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#1b2458"
+  },
+  "android": {
+    "backgroundColor": "#1b2458"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 600,
+      "launchAutoHide": true,
+      "backgroundColor": "#1b2458",
+      "showSpinner": false
+    }
+  }
+}

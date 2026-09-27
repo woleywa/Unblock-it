@@ -7,6 +7,16 @@ Vanilla JS, no build. Deployed by GitHub Pages from `main` (root). Bump `?v=N` o
 in `index.html` AND the `CACHE` name + file list in `sw.js` on every change, or phones keep the old
 version.
 
+## Apps (see APPS.md)
+- Capacitor 8 wraps the same files: `npm run build:web` copies them to `www/` (gitignored), `npm run sync`
+  also copies into `ios/` and `android/`. App id `com.woleywa.happyblocks`. `.github/workflows/apps.yml`
+  builds an Android debug APK (artifact) and an unsigned iOS simulator build on every push to main.
+- `js/native.js`: `Native.app`, `Native.buzz()` (haptics), `Native.webBase()` (invite links must use the
+  public web URL, not capacitor://), status bar, Android back button. No service worker in the apps.
+- Icons/splash: source art in `assets/` (rendered from Art.blockSVG), `npm run icons` makes every size.
+- Account deletion (Apple requirement): online.js `deleteAccount` (re-auth with password, leave team,
+  delete runs/player/name/save, then the auth user).
+
 ## Rules (engine.js)
 - A block leaves through a door of its colour on the edge it touches, if its span fits in the door and
   nothing is between it and the door. Blocks slide anywhere through empty cells.

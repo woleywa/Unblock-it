@@ -2,7 +2,7 @@
 // Uses game.js globals: $, show, esc, askName, totals, starsFor, begin, chPlay, home, ranks.
 const Social = (() => {
   const on = () => window.Online;
-  const link = (k, code) => `${location.origin}${location.pathname}#${k}=${code}`;
+  const link = (k, code) => `${Native.webBase()}#${k}=${code}`;
 
   // ── Small helpers ──────────────────────────────────────────
   let toastT = 0;
@@ -487,7 +487,25 @@ const Social = (() => {
     const body = $('acct-body');
     if (o.account) {
       body.innerHTML = `<p class="note small">Signed in as <b>${esc(o.account)}</b>. Your stars, team and friends are saved to your account — sign in with it on any device.</p>
-        <button class="ghost" id="acct-out" type="button">Sign out on this device</button>`;
+        <button class="ghost" id="acct-out" type="button">Sign out on this device</button>
+        <button class="linkish" id="acct-del" type="button">Delete my account</button>
+        <form id="acct-del-form" class="danger" hidden autocomplete="off">
+          <p class="note small">This deletes your account for good: nickname, stars, team spot, friends and records. It can’t be undone.</p>
+          <input type="password" id="acct-del-pw" placeholder="Your password" autocomplete="current-password">
+          <button class="big red" type="submit" id="acct-del-go">Delete forever</button>
+          <p class="err" id="acct-del-err"></p>
+        </form>`;
+      $('acct-del').addEventListener('click', () => { $('acct-del-form').hidden = false; $('acct-del').hidden = true; $('acct-del-pw').focus(); });
+      $('acct-del-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        $('acct-del-go').disabled = true; $('acct-del-err').textContent = '';
+        try {
+          await o.deleteAccount($('acct-del-pw').value, LEVELS.length);
+          progress = { stars: {}, moves: {} }; saveProgress();
+          store = { known: [], runs: {} }; persist();
+          $('acct').hidden = true; home(); toast('Your account was deleted');
+        } catch (err) { console.warn(err); $('acct-del-err').textContent = err.message || errText(err); $('acct-del-go').disabled = false; }
+      });
       $('acct-out').addEventListener('click', async () => {
         if (!confirm('Sign out? This device goes back to a fresh guest. Your account keeps everything.')) return;
         try {

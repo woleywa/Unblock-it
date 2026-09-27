@@ -15,7 +15,7 @@
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import {
   getAuth, signInAnonymously, onAuthStateChanged, EmailAuthProvider, linkWithCredential,
-  signInWithEmailAndPassword, sendPasswordResetEmail, signOut,
+  signInWithEmailAndPassword, sendPasswordResetEmail, signOut, reauthenticateWithCredential, deleteUser,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 // Firestore Lite: plain one-off requests, no live stream (nothing for a cache or a sleeping phone
 // to hold open), and a much smaller download.
@@ -100,6 +100,23 @@ async function signOutNow() {
   await ready;
   const old = uid;
   await signOut(auth);
+  await settledAs(u => u !== old);
+}
+// Delete the account and what's stored for it: leaves the team, removes the nickname, the player's
+// totals, the private save and their best run on every level; then the login itself.
+async function deleteAccount(pw, levelCount) {
+  await ready;
+  const user = auth.currentUser;
+  if (!user || user.isAnonymous) throw new Error('No account to delete');
+  await authCall(() => reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, pw)));
+  if (me && me.team) await moveTo(null, { stars: me.stars, moves: me.moves, levels: me.levels }, false);
+  const b = writeBatch(db);
+  for (let i = 0; i < levelCount; i++) b.delete(doc(db, 'levels', String(i), 'runs', uid));
+  if (me) { b.delete(doc(db, 'players', uid)); b.delete(doc(db, 'names', me.name.toLowerCase())); }
+  b.delete(doc(db, 'saves', uid));
+  await b.commit();
+  const old = uid;
+  await authCall(() => deleteUser(user));
   await settledAs(u => u !== old);
 }
 const resetPassword = email => authCall(() => sendPasswordResetEmail(auth, email.trim()));
@@ -378,7 +395,7 @@ window.Online = {
   teamChallenges: t => timed(teamChallenges(t)), normCode,
   now: () => Date.now() + skew,
   createAccount: (e, p) => timed(createAccount(e, p)), signIn: (e, p) => timed(signIn(e, p)), signOut: () => timed(signOutNow()),
-  resetPassword: e => timed(resetPassword(e)),
+  resetPassword: e => timed(resetPassword(e)), deleteAccount: (p, n) => timed(deleteAccount(p, n), 30000),
   getSave: () => timed(getSave()), putSave: p => timed(putSave(p)),
   addFriend: n => timed(addFriend(n)), addFriendId: f => timed(addFriendId(f)), removeFriend: f => timed(removeFriend(f)), getFriendName: f => timed(getFriendName(f)),
   friendsBoard: () => timed(friendsBoard()),

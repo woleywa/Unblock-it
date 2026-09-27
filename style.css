@@ -320,3 +320,6 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 30px; }
 .block.ghost .jelly * { pointer-events: none !important; }
 .hint-glow { position: absolute; inset: -4px; border-radius: 22%; box-shadow: 0 0 0 3px #ffd54a, 0 0 18px 4px rgba(255,213,74,0.7); animation: nextup 1s ease-in-out infinite; pointer-events: none; }
 #hint-btn:disabled { opacity: 0.5; }
+.danger { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 16px; border: 1px solid rgba(255,90,78,0.5); background: rgba(255,90,78,0.1); }
+.danger input { font: inherit; font-size: 1.05rem; color: var(--text); background: rgba(10,6,40,0.5); border: 2px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 11px 13px; outline: none; }
+.big.red { background: linear-gradient(180deg, #ff8a7e, #ff5a4e 50%, #e33a30); color: #fff; box-shadow: 0 6px 0 #a3241c, inset 0 2px 0 rgba(255,255,255,0.5); }
