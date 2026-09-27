@@ -54,6 +54,8 @@ const STAGES = [
   { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 0.6, lanes: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [3, 10], note: 'lanes' },
   // Prison: locked blocks behind bars; every key block that leaves opens one lock on each of them.
   { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 0.66, prison: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [3, 10], note: 'prison' },
+  // Chains: 1–2 blocks chained to a post; they can only go as far as the chain reaches.
+  { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 0.6, chains: true, shapes: ['dot', 'bar2h', 'bar2v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [3, 10], note: 'chains' },
 ];
 
 function shapeBox(sh) { return { h: Math.max(...sh.map(q => q[0])) + 1, w: Math.max(...sh.map(q => q[1])) + 1 }; }
@@ -190,6 +192,27 @@ function makeLevel(st) {
     }
     if (pieces.filter(p => p.axis).length < 2) return null;
   }
+  if (st.chains) {
+    // The post goes on a free cell next to the block; the chain is 2–4 long.
+    const want = int(1, 2);
+    let n = 0;
+    for (const p of pieces.slice().sort(() => rand() - 0.5)) {
+      if (n >= want) break;
+      const cells = p.shape ? p.shape.map(([a, b]) => [p.r + a, p.c + b]) : [...Array(p.h * p.w).keys()].map(k => [p.r + Math.floor(k / p.w), p.c + k % p.w]);
+      const spots = [];
+      for (const [r, c] of cells) for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const y = r + dr, x = c + dc;
+        if (y >= 0 && x >= 0 && y < H && x < W && occ[y][x] === 0) spots.push([y, x]);
+      }
+      if (!spots.length) continue;
+      const [y, x] = pick(spots);
+      occ[y][x] = -6;
+      walls.push([y, x]);
+      p.tether = { r: y, c: x, len: int(2, 4) };
+      n++;
+    }
+    if (!n) return null;
+  }
   if (st.prison) {
     // 2–3 key blocks, then 1–2 other blocks locked for up to that many keys (any key fits any lock).
     const order = pieces.slice().sort(() => rand() - 0.5);
@@ -223,7 +246,7 @@ const levels = (APPEND || REDO.length) ? require(CHALLENGE ? '../js/challenge-le
 let skip = levels.length;
 if (APPEND) seed = (seed + levels.length * 7919) % 2147483648;
 // No two levels may be the same board (the old random generator can repeat itself).
-const keyOf = l => JSON.stringify([l.W, l.H, l.walls, l.pieces.map(p => [p.color, p.r, p.c, p.h, p.w, p.shape || 0, p.ice || 0, p.fire || 0, p.inner || 0, p.under || 0, p.axis || 0, p.key ? 1 : 0, p.lock || 0]), l.gates, l.tracks || []]);
+const keyOf = l => JSON.stringify([l.W, l.H, l.walls, l.pieces.map(p => [p.color, p.r, p.c, p.h, p.w, p.shape || 0, p.ice || 0, p.fire || 0, p.inner || 0, p.under || 0, p.axis || 0, p.key ? 1 : 0, p.lock || 0, p.tether ? JSON.stringify(p.tether) : 0]), l.gates, l.tracks || []]);
 const keys = new Set(levels.filter((_, i) => !REDO.includes(i + 1)).map(keyOf));
 if (REDO.length) {
   seed = (seed * 31 + REDO.reduce((a, n) => a * 131 + n, 7)) % 2147483648;

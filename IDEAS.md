@@ -5,12 +5,12 @@ A running list of ideas for the game. ✅ = built, 🔨 = in progress, 💡 = id
 ## New blocks and board pieces
 - ✅ **Forest & beaver** — trees block cells and can hide a block; pull a beaver onto a tree and it eats
   it (wood chips flying), revealing what's hidden. Each beaver eats one tree and is gone.
-- 💡 **Prison** — blocks behind iron bars with a padlock number; every 🔑 key block you drag out opens it
+- ✅ **Prison** — blocks behind iron bars with a padlock number; every 🔑 key block you drag out opens it
   one step. The engine already supports keys and locks.
-- 💡 **Chained blocks** — a block chained to a post can only move as far as its chain reaches
+- ✅ **Chained blocks** — a block chained to a post can only move as far as its chain reaches
   (e.g. 2 cells from the post); the chain is drawn and pulls tight when you drag.
-- 💡 **Arrow blocks** — slide only one way (↔ or ↕). Already in the engine.
-- 💡 **Colour lanes** — floor tracks only one colour may cross. Already in the engine.
+- ✅ **Arrow blocks** — slide only one way (↔ or ↕). Already in the engine.
+- ✅ **Colour lanes** — floor tracks only one colour may cross. Already in the engine.
 - ✅ Walls, ice, frozen doors, layered blocks, fire & water.
 
 ## Learning the game

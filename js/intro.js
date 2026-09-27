@@ -52,6 +52,31 @@ const Intro = (() => {
         host.appendChild(d);
         return d;
       },
+      // A post at (pr, pc) and a chain to block d, redrawn every frame while the scene plays.
+      chain(d, pr, pc, len) {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', W * CS + 2 * GUT); svg.setAttribute('height', H * CS + 2 * GUT);
+        Object.assign(svg.style, { position: 'absolute', left: 0, top: 0, zIndex: 0, pointerEvents: 'none', overflow: 'visible' });
+        host.appendChild(svg);
+        const [x0, y0] = xy(pr + 0.5, pc + 0.5);
+        let on = true;
+        const tick = () => {
+          if (!on) return;
+          const hb = host.getBoundingClientRect(), bb = d.isConnected ? d.getBoundingClientRect() : null;
+          let h = `<circle cx="${x0}" cy="${y0}" r="${CS * 0.22}" fill="#8a6a44" stroke="#4a3520" stroke-width="${CS * 0.05}"/><circle cx="${x0}" cy="${y0 - CS * 0.05}" r="${CS * 0.12}" fill="#b89366"/>`
+            + `<circle cx="${x0 + CS * 0.27}" cy="${y0 - CS * 0.27}" r="${CS * 0.15}" fill="#fff" stroke="#2b2f45" stroke-width="${CS * 0.02}"/><text x="${x0 + CS * 0.27}" y="${y0 - CS * 0.27 + CS * 0.075}" text-anchor="middle" font-size="${CS * 0.2}" font-weight="700" fill="#2b2f45" font-family="Fredoka, system-ui, sans-serif">${len}</text>`;
+          if (bb && !d.classList.contains('leaving')) {
+            const x1 = bb.left - hb.left + bb.width / 2, y1 = bb.top - hb.top + bb.height / 2;
+            const dist = Math.abs(x1 - x0) / CS + Math.abs(y1 - y0) / CS, slack = Math.max(0, len - dist) / len;
+            const pth = `M${x0},${y0} Q${(x0 + x1) / 2},${(y0 + y1) / 2 + CS * 0.45 * slack} ${x1},${y1}`;
+            h = `<path d="${pth}" fill="none" stroke="#2b2f45" stroke-width="${CS * 0.16}" stroke-linecap="round"/><path d="${pth}" fill="none" stroke="#b9c0d8" stroke-width="${CS * 0.1}" stroke-linecap="round" stroke-dasharray="${CS * 0.16} ${CS * 0.1}"/>` + h;
+          }
+          svg.innerHTML = h;
+          requestAnimationFrame(tick);
+        };
+        tick();
+        return () => { on = false; };
+      },
       fire(n, r, c) { const d = Art.fire(n, CS); d.dataset.h = 1; put(d, r, c); host.appendChild(d); return d; },
       forest(r, c) { const d = Art.forest(CS); d.dataset.h = 1; put(d, r, c); host.appendChild(d); return d; },
       put,
@@ -224,6 +249,28 @@ const Intro = (() => {
         await wait(500); fire.remove();
         await drag(S, f, red, [[1, 2], [1, 3]], id); if (id !== run) return;
         await out(S, host, f, red, 'R', id);
+      },
+    },
+    chains: {
+      title: 'Chains',
+      text: 'A chained block only goes as far as its chain reaches (the number on the post) — so it needs a door within reach.',
+      async play(host, id) {
+        const S = board(host, 4, 3);
+        S.door('T', 1, 1, 'red'); S.door('R', 0, 1, 'blue');
+        const red = S.block({ w: 1, h: 1, color: 'red' }, 1, 1);
+        const blue = S.block({ w: 1, h: 1, color: 'blue' }, 0, 1);
+        const stop = S.chain(red, 1, 0, 2);
+        const f = finger(host);
+        await wait(500);
+        // As far as it goes: the chain pulls tight…
+        await drag(S, f, red, [[1, 2], [1, 2.25]], id); if (id !== run) return stop();
+        S.put(red, 1, 2); red.classList.remove('dragging'); red.classList.add('shake'); await wait(400); red.classList.remove('shake');
+        // …so clear the way to the door that's in reach.
+        await drag(S, f, blue, [[0, 2], [0, 3]], id); if (id !== run) return stop();
+        await out(S, host, f, blue, 'R', id); if (id !== run) return stop();
+        await drag(S, f, red, [[1, 1], [0, 1]], id); if (id !== run) return stop();
+        await out(S, host, f, red, 'T', id);
+        stop();
       },
     },
     prison: {

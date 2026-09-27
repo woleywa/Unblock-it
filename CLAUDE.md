@@ -56,6 +56,9 @@ version.
   straight lanes over empty cells or blocks of that colour only.
 - Prison: `lock: n, lockColor: 'gold'` blocks (bars + padlock) and `key: true, keyColor: 'gold'` blocks
   (golden key); each key that leaves opens one lock on every prison (Engine.applyExit).
+- Chains (`tether: { r, c, len }`): the post is a wall cell; `Engine.inReach` limits where the block may
+  sit (fits + fastSearch footprints) and `Engine.reachesDoor` which doors it can use. game.js drawChains()
+  draws posts (with the reach number) and chains, live while dragging.
 - "New!" pop-ups: js/intro.js (`Intro.show(key, again)`), one looping mini-board scene per feature
   (basics, walls, ice, frozen, layered, fire, beaver) drawn with the real Art functions and a 👆 finger.
   start() shows it once per feature (localStorage `unblock_seen_intros`) and adds "▶ Show me" to the hint.

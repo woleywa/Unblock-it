@@ -13,7 +13,7 @@ const INTRO = {
   frozen: 'New: frozen doors. They open after that many blocks leave.',
   layered: 'New: layered blocks. The outside leaves, the core stays behind.',
   fire: 'New: fire! Each water block you drag out sprays every fire once. Out fire, open road.',
-  chains: 'New: chains. A chained block can only go as far as its chain reaches from the post.',
+  chains: 'New: chains. A chained block only goes as far as its chain reaches — the number on the post.',
   prison: 'New: prison! Locked blocks can’t move. Every 🔑 key block you drag out opens a lock.',
   lanes: 'New: colour lanes. Only blocks of that colour may cross them.',
   arrows: 'New: arrow blocks. They only slide the way their arrows point.',
@@ -86,7 +86,7 @@ function home() {
 const STAGES = [
   ['Warm-up', 'red'], ['Getting busy', 'orange'], ['Walls', 'purple'],
   ['On ice', 'sky'], ['Frosty doors', 'blue'], ['Layers', 'pink'], ['Fire', 'orange'],
-  ['Mixed bag', 'green'], ['Big boards', 'purple'], ['Expert', 'red'], ['Beaver woods', 'orange'], ['Arrows', 'sky'], ['Colour lanes', 'green'], ['Prison', 'yellow'],
+  ['Mixed bag', 'green'], ['Big boards', 'purple'], ['Expert', 'red'], ['Beaver woods', 'orange'], ['Arrows', 'sky'], ['Colour lanes', 'green'], ['Prison', 'yellow'], ['Chains', 'blue'],
 ];
 function levelList() {
   const g = $('level-grid');
@@ -216,7 +216,7 @@ function render() {
   b.style.width = level.W * cs + 2 * gut + 'px';
   b.style.height = level.H * cs + 2 * gut + 'px';
   const walls = new Set((level.walls || []).map(([r, c]) => r + ',' + c));
-  const posts = new Set(st.pieces.filter(p => p.tether).map(p => p.tether.r + ',' + p.tether.c));
+  const posts = new Set(level.pieces.filter(p => p.tether).map(p => p.tether.r + ',' + p.tether.c));
   for (let r = 0; r < level.H; r++) for (let c = 0; c < level.W; c++) {
     const [x, y] = px(r, c);
     b.appendChild(el(posts.has(r + ',' + c) ? 'cell post' : walls.has(r + ',' + c) ? 'wall' : 'cell', { left: x + 3 + 'px', top: y + 3 + 'px', width: cs - 6 + 'px', height: cs - 6 + 'px', borderRadius: Math.round(cs * 0.2) + 'px' }));
@@ -228,7 +228,7 @@ function render() {
   }
   for (const gt of st.gates) b.appendChild(Art.door(gt, doorBox(gt), gut));
   for (const p of st.pieces) b.appendChild(p.fire ? fireEl(p) : p.color === 'forest' ? forestEl(p) : blockEl(p));
-  if (st.pieces.some(p => p.tether)) {
+  if (level.pieces.some(p => p.tether)) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.id = 'chains';
     svg.setAttribute('width', level.W * cs + 2 * gut); svg.setAttribute('height', level.H * cs + 2 * gut);
@@ -243,6 +243,12 @@ function drawChains(dragId, dr, dc) {
   const svg = $('chains');
   if (!svg) return;
   let h = '';
+  // Posts stay after their block has gone.
+  for (const q of level.pieces.filter(q => q.tether)) {
+    const [x0, y0] = px(q.tether.r + 0.5, q.tether.c + 0.5);
+    h += `<circle cx="${x0}" cy="${y0 + cs * 0.06}" r="${cs * 0.24}" fill="#1a1440" opacity="0.5"/><circle cx="${x0}" cy="${y0}" r="${cs * 0.22}" fill="#8a6a44" stroke="#4a3520" stroke-width="${cs * 0.05}"/><circle cx="${x0}" cy="${y0 - cs * 0.05}" r="${cs * 0.12}" fill="#b89366"/>`
+      + `<circle cx="${x0 + cs * 0.27}" cy="${y0 - cs * 0.27}" r="${cs * 0.15}" fill="#fff" stroke="#2b2f45" stroke-width="${cs * 0.02}"/><text x="${x0 + cs * 0.27}" y="${y0 - cs * 0.27 + cs * 0.075}" text-anchor="middle" font-size="${cs * 0.2}" font-weight="700" fill="#2b2f45" font-family="Fredoka, system-ui, sans-serif">${q.tether.len}</text>`;
+  }
   for (const p of st.pieces.filter(q => q.tether)) {
     const r = p.id === dragId ? dr : p.r, c = p.id === dragId ? dc : p.c, t = p.tether;
     const cells = Engine.cellsOf(p, r, c);
@@ -254,7 +260,7 @@ function drawChains(dragId, dr, dc) {
     h += `<path d="${d}" fill="none" stroke="#2b2f45" stroke-width="${cs * 0.16}" stroke-linecap="round"/>`
       + `<path d="${d}" fill="none" stroke="#b9c0d8" stroke-width="${cs * 0.1}" stroke-linecap="round" stroke-dasharray="${cs * 0.16} ${cs * 0.1}"/>`
       + `<path d="${d}" fill="none" stroke="#eef1ff" stroke-width="${cs * 0.035}" stroke-linecap="round" stroke-dasharray="${cs * 0.08} ${cs * 0.18}" opacity="0.8"/>`
-      + `<circle cx="${x0}" cy="${y0}" r="${cs * 0.2}" fill="#6b5a3e" stroke="#3a2e1c" stroke-width="${cs * 0.05}"/><circle cx="${x0}" cy="${y0 - cs * 0.04}" r="${cs * 0.1}" fill="#a58c62"/>`;
+      + `<circle cx="${x0}" cy="${y0 - cs * 0.05}" r="${cs * 0.09}" fill="#d9deef" stroke="#2b2f45" stroke-width="${cs * 0.03}"/>`;
   }
   svg.innerHTML = h;
 }
