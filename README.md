@@ -14,8 +14,8 @@ A sliding-block colour puzzle. Drag every block out through the door of its colo
 
 ## Play
 
-Hosted with GitHub Pages at `https://woleywa.github.io/Unblock-it/` (enable Pages: Settings → Pages →
-Deploy from branch `main`, folder `/`).
+Play at **https://unblock-it-913f7.web.app** (Firebase Hosting, published by GitHub Actions on every push
+to `main`; see `firebase.json`). The old GitHub Pages address forwards there.
 
 Locally: `python3 -m http.server` in this folder, then open http://localhost:8000.
 

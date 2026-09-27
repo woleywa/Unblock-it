@@ -10,6 +10,30 @@ on:
   workflow_dispatch:
 
 jobs:
+  # The website on Firebase Hosting (https://unblock-it-913f7.web.app). Needs the repository secret
+  # FIREBASE_SERVICE_ACCOUNT (the service-account JSON); without it this job just says so and skips.
+  hosting:
+    runs-on: ubuntu-latest
+    env:
+      SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build:web
+      - name: Deploy to Firebase Hosting
+        if: env.SA != ''
+        run: |
+          printf '%s' "$SA" > "$RUNNER_TEMP/sa.json"
+          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json" npx -y firebase-tools@13 deploy --only hosting --project unblock-it-913f7 --non-interactive
+          rm -f "$RUNNER_TEMP/sa.json"
+      - name: No Firebase key yet
+        if: env.SA == ''
+        run: echo "::warning::Add the FIREBASE_SERVICE_ACCOUNT repository secret to publish the website to Firebase Hosting."
+
   # Live updates: the game files as a zip + update.json on the "app-web" release. The apps check it at
   # start-up, download a newer game in the background and use it from the next launch.
   web-update:

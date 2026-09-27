@@ -351,3 +351,4 @@ a.linkish { display: block; text-align: center; }
 #name-modal, #acct { z-index: 25; }
 .card.form label.pick { justify-content: flex-start; margin-top: 0; font-size: 1rem; }
 #ans-bar { width: calc(100% - 24px); }
+.ver { color: var(--dim); font-size: 0.7rem; opacity: 0.55; margin-top: -8px; }

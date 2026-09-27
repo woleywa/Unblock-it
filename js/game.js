@@ -17,6 +17,19 @@ const INTRO = {
 
 // ── Progress ─────────────────────────────────────────────────
 const SAVE = 'unblock_progress_v1';
+// Progress carried over from the old address (?carry=…): merged in, best of each level.
+try {
+  const q = new URLSearchParams(location.search), c = q.get('carry');
+  if (c) {
+    const got = JSON.parse(atob(c)), mine = JSON.parse(localStorage.getItem(SAVE) || '{}');
+    const m = { stars: { ...(mine.stars || {}) }, moves: { ...(mine.moves || {}) } };
+    for (const [k, v] of Object.entries(got.stars || {})) if (!(m.stars[k] >= v)) m.stars[k] = v;
+    for (const [k, v] of Object.entries(got.moves || {})) if (!(m.moves[k] <= v)) m.moves[k] = v;
+    localStorage.setItem(SAVE, JSON.stringify(m));
+    q.delete('carry');
+    window.history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : '') + location.hash);
+  }
+} catch (e) { console.warn('carry', e); }
 let progress = { stars: {}, moves: {} };
 try { progress = { stars: {}, moves: {}, ...JSON.parse(localStorage.getItem(SAVE) || '{}') }; } catch (e) {}
 const saveProgress = () => { try { localStorage.setItem(SAVE, JSON.stringify(progress)); } catch (e) {} };
@@ -664,6 +677,9 @@ window.addEventListener('resize', () => { if (!$('game').hidden) { layout(); ren
 
 Art.defs();
 home();
+// Which version of the game this is (the build number from the GitHub build; hidden when unknown).
+fetch('version.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : null)
+  .then(v => { if (v) $('ver').textContent = `Game version ${v.build}`; }).catch(() => {});
 openLevelLink();
 // Offline cache for the web version; the apps carry their files already (and a cache could go stale).
 if ('serviceWorker' in navigator && !Native.app) navigator.serviceWorker.register('sw.js').catch(() => {});
