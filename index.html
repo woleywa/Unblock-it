@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=7">
 </head>
 <body>
   <div class="sky" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
@@ -27,6 +27,10 @@
     <p class="tag">Slide every block out through the door of its colour.</p>
     <button class="big" id="play">Play</button>
     <button class="ghost" id="to-levels">Levels</button>
+    <div class="pair">
+      <button class="ghost" id="to-chs">⚡ Challenges</button>
+      <button class="ghost" id="to-team">👥 Team</button>
+    </div>
     <button class="ghost" id="to-board">🏆 Leaderboard</button>
     <button class="me-chip" id="me-chip" hidden></button>
     <p class="stars-total" id="stars-total"></p>
@@ -48,8 +52,49 @@
       <h2>Leaderboard</h2>
       <span class="spacer"></span>
     </header>
+    <div class="tabs" id="rank-tabs"><button data-tab="players" class="on">Players</button><button data-tab="teams">Teams</button></div>
     <div id="rank-me"></div>
     <ol id="rank-list"></ol>
+  </main>
+
+  <main id="chs" class="screen" hidden>
+    <header class="bar">
+      <button class="icon" id="chs-back" aria-label="Back">‹</button>
+      <h2>Challenges</h2>
+      <span class="spacer"></span>
+    </header>
+    <div class="pane">
+      <button class="big" id="ch-new">＋ New challenge</button>
+      <form class="code-row" id="ch-code-form" autocomplete="off">
+        <input id="ch-code" maxlength="8" placeholder="Got a code?" autocapitalize="characters" spellcheck="false">
+        <button class="ghost" type="submit">Open</button>
+      </form>
+      <p class="err" id="ch-code-err"></p>
+      <div id="ch-list"></div>
+    </div>
+  </main>
+
+  <main id="ch" class="screen" hidden>
+    <header class="bar">
+      <button class="icon" id="ch-back" aria-label="Back">‹</button>
+      <h2 id="ch-title">Challenge</h2>
+      <button class="icon" id="ch-share" aria-label="Invite">⤴</button>
+    </header>
+    <div class="pane">
+      <div class="chips" id="ch-info"></div>
+      <div id="ch-me"></div>
+      <div id="ch-grid"></div>
+      <div id="ch-scores"></div>
+    </div>
+  </main>
+
+  <main id="team" class="screen" hidden>
+    <header class="bar">
+      <button class="icon" id="team-back" aria-label="Back">‹</button>
+      <h2>Team</h2>
+      <span class="spacer"></span>
+    </header>
+    <div class="pane" id="team-body"></div>
   </main>
 
   <main id="game" class="screen" hidden>
@@ -60,6 +105,7 @@
       <button class="icon" id="restart" aria-label="Restart">↻</button>
     </header>
     <p id="hint"></p>
+    <p id="clock" hidden></p>
     <div id="board-wrap"><div id="board"></div></div>
   </main>
 
@@ -82,14 +128,47 @@
       <div id="win-best"></div>
       <button class="big" id="next">Next level</button>
       <button class="ghost" id="replay">Play again</button>
+      <button class="ghost" id="to-ch" hidden>Back to challenge</button>
     </div>
   </div>
 
-  <script src="js/engine.js?v=6"></script>
-  <script src="js/levels.js?v=6"></script>
-  <script src="js/audio.js?v=6"></script>
-  <script src="js/art.js?v=6"></script>
-  <script src="js/game.js?v=6"></script>
-  <script type="module" src="js/online.js?v=6"></script>
+  <div id="timeup" class="overlay" hidden>
+    <div class="card">
+      <h2>Time’s up!</h2>
+      <p id="timeup-text"></p>
+      <button class="big" id="timeup-ok">See the scores</button>
+    </div>
+  </div>
+
+  <div id="new-ch" class="overlay" hidden>
+    <form class="card form" id="new-ch-form">
+      <h2>New challenge</h2>
+      <label>Starts</label>
+      <div class="opts" data-k="startIn"><button type="button" data-v="0" class="on">Now</button><button type="button" data-v="10">In 10 min</button><button type="button" data-v="60">In 1 hour</button></div>
+      <label>Open for</label>
+      <div class="opts" data-k="window"><button type="button" data-v="15">15 min</button><button type="button" data-v="60" class="on">1 hour</button><button type="button" data-v="1440">1 day</button><button type="button" data-v="2880">2 days</button><button type="button" data-v="10080">1 week</button></div>
+      <label>Play time each <small>optional</small></label>
+      <div class="opts" data-k="playMin"><button type="button" data-v="0" class="on">No limit</button><button type="button" data-v="5">5 min</button><button type="button" data-v="10">10 min</button><button type="button" data-v="15">15 min</button><button type="button" data-v="30">30 min</button></div>
+      <label>Levels <small>optional</small></label>
+      <div class="opts" data-k="levels"><button type="button" data-v="0" class="on">No limit</button><button type="button" data-v="5">5</button><button type="button" data-v="10">10</button><button type="button" data-v="15">15</button><button type="button" data-v="20">20</button></div>
+      <label>Players <b id="np-val">4</b></label>
+      <input type="range" id="np" min="1" max="20" value="4">
+      <p class="note small" id="new-ch-sum"></p>
+      <p class="err" id="new-ch-err"></p>
+      <button class="big" id="new-ch-go" type="submit">Create</button>
+      <button class="ghost" id="new-ch-cancel" type="button">Cancel</button>
+    </form>
+  </div>
+
+  <div id="toast" hidden></div>
+
+  <script src="js/engine.js?v=7"></script>
+  <script src="js/levels.js?v=7"></script>
+  <script src="js/audio.js?v=7"></script>
+  <script src="js/art.js?v=7"></script>
+  <script src="js/challenge-levels.js?v=7"></script>
+  <script src="js/game.js?v=7"></script>
+  <script src="js/social.js?v=7"></script>
+  <script type="module" src="js/online.js?v=7"></script>
 </body>
 </html>

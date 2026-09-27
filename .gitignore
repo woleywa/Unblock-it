@@ -1,2 +1,6 @@
 node_modules/
 .DS_Store
+
+# Secrets: never commit service-account keys
+*adminsdk*.json
+serviceAccount*.json

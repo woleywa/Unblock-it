@@ -33,7 +33,11 @@ const totals = () => {
 const firstOpen = () => { const i = LEVELS.findIndex((_, k) => !starsOf(k)); return i < 0 ? LEVELS.length - 1 : i; };
 
 // ── Screens ──────────────────────────────────────────────────
-function show(id) { ['home', 'levels', 'ranks', 'game'].forEach(s => $(s).hidden = s !== id); }
+function show(id) {
+  ['home', 'levels', 'ranks', 'game', 'chs', 'ch', 'team'].forEach(s => $(s).hidden = s !== id);
+  // Leaving the board (e.g. an invite link opened mid-game) closes its cards and challenge play.
+  if (id !== 'game') { $('win').hidden = true; $('timeup').hidden = true; chPlay = null; }
+}
 function logo() {
   const box = document.querySelector('.logo');
   if (box.dataset.done) return;
@@ -90,24 +94,31 @@ function levelList() {
 // ── Game state ───────────────────────────────────────────────
 let idx = 0, level = null, st = null, moves = 0, history = [], busy = false;
 let cs = 48, gut = 24;
+// Set while playing a challenge level (social.js): { code, pos, again(), next(), back(), won(moves, stars) }.
+let chPlay = null;
 
-function start(i) {
-  idx = i;
-  level = clone(LEVELS[i]);
+function begin(lv, title, hint) {
+  level = clone(lv);
   st = { pieces: clone(level.pieces), gates: clone(level.gates) };
   moves = 0; history = []; busy = false;
-  $('level-name').textContent = `Level ${i + 1}`;
-  $('hint').textContent = i === 0 ? 'Drag each block out through the door of its colour.' : INTRO[level.intro] || '';
+  $('level-name').textContent = title;
+  $('hint').textContent = hint || '';
   $('win').hidden = true;
+  $('clock').hidden = !chPlay;
   show('game');
   layout();
   render();
+}
+function start(i) {
+  chPlay = null;
+  idx = i;
+  begin(LEVELS[i], `Level ${i + 1}`, i === 0 ? 'Drag each block out through the door of its colour.' : INTRO[LEVELS[i].intro]);
 }
 
 function status() { $('moves').textContent = `${moves} move${moves === 1 ? '' : 's'} · par ${level.par}`; }
 
 function layout() {
-  const aw = Math.min(window.innerWidth, 560) - 24, ah = window.innerHeight - 150;
+  const aw = Math.min(window.innerWidth, 560) - 24, ah = window.innerHeight - (chPlay ? 190 : 150);
   cs = Math.floor(Math.min(aw / (level.W + 1), ah / (level.H + 1), 72));
   gut = Math.round(cs * 0.5);
 }
@@ -268,16 +279,18 @@ function leave(id, d, gt, r, c) {
 function starsFor(m, par) { return m <= par ? 3 : m <= Math.ceil(par * 1.4) ? 2 : 1; }
 function win() {
   const s = starsFor(moves, level.par);
+  Sound.win();
+  $('win-stars').innerHTML = [1, 2, 3].map(k => `<span class="star ${k <= s ? 'on' : 'off'}" style="--k:${k}"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8z"/></svg></span>`).join('');
+  $('win-text').textContent = s === 3 ? `${moves} moves — perfect!` : `${moves} moves · ${level.par} for three stars`;
+  $('win').hidden = false;
+  Art.confetti();
+  $('to-ch').hidden = !chPlay;
+  if (chPlay) { chPlay.won(moves, s); return; }
   progress.stars[idx] = Math.max(starsOf(idx), s);
   progress.moves[idx] = Math.min(progress.moves[idx] || Infinity, moves);
   saveProgress();
   winBoard(idx, moves);
-  Sound.win();
-  $('win-stars').innerHTML = [1, 2, 3].map(k => `<span class="star ${k <= s ? 'on' : 'off'}" style="--k:${k}"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8z"/></svg></span>`).join('');
-  $('win-text').textContent = s === 3 ? `${moves} moves — perfect!` : `${moves} moves · ${level.par} for three stars`;
   $('next').hidden = idx >= LEVELS.length - 1;
-  $('win').hidden = false;
-  Art.confetti();
 }
 
 // ── Online: nickname and leaderboards (js/online.js sets window.Online) ────
@@ -342,8 +355,15 @@ async function winBoard(level, m) {
   } catch (e) { console.warn(e); }
 }
 
+let rankTab = 'players';
+document.querySelectorAll('#rank-tabs button').forEach(b => b.addEventListener('click', () => {
+  rankTab = b.dataset.tab;
+  ranks();
+}));
 async function ranks() {
   show('ranks');
+  document.querySelectorAll('#rank-tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === rankTab));
+  if (rankTab === 'teams') return Social.rankTeams();
   const list = $('rank-list'), meBox = $('rank-me');
   const on = window.Online;
   list.innerHTML = ''; meBox.innerHTML = '';
@@ -378,7 +398,7 @@ window.addEventListener('online-ready', () => {
 $('play').addEventListener('click', () => { Sound.unlock(); start(firstOpen()); });
 $('to-levels').addEventListener('click', levelList);
 $('levels-back').addEventListener('click', home);
-$('game-back').addEventListener('click', levelList);
+$('game-back').addEventListener('click', () => chPlay ? chPlay.back() : levelList());
 $('sound').addEventListener('click', () => { Sound.toggle(); home(); });
 $('undo').addEventListener('click', () => {
   if (busy || !history.length) return;
@@ -386,9 +406,11 @@ $('undo').addEventListener('click', () => {
   st = h.st; moves = h.moves;
   render();
 });
-$('restart').addEventListener('click', () => !busy && start(idx));
-$('next').addEventListener('click', () => start(idx + 1));
-$('replay').addEventListener('click', () => start(idx));
+const again = () => chPlay ? chPlay.again() : start(idx);
+$('restart').addEventListener('click', () => !busy && again());
+$('next').addEventListener('click', () => chPlay ? chPlay.next() : start(idx + 1));
+$('replay').addEventListener('click', again);
+$('to-ch').addEventListener('click', () => chPlay && chPlay.back());
 window.addEventListener('resize', () => { if (!$('game').hidden) { layout(); render(); } });
 
 Art.defs();

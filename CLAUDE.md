@@ -46,5 +46,26 @@ version.
   stream — the full SDK hung reading on iPhone while writes worked). Every call has a timeout.
   game.js works without it (`window.Online` absent).
 - The service worker never caches Firestore/auth traffic (only own files, fonts, the SDK).
+- Teams (`teams/{code}`): `stars` = members' stars added up, `members` ≤ 20. The rules check both sides:
+  a player's stars change only together with their team's total (`increment`), joining/leaving moves
+  members ±1 and exactly that player's stars. online.js `writePlayer`/`moveTo` batch these; `retry`
+  re-reads the player doc once on permission-denied (stale copy).
+- Challenges (`challenges/{code}` + `entries/{uid}`): `start` + `window` min is when it's open, `playMin`
+  (0 = none) is each player's clock from `started` (server time), `levels` 0 = endless, `players` caps
+  `joined` (incremented in the same batch as the entry). The server clock decides (rules use
+  `request.time`, 30 s grace); the client estimates skew from its own writes (`Online.now()`).
+  Everyone's level order comes from the challenge `seed` (social.js `seqOf`, pool in
+  challenge-levels.js, easy → hard). Entry `runs` = { position: best moves }; stars recomputed from par.
+- Links: `#join=CODE` (team), `#c=CODE` (challenge). On iPhone a link opens Safari, which is a different
+  account from the home-screen app — so codes can be typed in too.
+- Note: game.js has a global `history` (undo stack) — use `window.history` for the browser's.
+- **Deploying rules**: the user gave a Firebase service-account key (kept outside the repo; never
+  commit it). `firebase deploy` fails on the `:test` call (403), so publish via the Rules REST API:
+  POST `projects/unblock-it-913f7/rulesets` with the file, then PATCH `releases/cloud.firestore`
+  (google-auth-library, cloud-platform scope). Test rules first in the emulator (Java is available):
+  `firebase emulators:exec --only firestore` with @firebase/rules-unit-testing.
+- End-to-end: Playwright against the auth + firestore emulators by rewriting online.js on the fly to
+  call `connectFirestoreEmulator`/`connectAuthEmulator` (clear data with DELETE
+  `/emulator/v1/projects/<id>/databases/(default)/documents`).
 - Local test: serve the SDK from `npm pack firebase@10.14.1` by routing gstatic URLs in Playwright,
   and launch Chromium with the sandbox proxy + ignoreHTTPSErrors.

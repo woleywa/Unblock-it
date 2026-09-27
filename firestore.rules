@@ -1,13 +1,26 @@
 rules_version = '2';
 // Unblock It — paste into Firebase console → Firestore Database → Rules, then Publish.
 // Everyone can read the leaderboards; each device (anonymous account) can only write its own data.
+// Team totals are kept honest from both sides: a player's stars can only change together with their
+// team's total, and a team's total/member count can only change by exactly that player's change.
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
+    function me() { return request.auth.uid; }
     function validName(n) { return n is string && n.matches('^[A-Za-z0-9 _.-]{3,16}$'); }
+    function validTeamName(n) { return n is string && n.matches('^[A-Za-z0-9 _.!-]{3,20}$'); }
     function ownsName(n) {
       return getAfter(/databases/$(database)/documents/names/$(n.lower())).data.uid == request.auth.uid;
     }
+    function teamOf(d) { return d.get('team', null); }
+    function playerBefore(u) { return get(/databases/$(database)/documents/players/$(u)).data; }
+    function playerAfter(u) { return getAfter(/databases/$(database)/documents/players/$(u)).data; }
+    function teamBefore(t) { return get(/databases/$(database)/documents/teams/$(t)).data; }
+    function teamAfter(t) { return getAfter(/databases/$(database)/documents/teams/$(t)).data; }
+    function teamStarsBefore(t) {
+      return exists(/databases/$(database)/documents/teams/$(t)) ? teamBefore(t).stars : 0;
+    }
+    function challenge(c) { return get(/databases/$(database)/documents/challenges/$(c)).data; }
 
     // One owner per nickname (the document id is the nickname in lower case).
     match /names/{key} {
@@ -21,26 +34,119 @@ service cloud.firestore {
     }
 
     // A player's totals; score = stars × 100000 − moves so the board sorts on one field.
+    // `team` (optional) is the code of the team they're in.
+    function validPlayer(d) {
+      return d.keys().hasOnly(['name', 'stars', 'moves', 'levels', 'score', 'best', 'updated', 'team'])
+        && validName(d.name) && ownsName(d.name)
+        && d.stars is int && d.stars >= 0 && d.stars <= 3000
+        && d.moves is int && d.moves >= 0 && d.moves < 100000
+        && d.levels is int && d.levels >= 0 && d.levels <= 1000
+        && d.score == d.stars * 100000 - d.moves
+        && (teamOf(d) == null || teamOf(d) is string);
+    }
+    function teamSynced() {
+      let n = request.resource.data;
+      let oStars = resource == null ? 0 : resource.data.stars;
+      let ot = resource == null ? null : teamOf(resource.data);
+      let nt = teamOf(n);
+      return ot == nt
+        ? (nt == null || n.stars == oStars || teamAfter(nt).stars == teamBefore(nt).stars + (n.stars - oStars))
+        : (ot == null || teamAfter(ot).stars == teamBefore(ot).stars - oStars)
+          && (nt == null || teamAfter(nt).stars == teamStarsBefore(nt) + n.stars);
+    }
     match /players/{uid} {
       allow read: if true;
-      allow create, update: if signedIn() && request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['name', 'stars', 'moves', 'levels', 'score', 'best', 'updated'])
-        && validName(request.resource.data.name) && ownsName(request.resource.data.name)
-        && request.resource.data.stars is int && request.resource.data.stars >= 0 && request.resource.data.stars <= 3000
-        && request.resource.data.moves is int && request.resource.data.moves >= 0 && request.resource.data.moves < 100000
-        && request.resource.data.levels is int && request.resource.data.levels >= 0 && request.resource.data.levels <= 1000
-        && request.resource.data.score == request.resource.data.stars * 100000 - request.resource.data.moves;
+      allow create, update: if signedIn() && me() == uid && validPlayer(request.resource.data) && teamSynced();
       allow delete: if false;
     }
 
-    // Each player's best run per level.
-    match /levels/{level}/runs/{uid} {
+    // Teams: the document id is the invite code. members ≤ 20; stars = the members' stars added up.
+    function memberChange(t) {
+      let a = playerAfter(me());
+      let b = playerBefore(me());
+      let n = request.resource.data;
+      let o = resource.data;
+      return (teamOf(b) == t && teamOf(a) == t && n.members == o.members && n.stars == o.stars + (a.stars - b.stars))
+        || (teamOf(b) != t && teamOf(a) == t && n.members == o.members + 1 && n.stars == o.stars + a.stars)
+        || (teamOf(b) == t && teamOf(a) != t && n.members == o.members - 1 && n.stars == o.stars - b.stars);
+    }
+    match /teams/{t} {
       allow read: if true;
-      allow create, update: if signedIn() && request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['name', 'moves', 'updated'])
-        && request.resource.data.moves is int && request.resource.data.moves >= 1 && request.resource.data.moves <= 999
-        && get(/databases/$(database)/documents/players/$(uid)).data.name == request.resource.data.name;
+      allow create: if signedIn()
+        && t.matches('^[A-Z0-9]{6}$')
+        && request.resource.data.keys().hasOnly(['name', 'by', 'members', 'stars', 'created'])
+        && validTeamName(request.resource.data.name)
+        && request.resource.data.by == me()
+        && request.resource.data.members == 1
+        && request.resource.data.created == request.time
+        && teamOf(playerAfter(me())) == t
+        && request.resource.data.stars == playerAfter(me()).stars;
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'stars'])
+        && request.resource.data.members <= 20
+        && memberChange(t);
       allow delete: if false;
+    }
+
+    // Challenges: the document id is the invite code. `start` + `window` minutes is when it's open;
+    // `playMin` (0 = no limit) is each player's own clock from when they start; `levels` 0 = no limit;
+    // `players` = how many can join; `joined` counts them.
+    function validChallenge(d) {
+      let p = playerBefore(me());
+      return d.keys().hasOnly(['by', 'byName', 'team', 'teamName', 'created', 'start', 'window', 'playMin', 'levels', 'players', 'joined', 'seed'])
+        && d.by == me() && d.byName == p.name
+        && d.team == teamOf(p)
+        && (d.team == null ? d.teamName == null : d.teamName == teamBefore(d.team).name)
+        && d.created == request.time
+        && d.start is timestamp && d.start >= request.time && d.start <= request.time + duration.value(7, 'd')
+        && d.window is int && d.window >= 5 && d.window <= 10080
+        && d.playMin is int && d.playMin >= 0 && d.playMin <= d.window
+        && d.levels is int && d.levels >= 0 && d.levels <= 100
+        && d.players is int && d.players >= 1 && d.players <= 20
+        && d.joined == 0 && d.seed is int;
+    }
+    function isOpen(x, graceSec) {
+      return request.time >= x.start && request.time < x.start + duration.value(x.window * 60 + graceSec, 's');
+    }
+    match /challenges/{c} {
+      allow read: if true;
+      allow create: if signedIn() && c.matches('^[A-Z0-9]{6}$') && validChallenge(request.resource.data);
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['joined'])
+        && request.resource.data.joined == resource.data.joined + 1
+        && request.resource.data.joined <= resource.data.players
+        && !exists(/databases/$(database)/documents/challenges/$(c)/entries/$(me()))
+        && existsAfter(/databases/$(database)/documents/challenges/$(c)/entries/$(me()));
+      allow delete: if false;
+
+      // Each player's result: best moves per level position in `runs`, and totals.
+      match /entries/{uid} {
+        allow read: if true;
+        allow create: if signedIn() && me() == uid
+          && request.resource.data.keys().hasOnly(['name', 'team', 'teamName', 'started', 'updated', 'stars', 'moves', 'solved', 'score', 'runs'])
+          && request.resource.data.name == playerBefore(uid).name
+          && request.resource.data.team == teamOf(playerBefore(uid))
+          && (request.resource.data.team == null ? request.resource.data.teamName == null
+              : request.resource.data.teamName == teamBefore(request.resource.data.team).name)
+          && request.resource.data.started == request.time && request.resource.data.updated == request.time
+          && request.resource.data.stars == 0 && request.resource.data.moves == 0
+          && request.resource.data.solved == 0 && request.resource.data.score == 0
+          && request.resource.data.runs == {}
+          && isOpen(challenge(c), 0)
+          && getAfter(/databases/$(database)/documents/challenges/$(c)).data.joined == challenge(c).joined + 1;
+        allow update: if signedIn() && me() == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['updated', 'stars', 'moves', 'solved', 'score', 'runs'])
+          && request.resource.data.updated == request.time
+          && isOpen(challenge(c), 30)
+          && (challenge(c).playMin == 0 || request.time < resource.data.started + duration.value(challenge(c).playMin * 60 + 30, 's'))
+          && request.resource.data.solved is int && request.resource.data.solved >= 0 && request.resource.data.solved <= 100
+          && (challenge(c).levels == 0 || request.resource.data.solved <= challenge(c).levels)
+          && request.resource.data.stars is int && request.resource.data.stars >= 0 && request.resource.data.stars <= request.resource.data.solved * 3
+          && request.resource.data.moves is int && request.resource.data.moves >= 0 && request.resource.data.moves < 100000
+          && request.resource.data.score == request.resource.data.stars * 100000 - request.resource.data.moves
+          && request.resource.data.runs is map && request.resource.data.runs.size() == request.resource.data.solved;
+        allow delete: if false;
+      }
     }
   }
 }
