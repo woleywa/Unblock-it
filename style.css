@@ -385,3 +385,21 @@ a.linkish { display: block; text-align: center; }
   padding: 11px 18px; border-radius: 999px; font-weight: 600; color: #4a2c00; background: linear-gradient(180deg, #ffe680, var(--accent));
   box-shadow: 0 6px 0 var(--accent-d), 0 10px 26px rgba(0,0,0,0.35); animation: pop 0.4s cubic-bezier(.2,1.6,.4,1); white-space: nowrap; }
 #upd-banner[hidden] { display: none; }
+
+/* Beaver hopping onto the trees and back */
+.block.hop { transition: transform 240ms cubic-bezier(.3,1.5,.5,1); }
+.block.hop .jelly { animation: hopup 0.47s ease-in-out; }
+@keyframes hopup { 0%,100% { translate: 0 0; } 25% { translate: 0 -14%; } 50% { translate: 0 0; } 75% { translate: 0 -8%; } }
+
+/* "New!" pop-up: a card with a tiny board that plays how the new thing works */
+#intro { z-index: 26; }
+.intro-card { max-width: min(92vw, 380px); padding: 22px 20px 20px; gap: 10px; }
+.intro-card .new-tag { align-self: center; padding: 3px 12px; border-radius: 999px; background: linear-gradient(180deg, #ffe76a, #ffb200); color: #5a2d00; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.06em; box-shadow: 0 3px 0 #b36b00; animation: tagpop 1.6s ease-in-out infinite; }
+@keyframes tagpop { 0%,100% { transform: scale(1) rotate(-3deg); } 50% { transform: scale(1.08) rotate(3deg); } }
+.intro-card h2 { font-size: 1.8rem; }
+.intro-card p { font-size: 0.98rem; line-height: 1.35; }
+#intro-board { position: relative; margin: 8px auto 14px; border-radius: 18px; background: linear-gradient(180deg, #5646b8, #3b2f8e 60%, #33287c);
+  box-shadow: 0 9px 0 #211a57, 0 16px 30px rgba(0,0,0,0.4), inset 0 3px 0 rgba(255,255,255,0.22); pointer-events: none; overflow: visible; }
+.intro-finger { position: absolute; left: 0; top: 0; z-index: 70; font-size: 34px; line-height: 1; opacity: 0; margin: -4px 0 0 -12px; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.4)); pointer-events: none; }
+.intro-finger.press { scale: 0.85; }
+.intro-again { background: none; border: 0; color: var(--dim); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 2px 6px; }

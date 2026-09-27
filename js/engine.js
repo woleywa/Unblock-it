@@ -171,6 +171,9 @@ const Engine = (() => {
     const g = grid(level, st.pieces);
     const woods = new Set();
     for (const q of st.pieces) if (q.color === 'forest') for (const [r, c] of cellsOf(q)) woods.add(r + ',' + c);
+    const nextTo = (p, r, c) => cellsOf(p, r, c).some(([y, x]) => ALL.some(([dy, dx]) => woods.has((y + dy) + ',' + (x + dx))));
+    // In a game the beaver can sit next to trees without eating (it eats when pulled onto them).
+    for (const p of st.pieces) if (p.color === 'beaver' && movable(p) && nextTo(p, p.r, p.c)) return { pieceId: p.id, r: p.r, c: p.c };
     for (const p of st.pieces) {
       if (p.color !== 'beaver' || !movable(p)) continue;
       for (const [r, c] of reachable(level, g, p)) {

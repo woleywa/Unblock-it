@@ -13,7 +13,7 @@ const INTRO = {
   frozen: 'New: frozen doors. They open after that many blocks leave.',
   layered: 'New: layered blocks. The outside leaves, the core stays behind.',
   fire: 'New: fire! Each water block you drag out sprays every fire once. Out fire, open road.',
-  beaver: 'New: the beaver! Drop it next to trees and it eats them — something may be hiding inside.',
+  beaver: 'New: the beaver! Pull it onto trees and it eats them — something may be hiding inside.',
 };
 
 // ── Progress ─────────────────────────────────────────────────
@@ -147,6 +147,16 @@ function start(i, opts = {}) {
   const hint = helpCtx ? `🤝 Helping ${helpCtx.fromName} — solve it and your moves go to them.`
     : i === 0 ? 'Drag each block out through the door of its colour.' : INTRO[LEVELS[i].intro];
   begin(LEVELS[i], `Level ${i + 1}`, hint);
+  // Something new in this level: the "New!" card the first time, and a "show me" link to see it again.
+  const key = i === 0 ? 'basics' : LEVELS[i].intro;
+  if (key && Intro.has(key) && !helpCtx && !answer) {
+    const again = document.createElement('button');
+    again.className = 'intro-again';
+    again.textContent = '▶ Show me';
+    again.onclick = () => Intro.show(key, true);
+    $('hint').append(' ', again);
+    Intro.show(key);
+  }
 }
 
 function status() { $('moves').textContent = `${moves} move${moves === 1 ? '' : 's'} · par ${level.par}`; }
@@ -266,6 +276,11 @@ $('board').addEventListener('pointermove', e => {
   for (const out of exits(p, drag.r, drag.c)) {
     if (gapTo(out.gt.side, p, drag.r, drag.c) === 0 && pullTo(out.gt.side, tr - drag.r, tc - drag.c) > 0.18) { finishDrag(out); return; }
   }
+  // The beaver pulled onto trees next to it: it hops on and eats them.
+  if (p.color === 'beaver') {
+    const way = Object.values(SIDE_DIR).find(([sr, sc]) => sr * (tr - drag.r) + sc * (tc - drag.c) > 0.25 && woodAt(p, drag.r, drag.c, sr, sc));
+    if (way) { finishDrag(null, way); return; }
+  }
   // Glide with the finger between cells wherever there's room (the snapped cell moves on at half a
   // cell); against something, give just a little, like pressing on jelly.
   const fits = (sr, sc) => Engine.fits(level, drag.g, p, drag.r + sr, drag.c + sc);
@@ -317,18 +332,25 @@ const endDrag = () => {
 $('board').addEventListener('pointerup', endDrag);
 $('board').addEventListener('pointercancel', endDrag);
 
-function finishDrag(out) {
+// Is there forest right next to block p at (r, c), in direction (sr, sc)?
+function woodAt(p, r, c, sr, sc) {
+  const woods = new Set();
+  for (const q of st.pieces) if (q.color === 'forest') for (const [y, x] of Engine.cellsOf(q)) woods.add(y + ',' + x);
+  return Engine.cellsOf(p, r + sr, c + sc).some(([y, x]) => woods.has(y + ',' + x));
+}
+
+function finishDrag(out, eat) {
   const { p, d, r0, c0, r, c, raf } = drag;
   if (raf) cancelAnimationFrame(raf);
   drag = null;
   d.classList.remove('dragging');
-  const movedAtAll = out || r !== r0 || c !== c0;
+  const movedAtAll = out || eat || r !== r0 || c !== c0;
   if (!movedAtAll) { place(d, r0, c0); settle(d); return; }
   history.push({ st: clone(st), moves, n: sol.length });
   moves++;
   sol.push({ p: p.id, r, c, g: out ? out.gt.id : 0 });
   st.pieces = st.pieces.map(x => x.id === p.id ? { ...x, r, c } : x);
-  if (!out) { place(d, r, c); settle(d); status(); beaverEat(p.id, d); return; }
+  if (!out) { status(); if (eat) beaverEat(p.id, d, eat); else { place(d, r, c); settle(d); } return; }
   leave(p.id, d, out.gt, r, c);
 }
 
@@ -385,11 +407,19 @@ function leave(id, d, gt, r, c) {
   }, fires.length ? 560 : 220);
 }
 
-// The beaver was dropped: chomp the trees next to it; anything hidden inside pops out.
-function beaverEat(id, d) {
+// The beaver hops onto the trees next to it, chomps them (anything hidden inside pops out) and
+// hops back. `way` is the direction it was pulled; without one (replays) it finds the trees itself.
+function beaverEat(id, d, way) {
+  const b = st.pieces.find(x => x.id === id);
+  if (!b || b.color !== 'beaver') return;
+  way = way || Object.values(SIDE_DIR).find(([sr, sc]) => woodAt(b, b.r, b.c, sr, sc));
   const eaten = Engine.eatAround(level, st, id);
-  if (!eaten.length) return;
+  if (!eaten.length) { place(d, b.r, b.c); settle(d); return; }
   busy = true;
+  d.classList.add('hop');
+  if (way) place(d, b.r + way[0] * 0.8, b.c + way[1] * 0.8);
+  d.style.setProperty('--z', 60);
+  setTimeout(() => place(d, b.r, b.c), 470);
   Sound.munch();
   Native.buzz();
   d.classList.remove('chomp'); void d.offsetWidth; d.classList.add('chomp');
@@ -453,6 +483,10 @@ function drawStep({ pieceId, r, c, side }) {
   if (side) {
     const [dr, dc] = SIDE_DIR[side], last = route[route.length - 1], k = gapTo(side, p, ...last) + 1;
     pts.push(px(last[0] + hr + 0.5 + dr * k, last[1] + hc + 0.5 + dc * k));
+  } else if (p.color === 'beaver') {
+    // …and then onto the trees.
+    const way = Object.values(SIDE_DIR).find(([sr, sc]) => woodAt(p, r, c, sr, sc));
+    if (way) pts.push(px(r + hr + 0.5 + way[0] * 0.8, c + hc + 0.5 + way[1] * 0.8));
   }
   if (pts.length < 2) pts.push(pts[0]);
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
