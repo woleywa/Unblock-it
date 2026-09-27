@@ -56,6 +56,8 @@ const STAGES = [
   { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 0.66, prison: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [3, 10], note: 'prison' },
   // Chains: 1–2 blocks chained to a post; they can only go as far as the chain reaches.
   { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 0.6, chains: true, shapes: ['dot', 'bar2h', 'bar2v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [3, 10], note: 'chains' },
+  // Packed: the whole board full; get a few blocks out first, then wiggle the rest free.
+  { n: 5, W: [5, 6], H: [6, 7], colors: 3, fill: 1, packed: true, holes: [0, 2], shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z'], extra: [3, 14], note: 'packed' },
 ];
 
 function shapeBox(sh) { return { h: Math.max(...sh.map(q => q[0])) + 1, w: Math.max(...sh.map(q => q[1])) + 1 }; }
@@ -81,6 +83,30 @@ function makeLevel(st) {
   const pieces = [];
   const free = H * W - walls.length;
   let used = 0, tries = 0;
+  if (st.packed) {
+    // Packed: tile the whole board (but a few holes), cell by cell, each with a random shape that fits.
+    const holes = new Set();
+    for (let k = int(...st.holes), t = 0; holes.size < k && t < 50; t++) { const r = int(0, H - 1), c = int(0, W - 1); if (occ[r][c] === 0) holes.add(r + ',' + c); }
+    for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
+      if (occ[r][c] !== 0 || holes.has(r + ',' + c)) continue;
+      const names = st.shapes.slice().sort(() => rand() - 0.5).concat(['dot']);
+      for (const nm of names) {
+        const sh = SHAPES[nm];
+        const [ar, ac] = sh.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1])[0];
+        const r0 = r - ar, c0 = c - ac, { h, w } = shapeBox(sh);
+        if (r0 < 0 || c0 < 0 || r0 + h > H || c0 + w > W) continue;
+        if (!sh.every(([a, b]) => occ[r0 + a][c0 + b] === 0 && !holes.has((r0 + a) + ',' + (c0 + b)))) continue;
+        const id = pieces.length + 1;
+        sh.forEach(([a, b]) => occ[r0 + a][c0 + b] = id);
+        const p = { id, color: pick(colors), r: r0, c: c0, h, w, key: false, lock: 0, ice: 0 };
+        if (sh.length !== h * w) p.shape = sh;
+        pieces.push(p);
+        used += sh.length;
+        break;
+      }
+    }
+    tries = Infinity;
+  }
   while (used / free < st.fill && tries++ < 400) {
     const sh = SHAPES[pick(st.shapes)], { h, w } = shapeBox(sh);
     const r = int(0, H - h), c = int(0, W - w);

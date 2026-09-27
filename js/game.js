@@ -13,6 +13,7 @@ const INTRO = {
   frozen: 'New: frozen doors. They open after that many blocks leave.',
   layered: 'New: layered blocks. The outside leaves, the core stays behind.',
   fire: 'New: fire! Each water block you drag out sprays every fire once. Out fire, open road.',
+  packed: 'Packed! The board is full — find the blocks that can leave first, then wiggle the rest free.',
   chains: 'New: chains. A chained block only goes as far as its chain reaches — the number on the post.',
   prison: 'New: prison! Locked blocks can’t move. Every 🔑 key block you drag out opens a lock.',
   lanes: 'New: colour lanes. Only blocks of that colour may cross them.',
@@ -86,7 +87,7 @@ function home() {
 const STAGES = [
   ['Warm-up', 'red'], ['Getting busy', 'orange'], ['Walls', 'purple'],
   ['On ice', 'sky'], ['Frosty doors', 'blue'], ['Layers', 'pink'], ['Fire', 'orange'],
-  ['Mixed bag', 'green'], ['Big boards', 'purple'], ['Expert', 'red'], ['Beaver woods', 'orange'], ['Arrows', 'sky'], ['Colour lanes', 'green'], ['Prison', 'yellow'], ['Chains', 'blue'],
+  ['Mixed bag', 'green'], ['Big boards', 'purple'], ['Expert', 'red'], ['Beaver woods', 'orange'], ['Arrows', 'sky'], ['Colour lanes', 'green'], ['Prison', 'yellow'], ['Chains', 'blue'], ['Packed', 'pink'],
 ];
 function levelList() {
   const g = $('level-grid');

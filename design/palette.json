@@ -1,0 +1,62 @@
+{
+  "red": {
+    "light": "#ff7a82",
+    "base": "#e8263a",
+    "dark": "#c0142a",
+    "side": "#860a1b"
+  },
+  "blue": {
+    "light": "#8db8ff",
+    "base": "#3d7bff",
+    "dark": "#2a5fe3",
+    "side": "#1c42ad"
+  },
+  "yellow": {
+    "light": "#fff5a0",
+    "base": "#ffe22e",
+    "dark": "#f2c800",
+    "side": "#b08f00"
+  },
+  "green": {
+    "light": "#8ff2b0",
+    "base": "#2fcf6f",
+    "dark": "#1dab56",
+    "side": "#12803f"
+  },
+  "purple": {
+    "light": "#d8b0ff",
+    "base": "#a45cff",
+    "dark": "#8439e8",
+    "side": "#6124b6"
+  },
+  "orange": {
+    "light": "#ffb07a",
+    "base": "#ff7417",
+    "dark": "#e85d00",
+    "side": "#a13d00"
+  },
+  "pink": {
+    "light": "#ffb0da",
+    "base": "#ff5fb2",
+    "dark": "#ea3a92",
+    "side": "#b52470"
+  },
+  "sky": {
+    "light": "#a6eeff",
+    "base": "#3fd0ff",
+    "dark": "#18aeee",
+    "side": "#0b83bc"
+  },
+  "water": {
+    "light": "#a8fff4",
+    "base": "#1fd6c6",
+    "dark": "#0fb0a8",
+    "side": "#0a7d80"
+  },
+  "beaver": {
+    "light": "#e2ae78",
+    "base": "#a86a38",
+    "dark": "#834f26",
+    "side": "#5c3416"
+  }
+}
