@@ -411,7 +411,9 @@ function beaverEat(id, d) {
 }
 
 // ── Hint (registered players on the hint list; not in challenges) ─────────
-function hintButton() { $('hint-btn').hidden = !(window.Online && window.Online.canHint) || !!chPlay; }
+// A developer who has switched developer mode off plays like everyone else: no hint button either.
+const devPaused = () => { try { return localStorage.getItem('unblock_dev') === '1' && localStorage.getItem('unblock_dev_on') === '0'; } catch (e) { return false; } };
+function hintButton() { $('hint-btn').hidden = !(window.Online && window.Online.canHint) || !!chPlay || devPaused(); }
 window.addEventListener('online-hints', () => { hintButton(); if (!$('levels').hidden) levelList(); });
 let hintPlan = null;
 function clearHint() {

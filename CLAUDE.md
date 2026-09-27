@@ -110,7 +110,7 @@ version.
 - Developer mode: accounts in `config/dev { uids }` (set with the service account). online.js stores
   `unblock_dev` in localStorage; the privacy page's 🛠 Developer section (only then) has an on/off switch
   (`unblock_dev_on`) and, in the app, the update status + "Check for updates" (applies at once). On:
-  every level is open (game.js `devOn`).
+  every level is open (game.js `devOn`). Off: a normal player, including no 💡 hint (`devPaused`).
 - App updates: after a download the game shows "✨ New version ready · Tap to update" on the home screen /
   level list only (never mid-level) → `Native.applyUpdate` (CapacitorUpdater.set). Also checks when the app
   comes back to the foreground. GitHub serves update.json as octet-stream → native HTTP may return base64.
