@@ -13,7 +13,7 @@ const INTRO = {
   frozen: 'New: frozen doors. They open after that many blocks leave.',
   layered: 'New: layered blocks. The outside leaves, the core stays behind.',
   fire: 'New: fire! Each water block you drag out sprays every fire once. Out fire, open road.',
-  beaver: 'New: the beaver! Pull it onto trees and it eats them — something may be hiding inside.',
+  beaver: 'New: beavers! Pull one onto a tree and it eats it — something may be hiding inside.',
 };
 
 // ── Progress ─────────────────────────────────────────────────
@@ -322,9 +322,6 @@ const endDrag = () => {
   // Let go near its door (one cell away at most) or flicked toward it: it leaves.
   const out = exits(p, r, c).find(o => {
     const gap = gapTo(o.gt.side, p, r, c), speed = pullTo(o.gt.side, vr, vc);
-    // A beaver with trees still to eat only leaves when really pushed in (no near-door drop or flick),
-    // so it doesn't slip out by accident.
-    if (p.color === 'beaver' && st.pieces.some(q => q.color === 'forest' && q.under)) return false;
     return gap === 0 || (gap === 1 && pullTo(o.gt.side, r - r0, c - c0) > 0) || (gap <= 4 && speed > 0.004);
   });
   finishDrag(out || null);
@@ -348,7 +345,7 @@ function finishDrag(out, eat) {
   if (!movedAtAll) { place(d, r0, c0); settle(d); return; }
   history.push({ st: clone(st), moves, n: sol.length });
   moves++;
-  sol.push({ p: p.id, r, c, g: out ? out.gt.id : 0 });
+  sol.push({ p: p.id, r, c, g: out ? out.gt.id : 0, e: eat ? forestAt(p, r, c, ...eat) : 0 });
   st.pieces = st.pieces.map(x => x.id === p.id ? { ...x, r, c } : x);
   if (!out) { status(); if (eat) beaverEat(p.id, d, eat); else { place(d, r, c); settle(d); } return; }
   leave(p.id, d, out.gt, r, c);
@@ -407,37 +404,46 @@ function leave(id, d, gt, r, c) {
   }, fires.length ? 560 : 220);
 }
 
-// The beaver hops onto the trees next to it, chomps them (anything hidden inside pops out) and
-// hops back. `way` is the direction it was pulled; without one (replays) it finds the trees itself.
-function beaverEat(id, d, way) {
+// The beaver hops onto the trees next to it and chomps them (anything hidden inside pops out); the
+// beaver is used up. `way` is the direction it was pulled; without one (replays) it finds the trees.
+function forestAt(p, r, c, sr, sc) {
+  const cells = new Set(Engine.cellsOf(p, r + sr, c + sc).map(q => q.join(',')));
+  const f = st.pieces.find(q => q.color === 'forest' && cells.has(q.r + ',' + q.c));
+  return f ? f.id : 0;
+}
+function beaverEat(id, d, way, fid) {
   const b = st.pieces.find(x => x.id === id);
   if (!b || b.color !== 'beaver') return;
-  way = way || Object.values(SIDE_DIR).find(([sr, sc]) => woodAt(b, b.r, b.c, sr, sc));
-  const eaten = Engine.eatAround(level, st, id);
+  way = way || Object.values(SIDE_DIR).find(([sr, sc]) => forestAt(b, b.r, b.c, sr, sc));
+  const eaten = Engine.eatAround(level, st, id, fid || (way ? forestAt(b, b.r, b.c, ...way) : 0));
   if (!eaten.length) { place(d, b.r, b.c); settle(d); return; }
   busy = true;
+  const f = document.querySelector(`[data-forest="${eaten[0]}"]`);
+  const fr = f ? +f.dataset.r : b.r, fc = f ? +f.dataset.c : b.c;
+  // Hop on…
   d.classList.add('hop');
-  if (way) place(d, b.r + way[0] * 0.8, b.c + way[1] * 0.8);
   d.style.setProperty('--z', 60);
-  setTimeout(() => place(d, b.r, b.c), 470);
-  Sound.munch();
-  Native.buzz();
-  d.classList.remove('chomp'); void d.offsetWidth; d.classList.add('chomp');
-  for (const f of eaten) {
-    const e = document.querySelector(`[data-forest="${f}"]`);
-    if (!e) continue;
-    e.classList.add('eaten');
-    const q = st.pieces.find(p => p.id === f) || { r: +e.dataset.r, c: +e.dataset.c };
-    const [cx, cy] = px((q.r ?? 0) + 0.5, (q.c ?? 0) + 0.5);
+  place(d, fr, fc);
+  d.style.setProperty('--z', 60);
+  setTimeout(() => {
+    // …chomp…
+    Sound.munch();
+    Native.buzz();
+    d.classList.add('chomp');
+    if (f) f.classList.add('eaten');
+    const [cx, cy] = px(fr + 0.5, fc + 0.5);
     [0, 160, 320].forEach(t => setTimeout(() => { Art.burst($('board'), cx, cy, 'wood', [0, -1]); Art.burst($('board'), cx, cy, 'leaf', [0, 1]); }, t));
-  }
+  }, 260);
+  // …and gone, with a happy little puff.
+  setTimeout(() => d.classList.add('full'), 700);
   setTimeout(() => {
     busy = false;
     render();
     // What was under the trees pops out.
-    for (const f of eaten) { const e = document.querySelector(`.block[data-id="${f}"]`); if (e) e.classList.add('thawed'); }
+    const e = document.querySelector(`.block[data-id="${eaten[0]}"]`);
+    if (e) e.classList.add('thawed');
     if (Engine.done(st)) win();
-  }, 620);
+  }, 1050);
 }
 
 // ── Hint (registered players on the hint list; not in challenges) ─────────
@@ -486,7 +492,7 @@ function drawStep({ pieceId, r, c, side }) {
   } else if (p.color === 'beaver') {
     // …and then onto the trees.
     const way = Object.values(SIDE_DIR).find(([sr, sc]) => woodAt(p, r, c, sr, sc));
-    if (way) pts.push(px(r + hr + 0.5 + way[0] * 0.8, c + hc + 0.5 + way[1] * 0.8));
+    if (way) pts.push(px(r + hr + 0.5 + way[0], c + hc + 0.5 + way[1]));
   }
   if (pts.length < 2) pts.push(pts[0]);
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -518,7 +524,7 @@ function replayTo(steps, n) {
     if (!p) return null;
     s2.pieces = s2.pieces.map(x => x.id === m.p ? { ...x, r: m.r, c: m.c } : x);
     if (m.g) { const gt = s2.gates.find(g => g.id === m.g); if (!gt) return null; Engine.applyExit(level, s2, m.p, m.r, m.c, gt); }
-    else Engine.eatAround(level, s2, m.p);
+    else if (m.e) Engine.eatAround(level, s2, m.p, m.e);
   }
   return s2;
 }
@@ -555,7 +561,7 @@ $('ans-watch').addEventListener('click', () => {
     moves++;
     st.pieces = st.pieces.map(x => x.id === m.p ? { ...x, r: m.r, c: m.c } : x);
     place(d, m.r, m.c); settle(d); status(); Sound.tick();
-    if (!m.g) setTimeout(() => beaverEat(m.p, d), 180);
+    if (m.e) setTimeout(() => beaverEat(m.p, d, null, m.e), 180);
     if (m.g) setTimeout(() => leave(m.p, d, st.gates.find(g => g.id === m.g), m.r, m.c), 260);
     setTimeout(step, m.g ? 700 : 520);
   };

@@ -43,11 +43,16 @@ version.
   (`Engine.done`). Fire levels (stage 7) leave out sky/blue (water is teal). The generator only keeps
   fire levels where some move crosses a burning cell.
 
-- Forest (colour 'forest', 1×1, `under`: hidden colour or null) and beaver (colour 'beaver'): a beaver that
-  ends a drag next to forest eats it (`Engine.eatAround`, same id → the hidden block). The solver keeps
-  beavers while forest hides blocks (findExit skips them), tries `findEat`, and findUnblock's first stage is
-  a fastSearch in `'eat'` mode (goal: beaver next to forest). In the game a hungry beaver only leaves when
-  pushed into its door (no near-door drop/flick exit).
+- Forest (colour 'forest', 1×1, `under`: hidden colour or null) and beaver (colour 'beaver', 1×1, no door):
+  a beaver that ends a drag next to forest hops onto ONE forest cell and eats it; the beaver is used up
+  (`Engine.eatAround(level, st, id, forestId)`, same id → the hidden block). Every forest must go, so the
+  generator puts one beaver per forest cell. The solver never exits beavers, tries `findEat` (also a beaver
+  already next to trees — in the game it can sit there unfed), and findUnblock's first stage is a
+  fastSearch in `'eat'` mode (goal: beaver next to forest). In the game the beaver eats only when pulled
+  onto the tree (pointermove → finishDrag(null, way)); solution steps record it as `e: forestId`.
+- "New!" pop-ups: js/intro.js (`Intro.show(key, again)`), one looping mini-board scene per feature
+  (basics, walls, ice, frozen, layered, fire, beaver) drawn with the real Art functions and a 👆 finger.
+  start() shows it once per feature (localStorage `unblock_seen_intros`) and adds "▶ Show me" to the hint.
 - Generator: `--append` makes only the stages after the existing levels; `--redo 38,39` replaces levels;
   both use mulberry32 (the original LCG repeats itself — it made identical levels) and every board is
   checked against the others for duplicates. A full rebuild still uses the LCG (same levels as before).

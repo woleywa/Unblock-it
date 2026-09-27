@@ -12,7 +12,7 @@
 //                                   players, joined, seed }             — window/playMin in minutes, 0 = no limit
 //   saves/{uid}                   { stars, moves, friends, updated } — private: progress + friend list
 //   help/{id}                     { from, fromName, level, par, to: [uids], created } — "help me with this level"
-//   help/{id}/answers/{uid}       { name, moves, steps: [{ p, r, c, g }], created } — a friend's solution
+//   help/{id}/answers/{uid}       { name, moves, steps: [{ p, r, c, g, e }], created } — a friend's solution
 //   challenges/{code}/entries/{uid} { name, team, teamName, started, updated, stars, moves, solved, score, runs }
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import {

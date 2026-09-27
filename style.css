@@ -403,3 +403,6 @@ a.linkish { display: block; text-align: center; }
 .intro-finger { position: absolute; left: 0; top: 0; z-index: 70; font-size: 34px; line-height: 1; opacity: 0; margin: -4px 0 0 -12px; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.4)); pointer-events: none; }
 .intro-finger.press { scale: 0.85; }
 .intro-again { background: none; border: 0; color: var(--dim); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 2px 6px; }
+/* A beaver that ate its tree: a happy puff and gone */
+.block.full { transition: transform 0.3s ease-in, opacity 0.3s ease-in; opacity: 0; }
+.block.full .jelly { transform: scale(0.3) translateY(-30%); transition: transform 0.3s ease-in; }

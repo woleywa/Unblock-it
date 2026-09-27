@@ -15,12 +15,13 @@
 // 'water') that leaves sprays all fires once, and a fire at 0 goes out (the cell is free). A level is
 // done when every block has left; fires still burning then don't matter.
 // Forest (colour 'forest', 1×1, under: colour or null) blocks its cell and may hide a block. A beaver
-// (colour 'beaver') that ends a drag next to forest eats it: the forest goes, a hidden block appears in
-// its place (same id). Forest with nothing under it doesn't have to be eaten.
+// (colour 'beaver', no door) that ends a drag next to forest hops onto one forest cell and eats it: the
+// beaver and that forest are gone, a hidden block appears in its place (same id). Every forest has to
+// be eaten, so a level has one beaver per forest cell.
 const Engine = (() => {
   const clone = s => JSON.parse(JSON.stringify(s));
   const movable = p => !p.ice && !p.lock && !p.fire && p.color !== '?' && p.color !== 'forest';
-  const done = st => !st.pieces.some(p => p.color !== '?' && !p.fire && !(p.color === 'forest' && !p.under));
+  const done = st => !st.pieces.some(p => p.color !== '?' && !p.fire);
 
   const rects = new Map();
   function offsets(p) {
@@ -117,10 +118,8 @@ const Engine = (() => {
 
   function findExit(level, st) {
     const g = grid(level, st.pieces);
-    // Beavers stay until every forest hiding a block has been eaten (a beaver that left can't eat).
-    const hungry = st.pieces.some(q => q.color === 'forest' && q.under);
     for (const p of st.pieces) {
-      if (!movable(p) || (hungry && p.color === 'beaver')) continue;
+      if (!movable(p) || p.color === 'beaver') continue;
       for (const [r, c] of reachable(level, g, p)) {
         const gt = gateFor(level, g, st.gates, p, r, c);
         if (gt) return { pieceId: p.id, r, c, gateId: gt.id };
@@ -153,17 +152,19 @@ const Engine = (() => {
     st.gates = st.gates.map(gt => gt.frozen ? { ...gt, frozen: gt.frozen - 1 } : gt);
   }
 
-  // A beaver that has just been dragged eats the forest next to it. Returns the eaten forests' ids.
-  function eatAround(level, st, id) {
+  // A beaver that has just been dragged hops onto one forest next to it (forestId if given, else one
+  // hiding a block first) and eats it; the beaver is used up. Returns the eaten forest's ids ([] or [id]).
+  function eatAround(level, st, id, forestId) {
     const b = st.pieces.find(x => x.id === id);
     if (!b || b.color !== 'beaver') return [];
     const near = new Set();
     for (const [r, c] of cellsOf(b)) for (const [dr, dc] of ALL) near.add((r + dr) + ',' + (c + dc));
-    const eaten = st.pieces.filter(q => q.color === 'forest' && cellsOf(q).some(([r, c]) => near.has(r + ',' + c)));
-    if (!eaten.length) return [];
-    st.pieces = st.pieces.filter(q => !eaten.includes(q))
-      .concat(eaten.filter(q => q.under).map(q => { const n = { ...q, color: q.under }; delete n.under; return n; }));
-    return eaten.map(q => q.id);
+    const woods = st.pieces.filter(q => q.color === 'forest' && cellsOf(q).some(([r, c]) => near.has(r + ',' + c)));
+    const f = woods.find(q => q.id === forestId) || woods.find(q => q.under) || woods[0];
+    if (!f) return [];
+    st.pieces = st.pieces.filter(q => q !== f && q !== b);
+    if (f.under) { const n = { ...f, color: f.under }; delete n.under; st.pieces.push(n); }
+    return [f.id];
   }
   // A beaver that can reach a spot next to forest (not where it already is): { pieceId, r, c } or null.
   function findEat(level, st) {
@@ -493,7 +494,7 @@ const Engine = (() => {
       return [...t.b.cells].some(i => tr.get(i) === T.color) && !cellsOf(T).every(([y, x]) => tr.get(y * W + x) === T.color);
     };
     // Hungry beavers first: clear a way for one to get next to the forest.
-    const hungry = st.pieces.some(q => q.color === 'forest' && q.under);
+    const hungry = st.pieces.some(q => q.color === 'forest');
     const beavers = hungry ? all.filter(p => p.color === 'beaver') : [];
     const stages = [
       ...beavers.map(b => () => fastSearch(level, st, b.id, new Set(all.map(p => p.id)), 300000, deadline, progress, 'eat')),

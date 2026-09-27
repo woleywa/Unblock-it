@@ -227,30 +227,30 @@ const Intro = (() => {
       },
     },
     beaver: {
-      title: 'The beaver!',
-      text: 'Pull the beaver onto the trees and it eats them — something may be hiding inside. Then it goes home through its brown door.',
+      title: 'Beavers!',
+      text: 'Pull a beaver onto a tree and it eats it — something may be hiding inside. Each beaver eats one tree, and every tree must go.',
       async play(host, id) {
         const S = board(host, 4, 3);
-        S.door('T', 3, 1, 'yellow'); S.door('B', 0, 1, 'beaver');
+        S.door('T', 3, 1, 'yellow');
         const hidden = S.block({ w: 1, h: 1, color: 'yellow' }, 0, 3);
         hidden.style.opacity = 0;
         const trees = S.forest(0, 3);
         const bv = S.block({ w: 1, h: 1, color: 'beaver' }, 2, 0);
         const f = finger(host);
         await wait(500);
-        await drag(S, f, bv, [[2, 1], [2, 2], [2, 3], [1, 3], [0.65, 3]], id); if (id !== run) return;
-        // Pulled onto the trees: it hops on, chomps, and hops back.
+        await drag(S, f, bv, [[2, 1], [2, 2], [2, 3], [1, 3], [0.6, 3]], id); if (id !== run) return;
+        // Pulled onto the tree: it hops on, chomps, and is gone.
         lift(f); bv.classList.remove('dragging'); bv.classList.add('hop');
-        S.put(bv, 0.2, 3); bv.style.setProperty('--z', 60);
-        setTimeout(() => S.put(bv, 1, 3), 470);
+        S.put(bv, 0, 3); bv.style.setProperty('--z', 60);
+        await wait(260); if (id !== run) return;
         bv.classList.add('chomp'); Sound.munch && Sound.munch();
         trees.classList.add('eaten');
-        const [x, y] = S.xy(0.5, 3.5); Art.burst(host, x, y, 'wood', [0, -1]); Art.burst(host, x, y, 'leaf', [0, -1]);
-        await wait(650); bv.classList.remove('chomp', 'hop'); trees.remove();
+        const [x, y] = S.xy(0.5, 3.5);
+        [0, 160, 320].forEach(t => setTimeout(() => { Art.burst(host, x, y, 'wood', [0, -1]); Art.burst(host, x, y, 'leaf', [0, 1]); }, t));
+        await wait(440); bv.classList.add('full');
+        await wait(350); bv.remove(); trees.remove();
         hidden.style.transition = 'opacity 0.3s'; hidden.style.opacity = 1; hidden.classList.add('thawed');
-        await wait(500);
-        await drag(S, f, bv, [[2, 3], [2, 2], [2, 1], [2, 0]], id); if (id !== run) return;
-        await out(S, host, f, bv, 'B', id); if (id !== run) return;
+        await wait(700);
         await out(S, host, f, hidden, 'T', id);
       },
     },
