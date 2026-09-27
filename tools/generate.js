@@ -52,6 +52,8 @@ const STAGES = [
   { n: 5, W: [6, 6], H: [7, 8], colors: 3, fill: 0.64, arrows: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [3, 10], note: 'arrows' },
   // Colour lanes: floor strips only blocks of that colour may cross.
   { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 0.6, lanes: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [3, 10], note: 'lanes' },
+  // Prison: locked blocks behind bars; every key block that leaves opens one lock on each of them.
+  { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 0.66, prison: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [3, 10], note: 'prison' },
 ];
 
 function shapeBox(sh) { return { h: Math.max(...sh.map(q => q[0])) + 1, w: Math.max(...sh.map(q => q[1])) + 1 }; }
@@ -188,6 +190,14 @@ function makeLevel(st) {
     }
     if (pieces.filter(p => p.axis).length < 2) return null;
   }
+  if (st.prison) {
+    // 2–3 key blocks, then 1–2 other blocks locked for up to that many keys (any key fits any lock).
+    const order = pieces.slice().sort(() => rand() - 0.5);
+    const keys = int(2, 3), jailed = int(1, 2);
+    order.slice(0, keys).forEach(p => { p.key = true; p.keyColor = 'gold'; });
+    order.slice(keys, keys + jailed).forEach(p => { p.lock = int(1, keys); p.lockColor = 'gold'; });
+    if (order.length < keys + jailed + 2) return null;
+  }
   return { W, H, walls, tracks, pieces, gates, tickPerCell: false };
 }
 
@@ -213,7 +223,7 @@ const levels = (APPEND || REDO.length) ? require(CHALLENGE ? '../js/challenge-le
 let skip = levels.length;
 if (APPEND) seed = (seed + levels.length * 7919) % 2147483648;
 // No two levels may be the same board (the old random generator can repeat itself).
-const keyOf = l => JSON.stringify([l.W, l.H, l.walls, l.pieces.map(p => [p.color, p.r, p.c, p.h, p.w, p.shape || 0, p.ice || 0, p.fire || 0, p.inner || 0, p.under || 0, p.axis || 0]), l.gates, l.tracks || []]);
+const keyOf = l => JSON.stringify([l.W, l.H, l.walls, l.pieces.map(p => [p.color, p.r, p.c, p.h, p.w, p.shape || 0, p.ice || 0, p.fire || 0, p.inner || 0, p.under || 0, p.axis || 0, p.key ? 1 : 0, p.lock || 0]), l.gates, l.tracks || []]);
 const keys = new Set(levels.filter((_, i) => !REDO.includes(i + 1)).map(keyOf));
 if (REDO.length) {
   seed = (seed * 31 + REDO.reduce((a, n) => a * 131 + n, 7)) % 2147483648;

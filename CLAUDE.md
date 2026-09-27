@@ -54,6 +54,8 @@ version.
   door (else it could never leave). Drawn as two arrowheads at the block's ends (art.js).
 - Colour lanes (`level.tracks` [[r, c, colour]]): striped floor cells (Art.lane); the generator lays 1–2
   straight lanes over empty cells or blocks of that colour only.
+- Prison: `lock: n, lockColor: 'gold'` blocks (bars + padlock) and `key: true, keyColor: 'gold'` blocks
+  (golden key); each key that leaves opens one lock on every prison (Engine.applyExit).
 - "New!" pop-ups: js/intro.js (`Intro.show(key, again)`), one looping mini-board scene per feature
   (basics, walls, ice, frozen, layered, fire, beaver) drawn with the real Art functions and a 👆 finger.
   start() shows it once per feature (localStorage `unblock_seen_intros`) and adds "▶ Show me" to the hint.

@@ -179,6 +179,25 @@ const Art = (() => {
         : `M${mid},${t} L${mid - k},${t - dir * k * 1.3} L${mid + k},${t - dir * k * 1.3} Z`;
       s += `<path d="${head(lo + tip, -1)}${head(hi - tip, 1)}" transform="translate(0 ${-cs * 0.02})" fill="#fff" stroke="${side}" stroke-width="${cs * 0.04}" stroke-linejoin="round" paint-order="stroke" pointer-events="none"/>`;
     }
+    if (p.key && !frozen) {
+      // Key block: a golden key lying on it (below the face).
+      const x = (hc + 0.5) * cs, y = (hr + 0.5) * cs + cs * 0.27, k = cs * 0.1;
+      s += `<g pointer-events="none" transform="translate(${x} ${y}) rotate(-12)">
+        <circle cx="${-k * 1.3}" cy="0" r="${k}" fill="none" stroke="#7a5200" stroke-width="${k * 0.95}"/>
+        <circle cx="${-k * 1.3}" cy="0" r="${k}" fill="none" stroke="#ffd34d" stroke-width="${k * 0.55}"/>
+        <path d="M${-k * 0.3},0 H${k * 1.9} M${k * 1.3},0 V${k * 0.8} M${k * 1.85},0 V${k * 0.65}" stroke="#7a5200" stroke-width="${k * 0.75}" stroke-linecap="round"/>
+        <path d="M${-k * 0.3},0 H${k * 1.9} M${k * 1.3},0 V${k * 0.8} M${k * 1.85},0 V${k * 0.65}" stroke="#ffd34d" stroke-width="${k * 0.38}" stroke-linecap="round"/></g>`;
+    }
+    if (p.lock && !frozen) {
+      // In prison: iron bars over the whole block and a padlock with how many keys it still needs.
+      s += `<g pointer-events="none"><g clip-path="url(#${uid})">`;
+      for (let x = cs * 0.2; x < W; x += cs * 0.3) s += `<rect x="${x - cs * 0.035}" y="0" width="${cs * 0.07}" height="${H}" rx="${cs * 0.03}" fill="#3a3f55" opacity="0.85"/><rect x="${x - cs * 0.035}" y="0" width="${cs * 0.025}" height="${H}" fill="#c9cfe6" opacity="0.6"/>`;
+      s += `</g>`;
+      const x = (hc + 0.5) * cs, y = (hr + 0.5) * cs + cs * 0.24, w = cs * 0.38, h = cs * 0.3;
+      s += `<path d="M${x - w * 0.3},${y - h * 0.45} v${-h * 0.35} a${w * 0.3},${w * 0.3} 0 0 1 ${w * 0.6},0 v${h * 0.35}" fill="none" stroke="#5b6078" stroke-width="${cs * 0.05}"/>`;
+      s += `<rect x="${x - w / 2}" y="${y - h / 2}" width="${w}" height="${h}" rx="${cs * 0.05}" fill="#ffc933" stroke="#7a5200" stroke-width="${cs * 0.025}"/>`;
+      s += `<text x="${x}" y="${y + h * 0.3}" text-anchor="middle" font-size="${h * 0.85}" font-weight="700" fill="#5a2d00" font-family="Fredoka, system-ui, sans-serif">${p.lock}</text></g>`;
+    }
     if (p.ice) {
       s += `<g pointer-events="none"><path d="${shape}" fill="url(#ice)" opacity="0.6"/>`;
       // Frost cracks and sparkles.
@@ -301,7 +320,7 @@ const Art = (() => {
 
   // Sparks bursting from where a block went out.
   function burst(host, x, y, color, dir) {
-    const [l, b] = color === 'ice' ? ['#ffffff', '#cdeeff'] : color === 'wood' ? ['#f2d29b', '#a0692f'] : color === 'leaf' ? ['#a6e98a', '#2e8b3a'] : PAL[color] || PAL.blue;
+    const [l, b] = color === 'ice' ? ['#ffffff', '#cdeeff'] : color === 'wood' ? ['#f2d29b', '#a0692f'] : color === 'leaf' ? ['#a6e98a', '#2e8b3a'] : color === 'gold' ? ['#fff3b0', '#ffc933'] : PAL[color] || PAL.blue;
     for (let i = 0; i < 18; i++) {
       const s = document.createElement('i');
       s.className = 'spark';

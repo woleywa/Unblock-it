@@ -13,6 +13,7 @@ const INTRO = {
   frozen: 'New: frozen doors. They open after that many blocks leave.',
   layered: 'New: layered blocks. The outside leaves, the core stays behind.',
   fire: 'New: fire! Each water block you drag out sprays every fire once. Out fire, open road.',
+  prison: 'New: prison! Locked blocks can’t move. Every 🔑 key block you drag out opens a lock.',
   lanes: 'New: colour lanes. Only blocks of that colour may cross them.',
   arrows: 'New: arrow blocks. They only slide the way their arrows point.',
   beaver: 'New: beavers! Pull one onto a tree and it eats it — something may be hiding inside.',
@@ -84,7 +85,7 @@ function home() {
 const STAGES = [
   ['Warm-up', 'red'], ['Getting busy', 'orange'], ['Walls', 'purple'],
   ['On ice', 'sky'], ['Frosty doors', 'blue'], ['Layers', 'pink'], ['Fire', 'orange'],
-  ['Mixed bag', 'green'], ['Big boards', 'purple'], ['Expert', 'red'], ['Beaver woods', 'orange'], ['Arrows', 'sky'], ['Colour lanes', 'green'],
+  ['Mixed bag', 'green'], ['Big boards', 'purple'], ['Expert', 'red'], ['Beaver woods', 'orange'], ['Arrows', 'sky'], ['Colour lanes', 'green'], ['Prison', 'yellow'],
 ];
 function levelList() {
   const g = $('level-grid');
@@ -251,7 +252,7 @@ $('board').addEventListener('pointerdown', e => {
   const d = e.target.closest('.block');
   if (!d) return;
   const p = st.pieces.find(x => x.id === +d.dataset.id);
-  if (p.ice) { d.classList.remove('shake'); void d.offsetWidth; d.classList.add('shake'); Sound.bump(); return; }
+  if (p.ice || p.lock) { d.classList.remove('shake'); void d.offsetWidth; d.classList.add('shake'); Sound.bump(); return; }
   clearHint();
   drag = { p, d, x0: e.clientX, y0: e.clientY, r0: p.r, c0: p.c, r: p.r, c: p.c, g: Engine.grid(level, st.pieces), trail: [] };
   d.classList.add('dragging');
@@ -375,7 +376,7 @@ function leave(id, d, gt, r, c) {
   }
   Native.buzz();
   const before = st.gates.filter(g => g.frozen).length, iced = st.pieces.filter(q => q.ice).length;
-  const icedIds = st.pieces.filter(q => q.ice).map(q => q.id);
+  const icedIds = st.pieces.filter(q => q.ice).map(q => q.id), lockedIds = st.pieces.filter(q => q.lock).map(q => q.id);
   // Water: drops fly from the door onto every fire.
   const fires = p.color === 'water' ? st.pieces.filter(q => q.fire) : [];
   if (fires.length && door) {
@@ -387,6 +388,15 @@ function leave(id, d, gt, r, c) {
   setTimeout(() => {
     busy = false;
     if (st.gates.filter(g => g.frozen).length < before || st.pieces.filter(q => q.ice).length < iced) Sound.thaw();
+    // Prisons a key just opened: the bars fly off in gold sparks.
+    for (const q of st.pieces.filter(q => !q.lock && lockedIds.includes(q.id))) {
+      const e = document.querySelector(`.block[data-id="${q.id}"]`);
+      if (!e) continue;
+      e.classList.add('thawed');
+      const [x, y] = px(q.r + q.h / 2, q.c + q.w / 2);
+      Art.burst($('board'), x, y, 'gold', [0, -1]);
+      Sound.thaw();
+    }
     render();
     // Blocks whose ice just melted pop out in their colour.
     for (const q of st.pieces.filter(q => !q.ice && icedIds.includes(q.id))) {

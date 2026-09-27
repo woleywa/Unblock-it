@@ -225,6 +225,31 @@ const Intro = (() => {
         await out(S, host, f, red, 'R', id);
       },
     },
+    prison: {
+      title: 'Prison',
+      text: 'Blocks behind bars can’t move. Every 🔑 key block you drag out opens one lock — at 0 they’re free.',
+      async play(host, id) {
+        const S = board(host, 4, 3);
+        S.door('T', 1, 1, 'blue'); S.door('B', 0, 1, 'red'); S.door('B', 3, 1, 'red');
+        const JP = { w: 1, h: 1, color: 'blue', lock: 2, lockColor: 'gold' };
+        const jail = S.block(JP, 1, 1);
+        const k1 = S.block({ w: 1, h: 1, color: 'red', key: true, keyColor: 'gold' }, 1, 0);
+        const k2 = S.block({ w: 1, h: 1, color: 'red', key: true, keyColor: 'gold' }, 1, 3);
+        const f = finger(host);
+        await wait(500);
+        jail.classList.add('shake'); await wait(400); jail.classList.remove('shake');
+        await drag(S, f, k1, [[2, 0]], id); if (id !== run) return;
+        await out(S, host, f, k1, 'B', id); if (id !== run) return;
+        S.redraw(jail, { ...JP, lock: 1 }); jail.classList.add('thawed'); await wait(450); jail.classList.remove('thawed');
+        await drag(S, f, k2, [[2, 3]], id); if (id !== run) return;
+        await out(S, host, f, k2, 'B', id); if (id !== run) return;
+        S.redraw(jail, { w: 1, h: 1, color: 'blue' }); jail.classList.add('thawed');
+        const [x, y] = S.xy(1.5, 1.5); Art.burst(host, x, y, 'gold', [0, -1]);
+        await wait(700); jail.classList.remove('thawed');
+        await drag(S, f, jail, [[0, 1]], id); if (id !== run) return;
+        await out(S, host, f, jail, 'T', id);
+      },
+    },
     lanes: {
       title: 'Colour lanes',
       text: 'Striped floor lanes let only blocks of their colour across. Everyone else has to go around.',
