@@ -13,6 +13,7 @@ const INTRO = {
   frozen: 'New: frozen doors. They open after that many blocks leave.',
   layered: 'New: layered blocks. The outside leaves, the core stays behind.',
   fire: 'New: fire! Each water block you drag out sprays every fire once. Out fire, open road.',
+  chains: 'New: chains. A chained block can only go as far as its chain reaches from the post.',
   prison: 'New: prison! Locked blocks can’t move. Every 🔑 key block you drag out opens a lock.',
   lanes: 'New: colour lanes. Only blocks of that colour may cross them.',
   arrows: 'New: arrow blocks. They only slide the way their arrows point.',
@@ -215,9 +216,10 @@ function render() {
   b.style.width = level.W * cs + 2 * gut + 'px';
   b.style.height = level.H * cs + 2 * gut + 'px';
   const walls = new Set((level.walls || []).map(([r, c]) => r + ',' + c));
+  const posts = new Set(st.pieces.filter(p => p.tether).map(p => p.tether.r + ',' + p.tether.c));
   for (let r = 0; r < level.H; r++) for (let c = 0; c < level.W; c++) {
     const [x, y] = px(r, c);
-    b.appendChild(el(walls.has(r + ',' + c) ? 'wall' : 'cell', { left: x + 3 + 'px', top: y + 3 + 'px', width: cs - 6 + 'px', height: cs - 6 + 'px', borderRadius: Math.round(cs * 0.2) + 'px' }));
+    b.appendChild(el(posts.has(r + ',' + c) ? 'cell post' : walls.has(r + ',' + c) ? 'wall' : 'cell', { left: x + 3 + 'px', top: y + 3 + 'px', width: cs - 6 + 'px', height: cs - 6 + 'px', borderRadius: Math.round(cs * 0.2) + 'px' }));
   }
   // Colour lanes: floor cells only blocks of that colour may cross.
   for (const [r, c, col] of level.tracks || []) {
@@ -226,7 +228,35 @@ function render() {
   }
   for (const gt of st.gates) b.appendChild(Art.door(gt, doorBox(gt), gut));
   for (const p of st.pieces) b.appendChild(p.fire ? fireEl(p) : p.color === 'forest' ? forestEl(p) : blockEl(p));
+  if (st.pieces.some(p => p.tether)) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.id = 'chains';
+    svg.setAttribute('width', level.W * cs + 2 * gut); svg.setAttribute('height', level.H * cs + 2 * gut);
+    b.appendChild(svg);
+    drawChains();
+  }
   status();
+}
+
+// Chains from each post to its block (the dragged one where the finger has it). Tight at full reach.
+function drawChains(dragId, dr, dc) {
+  const svg = $('chains');
+  if (!svg) return;
+  let h = '';
+  for (const p of st.pieces.filter(q => q.tether)) {
+    const r = p.id === dragId ? dr : p.r, c = p.id === dragId ? dc : p.c, t = p.tether;
+    const cells = Engine.cellsOf(p, r, c);
+    const near = cells.reduce((a, q) => Math.hypot(q[0] - t.r, q[1] - t.c) < Math.hypot(a[0] - t.r, a[1] - t.c) ? q : a);
+    const [x0, y0] = px(t.r + 0.5, t.c + 0.5), [x1, y1] = px(near[0] + 0.5, near[1] + 0.5);
+    const dist = Math.abs(near[0] - t.r) + Math.abs(near[1] - t.c), slack = Math.max(0, t.len - dist) / t.len;
+    const mx = (x0 + x1) / 2, my = (y0 + y1) / 2 + cs * 0.45 * slack;
+    const d = `M${x0},${y0} Q${mx},${my} ${x1},${y1}`;
+    h += `<path d="${d}" fill="none" stroke="#2b2f45" stroke-width="${cs * 0.16}" stroke-linecap="round"/>`
+      + `<path d="${d}" fill="none" stroke="#b9c0d8" stroke-width="${cs * 0.1}" stroke-linecap="round" stroke-dasharray="${cs * 0.16} ${cs * 0.1}"/>`
+      + `<path d="${d}" fill="none" stroke="#eef1ff" stroke-width="${cs * 0.035}" stroke-linecap="round" stroke-dasharray="${cs * 0.08} ${cs * 0.18}" opacity="0.8"/>`
+      + `<circle cx="${x0}" cy="${y0}" r="${cs * 0.2}" fill="#6b5a3e" stroke="#3a2e1c" stroke-width="${cs * 0.05}"/><circle cx="${x0}" cy="${y0 - cs * 0.04}" r="${cs * 0.1}" fill="#a58c62"/>`;
+  }
+  svg.innerHTML = h;
 }
 
 // ── Dragging ─────────────────────────────────────────────────
@@ -240,6 +270,8 @@ function exitFor(p, r, c, side) {
     if (gt.frozen || gt.color !== p.color || (side && gt.side !== side)) continue;
     // Arrow blocks leave only along their arrow.
     if ((p.axis === 'h' && (gt.side === 'T' || gt.side === 'B')) || (p.axis === 'v' && (gt.side === 'L' || gt.side === 'R'))) continue;
+    // A chained block only reaches doors within its chain's reach.
+    if (!Engine.reachesDoor(level, p, gt, cells)) continue;
     const lane = Engine.laneOf(level, gt, cells);
     if (lane && lane.every(([y, x]) => { const v = g[y * level.W + x]; return v === -1 || v === p.id; })) return { gt, lane };
   }
@@ -306,6 +338,7 @@ $('board').addEventListener('pointermove', e => {
     drag.raf = 0;
     const [x, y] = px(drag.r + drag.fr, drag.c + drag.fc);
     drag.d.style.transform = `translate(${x}px, ${y}px)`;
+    if (drag.p.tether) drawChains(drag.p.id, drag.r + drag.fr, drag.c + drag.fc);
   });
 });
 

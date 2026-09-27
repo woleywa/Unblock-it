@@ -18,6 +18,9 @@
 // (colour 'beaver', no door) that ends a drag next to forest hops onto one forest cell and eats it: the
 // beaver and that forest are gone, a hidden block appears in its place (same id). Every forest has to
 // be eaten, so a level has one beaver per forest cell.
+// Chain (tether: { r, c, len }): the block is chained to a post at (r, c) (a wall cell) and may only
+// sit where one of its cells is at most len steps (up/down/left/right) from the post. It can still
+// leave through a door within that reach; the chain snaps.
 const Engine = (() => {
   const clone = s => JSON.parse(JSON.stringify(s));
   const movable = p => !p.ice && !p.lock && !p.fire && p.color !== '?' && p.color !== 'forest';
@@ -50,6 +53,14 @@ const Engine = (() => {
     }
     return out;
   }
+  // A chained block can use a door only if, slid right up to it, it's still within reach of its post.
+  function reachesDoor(level, p, gt, cells) {
+    if (!p.tether) return true;
+    const at = gt.at ?? (gt.side === 'L' || gt.side === 'T' ? 0 : gt.side === 'R' ? level.W - 1 : level.H - 1);
+    const ys = cells.map(q => q[0]), xs = cells.map(q => q[1]);
+    const d = gt.side === 'L' ? [0, at - Math.min(...xs)] : gt.side === 'R' ? [0, at - Math.max(...xs)] : gt.side === 'T' ? [at - Math.min(...ys), 0] : [at - Math.max(...ys), 0];
+    return inReach(p, cells.map(([y, x]) => [y + d[0], x + d[1]]));
+  }
   const ALL = [[1,0],[-1,0],[0,1],[0,-1]], H_ONLY = [[0,1],[0,-1]], V_ONLY = [[1,0],[-1,0]];
   const dirsOf = p => p.axis === 'h' ? H_ONLY : p.axis === 'v' ? V_ONLY : ALL;
   const gateOk = (p, gt) => !gt.frozen && gt.color === p.color && (!p.star || gt.star)
@@ -69,8 +80,11 @@ const Engine = (() => {
     return trackCache.get(level);
   }
 
+  // A chained block's cells at (r, c) are within reach of its post.
+  const inReach = (p, cells) => !p.tether || cells.some(([y, x]) => Math.abs(y - p.tether.r) + Math.abs(x - p.tether.c) <= p.tether.len);
   function fits(level, g, p, r, c) {
     const tr = trackMap(level);
+    if (!inReach(p, cellsOf(p, r, c))) return false;
     for (const [y, x] of cellsOf(p, r, c)) {
       if (y < 0 || x < 0 || y >= level.H || x >= level.W) return false;
       const v = g[y * level.W + x];
@@ -111,7 +125,7 @@ const Engine = (() => {
     for (const gt of gates) {
       if (!gateOk(p, gt)) continue;
       const lane = laneOf(level, gt, cells);
-      if (lane && lane.every(([y, x]) => free(y, x))) return gt;
+      if (lane && lane.every(([y, x]) => free(y, x)) && reachesDoor(level, p, gt, cells)) return gt;
     }
     return null;
   }
@@ -214,7 +228,7 @@ const Engine = (() => {
       let best = Infinity, bestRun = [];
       for (const gt of gates) {
         const run = laneOf(level, gt, cells);
-        if (!run) continue;
+        if (!run || !reachesDoor(level, T, gt, cells)) continue;
         let s = 0;
         for (const [yy, xx] of run) { s += cell(yy, xx); if (want) want.push([yy, xx]); }
         if (s < best) { best = s; bestRun = want ? want.splice(0) : []; } else if (want) want.length = 0;
@@ -283,6 +297,7 @@ const Engine = (() => {
           if (base[i] !== -1 || (t && t !== p.color)) { ok = false; break; }
           cs.push(i);
         }
+        if (ok && p.tether && !inReach(p, cs.map(i => [(i / W) | 0, i % W]))) ok = false;
         if (ok) arr[a] = cs;
       }
       return arr;
@@ -296,7 +311,7 @@ const Engine = (() => {
       for (const gt of st.gates) {
         if (!gateOk(P, gt)) continue;
         const run = laneOf(level, gt, cells);
-        if (!run) continue;
+        if (!run || !reachesDoor(level, P, gt, cells)) continue;
         const lane = [];
         let ok = true;
         for (const [y, x] of run) {
@@ -307,7 +322,7 @@ const Engine = (() => {
         if (ok) (lanes[a] = lanes[a] || []).push(lane);
       }
     }
-    const sig = rel.map((p, k) => k === T ? '#' : [p.color, p.inner || '', p.key ? 1 + (p.keyColor || '') : 0, p.lock + (p.lockColor || ''), p.axis || '', p.star ? 1 : 0, p.shape ? JSON.stringify(p.shape) : p.h + 'x' + p.w].join('|'));
+    const sig = rel.map((p, k) => k === T ? '#' : [p.color, p.inner || '', p.key ? 1 + (p.keyColor || '') : 0, p.lock + (p.lockColor || ''), p.axis || '', p.star ? 1 : 0, p.tether ? JSON.stringify(p.tether) : '', p.shape ? JSON.stringify(p.shape) : p.h + 'x' + p.w].join('|'));
     const groups = [...new Set(sig)].map(g => sig.map((s2, k) => s2 === g ? k : -1).filter(k => k >= 0));
     // Positions are stored flat (K numbers per state) and remembered by a 64-bit hash of the
     // canonical (per-group sorted) positions, which keeps a million+ states within phone memory.
@@ -566,7 +581,7 @@ const Engine = (() => {
     return out;
   }
 
-  return { solve, movable, done, eatAround, path, cellsOf, fastSearch, grid, reachable, fits, gateFor, laneOf, applyExit };
+  return { inReach, reachesDoor, solve, movable, done, eatAround, path, cellsOf, fastSearch, grid, reachable, fits, gateFor, laneOf, applyExit };
 })();
 
 if (typeof module !== 'undefined') module.exports = Engine;

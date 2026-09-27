@@ -445,3 +445,7 @@ a.linkish { display: block; text-align: center; }
 /* Colour lane cells */
 .lane { position: absolute; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--b) 55%, #1c1547) 0 7px, color-mix(in srgb, var(--b) 30%, #1c1547) 7px 14px);
   box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--l) 70%, transparent), inset 0 4px 6px rgba(0,0,0,0.35); opacity: 0.95; }
+
+/* Chains: the post's cell and the chain layer (above the floor, below the blocks) */
+.cell.post { background: linear-gradient(180deg, #2a2160, #2f2668); }
+#chains { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 0; }

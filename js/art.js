@@ -173,11 +173,16 @@ const Art = (() => {
       // On a block that's wider across than one cell, put them in the last row/column, clear of the face.
       const across = p.axis === 'h' ? p.h : p.w;
       const mid = (!p.shape && across >= 2 ? across - 0.5 : (p.axis === 'h' ? hr : hc) + 0.5) * cs;
-      const k = cs * 0.14, tip = cs * 0.1;
-      const head = (t, dir) => p.axis === 'h'
-        ? `M${t},${mid} L${t - dir * k * 1.3},${mid - k} L${t - dir * k * 1.3},${mid + k} Z`
-        : `M${mid},${t} L${mid - k},${t - dir * k * 1.3} L${mid + k},${t - dir * k * 1.3} Z`;
-      s += `<path d="${head(lo + tip, -1)}${head(hi - tip, 1)}" transform="translate(0 ${-cs * 0.02})" fill="#fff" stroke="${side}" stroke-width="${cs * 0.04}" stroke-linejoin="round" paint-order="stroke" pointer-events="none"/>`;
+      // Soft double chevrons (like »), rounded and a little puffy, with a shadow under them.
+      const k = cs * 0.085, gap = cs * 0.085, inset = cs * 0.13;
+      const chev = (t, dir) => p.axis === 'h'
+        ? `M${t - dir * k},${mid - k * 1.25} L${t},${mid} L${t - dir * k},${mid + k * 1.25}`
+        : `M${mid - k * 1.25},${t - dir * k} L${mid},${t} L${mid + k * 1.25},${t - dir * k}`;
+      const pair = (t, dir) => chev(t, dir) + chev(t - dir * gap, dir);
+      const dd = pair(lo + inset, -1) + pair(hi - inset, 1);
+      s += `<g pointer-events="none" fill="none" stroke-linecap="round" stroke-linejoin="round">`
+        + `<path d="${dd}" stroke="${side}" stroke-width="${cs * 0.085}" opacity="0.45" transform="translate(0 ${cs * 0.025})"/>`
+        + `<path d="${dd}" stroke="#fff" stroke-width="${cs * 0.06}" opacity="0.92"/></g>`;
     }
     if (p.key && !frozen) {
       // Key block: a golden key lying on it (below the face).
@@ -233,18 +238,24 @@ const Art = (() => {
     return d;
   }
 
-  // A forest on one cell: grass, three trees that sway, a bit of shade. What's hidden stays hidden.
+  // A forest on one cell: a grassy mound with two fluffy round trees that sway, a tiny mushroom and a
+  // flower. What's hidden stays hidden.
   function forest(cs) {
     const d = document.createElement('div');
     d.className = 'forest';
-    const tree = (x, y, k, dark, light, i) => `<g class="tree" style="--i:${i};transform-origin:${x}px ${y + 30 * k}px">
-      <rect x="${x - 3 * k}" y="${y + 18 * k}" width="${6 * k}" height="${12 * k}" rx="${2 * k}" fill="#7a4a24"/>
-      <path d="M${x},${y - 22 * k} L${x + 17 * k},${y + 4 * k} L${x + 10 * k},${y + 4 * k} L${x + 20 * k},${y + 20 * k} L${x - 20 * k},${y + 20 * k} L${x - 10 * k},${y + 4 * k} L${x - 17 * k},${y + 4 * k} Z" fill="${dark}"/>
-      <path d="M${x},${y - 22 * k} L${x + 17 * k},${y + 4 * k} L${x},${y + 4 * k} Z" fill="${light}" opacity="0.55"/></g>`;
+    const tree = (x, y, k, i, dark, mid, light) => `<g class="tree" style="--i:${i};transform-origin:${x}px ${y + 26 * k}px">
+      <rect x="${x - 3.2 * k}" y="${y + 8 * k}" width="${6.4 * k}" height="${18 * k}" rx="${3 * k}" fill="#8a5a2e"/>
+      <rect x="${x - 3.2 * k}" y="${y + 8 * k}" width="${2.4 * k}" height="${18 * k}" rx="${1.2 * k}" fill="#a8743f"/>
+      <circle cx="${x - 9 * k}" cy="${y + 2 * k}" r="${10 * k}" fill="${dark}"/><circle cx="${x + 9 * k}" cy="${y + 2 * k}" r="${10 * k}" fill="${dark}"/>
+      <circle cx="${x}" cy="${y - 8 * k}" r="${13 * k}" fill="${mid}"/><circle cx="${x - 7 * k}" cy="${y - 1 * k}" r="${9 * k}" fill="${mid}"/><circle cx="${x + 7 * k}" cy="${y}" r="${9 * k}" fill="${mid}"/>
+      <ellipse cx="${x - 5 * k}" cy="${y - 13 * k}" rx="${5.5 * k}" ry="${3.8 * k}" fill="${light}" opacity="0.85"/>
+      <circle cx="${x + 6 * k}" cy="${y - 4 * k}" r="${1.6 * k}" fill="#ff6f8f"/><circle cx="${x - 8 * k}" cy="${y + 3 * k}" r="${1.4 * k}" fill="#ff6f8f"/></g>`;
     d.innerHTML = `<svg viewBox="0 0 100 100" width="${cs}" height="${cs}" overflow="visible">
-      <rect x="4" y="4" width="92" height="92" rx="22" fill="#2f7a3a"/><rect x="4" y="4" width="92" height="46" rx="22" fill="#3c9447" opacity="0.6"/>
-      <ellipse cx="50" cy="86" rx="40" ry="8" fill="#1f5a28" opacity="0.6"/>
-      ${tree(28, 44, 0.95, '#1e6b33', '#7fd989', 0)}${tree(72, 40, 1.05, '#23803c', '#8fe39a', 1)}${tree(50, 58, 1.15, '#1a5e2d', '#79d383', 2)}
+      <rect x="4" y="6" width="92" height="90" rx="26" fill="#1d5e36"/><rect x="4" y="6" width="92" height="44" rx="24" fill="#2a7a45" opacity="0.8"/>
+      <ellipse cx="50" cy="86" rx="38" ry="7" fill="#1d6a35" opacity="0.55"/>
+      ${tree(66, 46, 1.25, 1, '#2fa34c', '#56d46f', '#c8f9bd')}${tree(36, 50, 1.55, 0, '#2b9a48', '#4ccb66', '#bdf5b1')}
+      <g transform="translate(18 80)"><rect x="-1.6" y="-4" width="3.2" height="6" rx="1.4" fill="#fff4e0"/><path d="M-6,-3 Q0,-11 6,-3 Z" fill="#ff5a6e"/><circle cx="-2" cy="-5.5" r="1" fill="#fff"/><circle cx="2" cy="-4.5" r="0.8" fill="#fff"/></g>
+      <g transform="translate(84 82)"><circle r="2.2" cx="0" cy="-3" fill="#fff"/><circle r="2.2" cx="-2.8" cy="0" fill="#fff"/><circle r="2.2" cx="2.8" cy="0" fill="#fff"/><circle r="2.2" cx="0" cy="2.4" fill="#fff"/><circle r="1.8" fill="#ffd34d"/></g>
     </svg>`;
     d.style.width = d.style.height = cs + 'px';
     return d;

@@ -63,25 +63,22 @@ const Intro = (() => {
   function finger() { return document.createElement('div'); }
 
   // Drag block d along cells [[r,c], …] with the finger, one smooth glide per step.
+  // Glide block d along cells [[r,c], …] in one smooth move (a short pause first, like picking it up).
   async function drag(S, f, d, path, id) {
-    const [r0, c0] = d._rc, p = d._p;
-    const at = (r, c) => { const [x, y] = S.xy(r, c); return [x + p.w * CS / 2, y + p.h * CS / 2]; };
-    let [fx, fy] = at(r0, c0);
-    f.style.transition = 'transform 0.35s ease, opacity 0.2s';
-    f.style.transform = `translate(${fx}px, ${fy}px)`;
-    f.style.opacity = 1;
-    await wait(420);
+    await wait(300);
     if (id !== run) return;
-    f.classList.add('press');
     d.classList.add('dragging');
-    await wait(160);
-    for (const [r, c] of path) {
-      if (id !== run) return;
-      S.put(d, r, c);
-      [fx, fy] = at(r, c);
-      f.style.transform = `translate(${fx}px, ${fy}px)`;
-      await wait(260);
-    }
+    const pts = [d._rc, ...path];
+    const tf = ([r, c]) => { const [x, y] = S.xy(r, c); return `translate(${x}px, ${y}px)`; };
+    // Time per stretch in proportion to its length, so the speed stays even along the route.
+    const len = pts.slice(1).map((q, i) => Math.hypot(q[0] - pts[i][0], q[1] - pts[i][1]));
+    const total = len.reduce((a, b) => a + b, 0) || 1;
+    let run0 = 0;
+    const frames = pts.map((q, i) => { if (i) run0 += len[i - 1]; return { transform: tf(q), offset: run0 / total }; });
+    const [r, c] = path[path.length - 1];
+    await d.animate(frames, { duration: Math.max(260, total * 230), easing: 'ease-in-out' }).finished.catch(() => {});
+    if (id !== run) return;
+    S.put(d, r, c);
   }
   function release(f, d) {
     f.classList.remove('press');
@@ -93,7 +90,12 @@ const Intro = (() => {
 
   // Drag a block out through a door: into the door, then gone with sparks.
   async function out(S, host, f, d, side, id) {
+    if (id !== run) return;
     const [r, c] = d._rc, p = d._p;
+    // A block only ever leaves through a door of its colour on that side, in line with it.
+    const ok = [...host.querySelectorAll('.door')].some(e => { const g = e._door; if (!g || g.side !== side || g.color !== p.color) return false;
+      const lo = side === 'L' || side === 'R' ? r : c, n = side === 'L' || side === 'R' ? p.h : p.w; return lo >= g.start && lo + n <= g.start + g.len; });
+    if (!ok) console.warn('intro: no door for', p.color, side, r, c);
     const dr = { T: -1, B: 1, L: 0, R: 0 }[side], dc = { L: -1, R: 1, T: 0, B: 0 }[side];
     const far = side === 'T' || side === 'B' ? p.h + 0.4 : p.w + 0.4;
     await drag(S, f, d, [[r + dr * 0.6, c + dc * 0.6]], id);
@@ -115,7 +117,7 @@ const Intro = (() => {
       text: 'Drag each block out through the door of its colour. Fewer moves = more stars ⭐',
       async play(host, id) {
         const S = board(host, 4, 3);
-        S.door('R', 1, 1, 'red'); S.door('T', 0, 2, 'blue');
+        S.door('R', 1, 1, 'red'); S.door('T', 2, 2, 'blue');
         const red = S.block({ w: 1, h: 1, color: 'red' }, 1, 0);
         const blue = S.block({ w: 2, h: 1, color: 'blue' }, 1, 2);
         const f = finger(host);
@@ -204,7 +206,7 @@ const Intro = (() => {
       text: 'Nothing can cross fire. Each water block you drag out sprays every fire once — out fire, open road.',
       async play(host, id) {
         const S = board(host, 4, 3);
-        S.door('R', 1, 1, 'red'); S.door('B', 0, 1, 'water');
+        S.door('R', 1, 1, 'red'); S.door('B', 1, 1, 'water');
         const fire = S.fire(1, 1, 2);
         const red = S.block({ w: 1, h: 1, color: 'red' }, 1, 0);
         const w = S.block({ w: 1, h: 1, color: 'water' }, 2, 1);
@@ -212,9 +214,8 @@ const Intro = (() => {
         await wait(500);
         await drag(S, f, red, [[1, 1], [1, 1.2]], id); if (id !== run) return;
         S.put(red, 1, 1); red.classList.add('shake'); await wait(350); red.classList.remove('shake');
-        await drag(S, f, w, [[2, 0]], id); if (id !== run) return;
         await out(S, host, f, w, 'B', id); if (id !== run) return;
-        const [x0, y0] = S.xy(3, 0.5), [x1, y1] = S.xy(1.5, 2.5);
+        const [x0, y0] = S.xy(3, 1.5), [x1, y1] = S.xy(1.5, 2.5);
         Art.sprinkle(host, x0, y0, x1, y1);
         Sound.splash && Sound.splash();
         await wait(480);
@@ -277,7 +278,7 @@ const Intro = (() => {
       text: 'Blocks with arrows only slide the way the arrows point — ↔ or ↕.',
       async play(host, id) {
         const S = board(host, 4, 3);
-        S.door('R', 1, 1, 'blue'); S.door('T', 0, 1, 'green');
+        S.door('R', 1, 1, 'blue'); S.door('T', 2, 1, 'green');
         const a = S.block({ w: 1, h: 1, color: 'blue', axis: 'h' }, 1, 0);
         const g = S.block({ w: 1, h: 1, color: 'green' }, 1, 2);
         const f = finger(host);
