@@ -14,7 +14,7 @@ website, iPhone/iPad and Android. App ID (bundle id): **`com.woleywa.happyblocks
 | `android/` | Android Studio / Gradle project |
 | `assets/` | Source art for app icons and splash (`npm run icons` regenerates every size) |
 | `js/native.js` | App-only bits: status bar, haptics, Android back button, share links → web address |
-| `.github/workflows/apps.yml` | Builds both apps on every push to `main` |
+| `.github/workflows/apps.yml` | Builds both apps on every push to `main` (Android APK, unsigned iOS .ipa) |
 
 After changing the game: `npm run sync` (copies it into both apps). The GitHub build does this itself.
 
@@ -22,7 +22,14 @@ After changing the game: `npm run sync` (copies it into both apps). The GitHub b
 
 - **Android**: open the latest *Apps* run under the repo's **Actions** tab → *Artifacts* →
   `happy-blocks-android` → unzip → install `app-debug.apk` on an Android phone (allow "install unknown apps").
-- **iPhone**: needs signing (below). Until then the build only proves it compiles.
+- **iPhone without the paid account** (a free Apple ID works; the app then runs for 7 days before it needs
+  re-signing, and a free Apple ID can have up to 3 such apps):
+  - *With a Mac*: open `ios/App/App.xcodeproj` in Xcode (after `npm install && npm run sync`), Signing &
+    Capabilities → Team → your Apple ID ("Personal Team"), plug in the iPhone, press Run. On the phone:
+    Settings → General → VPN & Device Management → trust your Apple ID, and turn on Developer Mode.
+  - *Without a Mac* (Windows or Mac): download `happy-blocks-ios-unsigned` from the latest *Apps* run and
+    install the `.ipa` with **Sideloadly** or **AltStore** (they sign it with your Apple ID). Same 7-day limit.
+  - Or simply use the web version: Safari → Share → Add to Home Screen — it's the same game.
 
 ## To publish
 

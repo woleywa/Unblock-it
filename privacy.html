@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Happy Blocks — Privacy Policy</title>
+  <meta name="description" content="What Happy Blocks stores, who can see it, and how to delete it.">
+  <meta name="theme-color" content="#2a1f73">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
+  <style>
+    :root { --text: #fffaf2; --dim: #cfc6f5; --accent: #ffd54a; --card: rgba(255,255,255,0.07); --line: rgba(255,255,255,0.14); }
+    * { box-sizing: border-box; }
+    html { background: #1b2458; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--text); line-height: 1.6;
+      font-family: 'Fredoka', ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, sans-serif; font-weight: 500;
+      background: radial-gradient(120% 60% at 50% -10%, #4a36b0 0%, #2a1f73 45%, #1b2458 100%) fixed;
+      padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
+    }
+    main { max-width: 720px; margin: 0 auto; padding: 28px 0 48px; }
+    header { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+    header img { width: 56px; height: 56px; border-radius: 14px; box-shadow: 0 4px 0 rgba(0,0,0,0.3); }
+    h1 { font-size: 2rem; line-height: 1.1; margin: 0; }
+    h2 { font-size: 1.25rem; margin: 30px 0 8px; color: var(--accent); }
+    p, li { color: var(--dim); }
+    strong { color: var(--text); font-weight: 600; }
+    a { color: #9be8ff; }
+    .meta { color: var(--dim); font-size: 0.9rem; margin: 0 0 18px; }
+    .summary { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 6px 18px; }
+    .summary li { margin: 8px 0; }
+    table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.95rem; }
+    th, td { text-align: left; vertical-align: top; padding: 10px 8px; border-bottom: 1px solid var(--line); }
+    th { color: var(--text); font-weight: 600; }
+    td { color: var(--dim); }
+    .tag { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+    .pub { background: rgba(255,213,74,0.18); color: var(--accent); }
+    .priv { background: rgba(63,208,255,0.18); color: #9be8ff; }
+    .dev { background: rgba(255,255,255,0.12); color: var(--text); }
+    @media (max-width: 560px) { table, thead, tbody, tr, th, td { display: block; } thead { display: none; }
+      tr { border-bottom: 1px solid var(--line); padding: 8px 0; } td { border: 0; padding: 2px 0; } td:first-child { color: var(--text); font-weight: 600; } }
+    footer { margin-top: 40px; font-size: 0.85rem; color: var(--dim); }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <img src="icons/icon-192.png" alt="">
+    <h1>Happy Blocks<br>Privacy Policy</h1>
+  </header>
+  <p class="meta">Effective 27 September 2026 · applies to the Happy Blocks website, iPhone/iPad app and Android app.</p>
+
+  <div class="summary">
+    <ul>
+      <li><strong>No ads, no tracking, no analytics.</strong> We don’t sell or share your data with anyone for advertising.</li>
+      <li>You can play <strong>without an account</strong>. Your progress then stays on your device.</li>
+      <li>If you pick a nickname or join a team or challenge, your <strong>nickname and scores are public</strong> to other players.</li>
+      <li>If you add an email and password, your <strong>email stays private</strong> and is only used to sign you in.</li>
+      <li>You can <strong>delete your account</strong> and its data in the app at any time.</li>
+    </ul>
+  </div>
+
+  <h2>Who we are</h2>
+  <p>Happy Blocks is a puzzle game made by an independent developer (GitHub: <a href="https://github.com/woleywa">woleywa</a>).
+    In this policy “we” means the maker of Happy Blocks. For questions, see <a href="#contact">Contact</a>.</p>
+
+  <h2>What we store</h2>
+  <table>
+    <thead><tr><th>Data</th><th>Why</th><th>Who can see it</th></tr></thead>
+    <tbody>
+      <tr><td>Your progress (stars and best moves per level), sound setting, challenges you opened</td>
+        <td>So the game remembers where you are</td><td><span class="tag dev">Only on your device</span> (browser/app storage)</td></tr>
+      <tr><td>A random account ID</td>
+        <td>Created automatically when you’re online, so your scores can be saved. It isn’t linked to your name, phone number or device ID.</td>
+        <td><span class="tag priv">Private</span></td></tr>
+      <tr><td>Nickname (if you choose one)</td><td>To show you on leaderboards, teams, challenges and friends lists</td><td><span class="tag pub">Public</span></td></tr>
+      <tr><td>Totals: stars, moves, levels solved; your best run on each level</td><td>Leaderboards</td><td><span class="tag pub">Public</span></td></tr>
+      <tr><td>Team membership and team name</td><td>Team pages and the team leaderboard</td><td><span class="tag pub">Public</span></td></tr>
+      <tr><td>Challenges you create or join, with your results and the time you started</td><td>Running the challenge and its scoreboard</td><td><span class="tag pub">Public</span> to anyone with the challenge code</td></tr>
+      <tr><td>Your friends list</td><td>The Friends leaderboard</td><td><span class="tag priv">Private</span> (the people you add can’t see who added them)</td></tr>
+      <tr><td>A copy of your progress</td><td>So it follows your account to other devices</td><td><span class="tag priv">Private</span></td></tr>
+      <tr><td>Email address and password (only if you save your progress with an account)</td>
+        <td>To sign you in and to send a password-reset email when you ask for one. Passwords are handled by Google Firebase Authentication; we never see them.</td>
+        <td><span class="tag priv">Private</span></td></tr>
+    </tbody>
+  </table>
+  <p>We don’t collect your location, contacts, photos, advertising ID or payment details, and there are no in-app purchases.</p>
+
+  <h2>Services we use</h2>
+  <ul>
+    <li><strong>Google Firebase</strong> (Authentication and Cloud Firestore) stores the online data above.
+      Google processes it on our behalf under the <a href="https://firebase.google.com/terms/data-processing-terms">Firebase data processing terms</a>;
+      see also <a href="https://firebase.google.com/support/privacy">Privacy and Security in Firebase</a>.</li>
+    <li><strong>Google Fonts</strong> supplies the game’s font. Your device downloads it from Google, which sees your IP address as part of that request
+      (<a href="https://developers.google.com/fonts/faq/privacy">Google Fonts privacy</a>).</li>
+    <li><strong>GitHub Pages</strong> hosts the website version. GitHub may log IP addresses for security
+      (<a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub privacy statement</a>).</li>
+    <li>If you install the app from the <strong>App Store</strong> or <strong>Google Play</strong>, Apple or Google handle the download under their own privacy policies.</li>
+  </ul>
+  <p>Data stored with these services may be processed outside your country, including in the United States.</p>
+
+  <h2>Why we’re allowed to use it</h2>
+  <p>We use your data only to run the game and the features you choose to use (legal basis: performing our service for you, and our legitimate interest in
+    keeping leaderboards fair). Creating a nickname, team, challenge or account is always optional.</p>
+
+  <h2>How long we keep it</h2>
+  <ul>
+    <li>Everything linked to your account stays until you delete the account.</li>
+    <li>Results in challenges you joined stay with that challenge after it ends, so its scoreboard remains complete.</li>
+    <li>Data on your device stays until you delete the app, clear the website’s data, or sign out.</li>
+  </ul>
+
+  <h2>Your choices and rights</h2>
+  <ul>
+    <li><strong>Delete your account:</strong> in the game, tap your name → <strong>Delete my account</strong> (as a guest: <strong>Delete my nickname and scores</strong>).
+      This removes your login, email, nickname, totals, level records, saved progress, friends list and team membership. Progress kept only on your device
+      is removed by deleting the app or clearing the website’s data.</li>
+    <li><strong>Change your nickname or team name</strong> at any time, and <strong>leave a team</strong> from the team page.</li>
+    <li>Depending on where you live (for example under the GDPR or CCPA), you may have the right to access, correct, export or delete your data, or to object
+      to its use. Contact us and we’ll help. You can also complain to your local data protection authority.</li>
+  </ul>
+
+  <h2>Children</h2>
+  <p>Happy Blocks is a game for everyone, but it isn’t directed at children under 13, and we don’t knowingly collect personal information from them.
+    Kids can play as a guest without giving any personal information. If you think a child has created an account, contact us and we’ll delete it.</p>
+
+  <h2>Security</h2>
+  <p>Data is sent over encrypted connections (HTTPS). Database rules let each player change only their own data, and private data (email, progress copy,
+    friends list) can only be read by its owner.</p>
+
+  <h2>Changes</h2>
+  <p>If this policy changes, we’ll update this page and its effective date. Important changes will also be mentioned in the game.</p>
+
+  <h2 id="contact">Contact</h2>
+  <p>Questions or requests: open an issue at
+    <a href="https://github.com/woleywa/Unblock-it/issues">github.com/woleywa/Unblock-it/issues</a>
+    (please don’t post your email address or password there — we’ll reply with a private way to reach us).</p>
+
+  <footer><a href="./">← Back to Happy Blocks</a></footer>
+</main>
+</body>
+</html>

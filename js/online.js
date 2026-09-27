@@ -107,8 +107,9 @@ async function signOutNow() {
 async function deleteAccount(pw, levelCount) {
   await ready;
   const user = auth.currentUser;
-  if (!user || user.isAnonymous) throw new Error('No account to delete');
-  await authCall(() => reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, pw)));
+  if (!user) throw new Error('No account to delete');
+  // Registered: confirm with the password (Firebase also needs a recent sign-in to delete).
+  if (!user.isAnonymous) await authCall(() => reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, pw)));
   if (me && me.team) await moveTo(null, { stars: me.stars, moves: me.moves, levels: me.levels }, false);
   const b = writeBatch(db);
   for (let i = 0; i < levelCount; i++) b.delete(doc(db, 'levels', String(i), 'runs', uid));

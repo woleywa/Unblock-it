@@ -1,6 +1,7 @@
 # Builds the iOS and Android apps from the web game on every push to main (and on demand).
 # Android: a debug APK you can install on a phone (download it from the run's Artifacts).
-# iOS: a simulator build that proves the app compiles; App Store/TestFlight uploads need the
+# iOS: a simulator build that proves the app compiles, plus an unsigned .ipa you can sign with your
+# own (free) Apple ID and install with Sideloadly or AltStore. App Store/TestFlight uploads need the
 # Apple Developer account's signing keys as repository secrets (see APPS.md).
 name: Apps
 on:
@@ -47,3 +48,14 @@ jobs:
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO build | tail -40
           test ${PIPESTATUS[0]} -eq 0
+      - name: Unsigned .ipa (sign it with your own Apple ID to install; see APPS.md)
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO build | tail -20
+          mkdir -p Payload && cp -R build/Build/Products/Release-iphoneos/App.app Payload/
+          zip -qr HappyBlocks-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with:
+          name: happy-blocks-ios-unsigned
+          path: HappyBlocks-unsigned.ipa
