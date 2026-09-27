@@ -16,15 +16,24 @@ const INTRO = {
 
 // ── Progress ─────────────────────────────────────────────────
 const SAVE = 'unblock_progress_v1';
-let progress = { stars: {} };
-try { progress = { stars: {}, ...JSON.parse(localStorage.getItem(SAVE) || '{}') }; } catch (e) {}
+let progress = { stars: {}, moves: {} };
+try { progress = { stars: {}, moves: {}, ...JSON.parse(localStorage.getItem(SAVE) || '{}') }; } catch (e) {}
 const saveProgress = () => { try { localStorage.setItem(SAVE, JSON.stringify(progress)); } catch (e) {} };
 const starsOf = i => progress.stars[i] || 0;
 const unlocked = i => i === 0 || starsOf(i - 1) > 0 || starsOf(i) > 0;
+// Totals for the leaderboard: stars, and the best move counts of the levels solved.
+const totals = () => {
+  const done = Object.keys(progress.stars).filter(k => progress.stars[k] > 0);
+  return {
+    stars: done.reduce((a, k) => a + progress.stars[k], 0),
+    moves: done.reduce((a, k) => a + (progress.moves[k] || LEVELS[k].par * 2), 0),
+    levels: done.length,
+  };
+};
 const firstOpen = () => { const i = LEVELS.findIndex((_, k) => !starsOf(k)); return i < 0 ? LEVELS.length - 1 : i; };
 
 // ── Screens ──────────────────────────────────────────────────
-function show(id) { ['home', 'levels', 'game'].forEach(s => $(s).hidden = s !== id); }
+function show(id) { ['home', 'levels', 'ranks', 'game'].forEach(s => $(s).hidden = s !== id); }
 function logo() {
   const box = document.querySelector('.logo');
   if (box.dataset.done) return;
@@ -44,6 +53,7 @@ function home() {
   $('stars-total').textContent = total ? `★ ${total} / ${LEVELS.length * 3}` : '';
   $('play').textContent = total ? 'Continue' : 'Play';
   $('sound').textContent = Sound.on ? '🔊 Sound on' : '🔇 Sound off';
+  meChip();
   show('home');
 }
 const STAGES = [
@@ -249,7 +259,9 @@ function starsFor(m, par) { return m <= par ? 3 : m <= Math.ceil(par * 1.4) ? 2 
 function win() {
   const s = starsFor(moves, level.par);
   progress.stars[idx] = Math.max(starsOf(idx), s);
+  progress.moves[idx] = Math.min(progress.moves[idx] || Infinity, moves);
   saveProgress();
+  winBoard(idx, moves);
   Sound.win();
   $('win-stars').innerHTML = [1, 2, 3].map(k => `<span class="star ${k <= s ? 'on' : 'off'}" style="--k:${k}"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8z"/></svg></span>`).join('');
   $('win-text').textContent = s === 3 ? `${moves} moves — perfect!` : `${moves} moves · ${level.par} for three stars`;
@@ -257,6 +269,99 @@ function win() {
   $('win').hidden = false;
   Art.confetti();
 }
+
+// ── Online: nickname and leaderboards (js/online.js sets window.Online) ────
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+let askedName = false;
+try { askedName = localStorage.getItem('unblock_asked_name') === '1'; } catch (e) {}
+
+function meChip() {
+  const on = window.Online;
+  $('me-chip').hidden = !on;
+  if (on) $('me-chip').textContent = on.name ? `👤 ${on.name} · change` : '👤 Pick a nickname';
+}
+
+let nameDone = null;
+function askName(then) {
+  nameDone = then || null;
+  $('name-input').value = (window.Online && window.Online.name) || '';
+  $('name-err').textContent = '';
+  $('name-modal').hidden = false;
+  setTimeout(() => $('name-input').focus(), 50);
+}
+$('name-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  if (!window.Online) return;
+  $('name-save').disabled = true;
+  $('name-err').textContent = '';
+  try {
+    await window.Online.setName($('name-input').value, totals());
+    $('name-modal').hidden = true;
+    meChip();
+    if (nameDone) nameDone();
+  } catch (err) {
+    $('name-err').textContent = err.code === 'permission-denied' ? 'The leaderboard isn’t set up yet — try again later.' : (err.message || 'Couldn’t save — check your connection.');
+  }
+  $('name-save').disabled = false;
+});
+$('name-cancel').addEventListener('click', () => { $('name-modal').hidden = true; });
+$('me-chip').addEventListener('click', () => askName());
+
+// Win card: this level's best three, and an invitation to join the leaderboard.
+async function winBoard(level, m) {
+  const box = $('win-best');
+  box.innerHTML = '';
+  const on = window.Online;
+  if (!on) return;
+  if (!on.name) {
+    if (askedName) return;
+    const b = document.createElement('button');
+    b.className = 'ghost join'; b.textContent = '🏆 Put me on the leaderboard';
+    b.addEventListener('click', () => askName(() => winBoard(level, m)));
+    box.appendChild(b);
+    askedName = true;
+    try { localStorage.setItem('unblock_asked_name', '1'); } catch (e) {}
+    return;
+  }
+  try {
+    await on.submit(level, m, totals());
+    const best = await on.levelTop(level, 3);
+    if (!best.length) return;
+    box.innerHTML = '<h4>Best on this level</h4>' + best.map((r, i) =>
+      `<div class="row${r.mine ? ' mine' : ''}"><span>${['🥇', '🥈', '🥉'][i]} ${esc(r.name)}</span><b>${r.moves} moves</b></div>`).join('');
+  } catch (e) { console.warn(e); }
+}
+
+async function ranks() {
+  show('ranks');
+  const list = $('rank-list'), meBox = $('rank-me');
+  const on = window.Online;
+  list.innerHTML = ''; meBox.innerHTML = '';
+  meBox.innerHTML = '<p class="note">Loading…</p>';
+  if (!on || !(await on.ready)) { meBox.innerHTML = '<p class="note">The leaderboard needs an internet connection.</p>'; return; }
+  try {
+    if (on.name) await on.submit(null, 0, totals());
+    const [rows, rank] = await Promise.all([on.top(50), on.myRank()]);
+    meBox.innerHTML = on.name
+      ? `<div class="me-card"><span>You’re <b>#${rank}</b> as <b>${esc(on.name)}</b></span><span>★ ${totals().stars}</span></div>`
+      : '<button class="big" id="rank-join">Pick a nickname to join</button>';
+    if (!on.name) $('rank-join').addEventListener('click', () => askName(ranks));
+    list.innerHTML = rows.length ? rows.map((r, i) =>
+      `<li class="${r.mine ? 'mine' : ''}"><span class="pos">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><span class="who">${esc(r.name)}</span><span class="st">★ ${r.stars}</span><span class="mv">${r.moves} moves</span></li>`).join('')
+      : '<p class="note">No one yet — be the first!</p>';
+  } catch (e) {
+    console.warn(e);
+    meBox.innerHTML = `<p class="note">${e.code === 'permission-denied' ? 'The leaderboard isn’t set up yet.' : 'Couldn’t load the leaderboard — check your connection.'}</p>`;
+  }
+}
+$('to-board').addEventListener('click', ranks);
+$('ranks-back').addEventListener('click', home);
+window.addEventListener('online-ready', () => {
+  window.Online.ready.then(() => {
+    meChip();
+    if (window.Online.name) window.Online.submit(null, 0, totals()).catch(() => {});
+  });
+});
 
 // ── Buttons ──────────────────────────────────────────────────
 $('play').addEventListener('click', () => { Sound.unlock(); start(firstOpen()); });

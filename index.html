@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
   <div class="sky" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
@@ -27,6 +27,8 @@
     <p class="tag">Slide every block out through the door of its colour.</p>
     <button class="big" id="play">Play</button>
     <button class="ghost" id="to-levels">Levels</button>
+    <button class="ghost" id="to-board">🏆 Leaderboard</button>
+    <button class="me-chip" id="me-chip" hidden></button>
     <p class="stars-total" id="stars-total"></p>
     <button class="ghost small" id="sound">🔊 Sound on</button>
   </main>
@@ -40,6 +42,16 @@
     <div id="level-grid"></div>
   </main>
 
+  <main id="ranks" class="screen" hidden>
+    <header class="bar">
+      <button class="icon" id="ranks-back" aria-label="Back">‹</button>
+      <h2>Leaderboard</h2>
+      <span class="spacer"></span>
+    </header>
+    <div id="rank-me"></div>
+    <ol id="rank-list"></ol>
+  </main>
+
   <main id="game" class="screen" hidden>
     <header class="bar">
       <button class="icon" id="game-back" aria-label="Levels">‹</button>
@@ -51,20 +63,33 @@
     <div id="board-wrap"><div id="board"></div></div>
   </main>
 
+  <div id="name-modal" class="overlay" hidden>
+    <form class="card" id="name-form" autocomplete="off">
+      <h2>Your nickname</h2>
+      <p>It’s how you’ll show up on the leaderboard.</p>
+      <input id="name-input" maxlength="16" placeholder="e.g. BlockBoss" autocapitalize="off" spellcheck="false">
+      <p class="err" id="name-err"></p>
+      <button class="big" id="name-save" type="submit">Save</button>
+      <button class="ghost" id="name-cancel" type="button">Not now</button>
+    </form>
+  </div>
+
   <div id="win" class="overlay" hidden>
     <div class="card">
       <h2>Unblocked!</h2>
       <div class="win-stars" id="win-stars"></div>
       <p id="win-text"></p>
+      <div id="win-best"></div>
       <button class="big" id="next">Next level</button>
       <button class="ghost" id="replay">Play again</button>
     </div>
   </div>
 
-  <script src="js/engine.js?v=3"></script>
-  <script src="js/levels.js?v=3"></script>
-  <script src="js/audio.js?v=3"></script>
-  <script src="js/art.js?v=3"></script>
-  <script src="js/game.js?v=3"></script>
+  <script src="js/engine.js?v=4"></script>
+  <script src="js/levels.js?v=4"></script>
+  <script src="js/audio.js?v=4"></script>
+  <script src="js/art.js?v=4"></script>
+  <script src="js/game.js?v=4"></script>
+  <script type="module" src="js/online.js?v=4"></script>
 </body>
 </html>

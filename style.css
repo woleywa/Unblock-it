@@ -180,3 +180,29 @@ h1 { font-size: 3.4rem; font-weight: 700; letter-spacing: -0.01em; line-height: 
 @keyframes starpop { from { transform: scale(0) rotate(-40deg); } }
 .card p { color: var(--dim); font-weight: 600; }
 .confetti { position: fixed; top: 0; z-index: 19; pointer-events: none; }
+
+/* ── Online ───────────────────────────────────────────── */
+.me-chip { margin-top: 4px; padding: 7px 16px; border-radius: 999px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); color: var(--dim); font-weight: 600; font-size: 0.9rem; }
+#name-form input {
+  width: 100%; font: inherit; font-size: 1.2rem; font-weight: 600; text-align: center; color: var(--text);
+  background: rgba(10,6,40,0.5); border: 2px solid rgba(255,255,255,0.2); border-radius: 16px; padding: 12px 14px; outline: none;
+}
+#name-form input:focus { border-color: var(--accent); }
+.err { color: #ffb4a8 !important; min-height: 1.2em; font-size: 0.9rem; }
+#win-best { width: 100%; }
+#win-best h4 { font-size: 0.85rem; color: var(--dim); margin-bottom: 6px; font-weight: 600; }
+#win-best .row { display: flex; justify-content: space-between; padding: 6px 10px; border-radius: 10px; font-size: 0.95rem; }
+#win-best .row.mine { background: rgba(255,213,74,0.16); }
+.join { min-width: 0 !important; width: 100%; padding: 10px 16px !important; }
+#rank-me { width: 100%; max-width: 480px; padding: 6px 16px; display: flex; justify-content: center; }
+.me-card { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255,213,74,0.25), rgba(255,213,74,0.12)); border: 1px solid rgba(255,213,74,0.4); }
+.note { color: var(--dim); text-align: center; padding: 20px; }
+#rank-list { list-style: none; width: 100%; max-width: 480px; padding: 6px 16px 40px; display: flex; flex-direction: column; gap: 6px; }
+#rank-list li { display: grid; grid-template-columns: 40px 1fr auto auto; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 16px;
+  background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1); }
+#rank-list li.mine { background: rgba(255,213,74,0.18); border-color: rgba(255,213,74,0.45); }
+#rank-list .pos { font-weight: 700; text-align: center; font-size: 1.1rem; }
+#rank-list .who { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#rank-list .st { color: var(--accent); font-weight: 700; }
+#rank-list .mv { color: var(--dim); font-size: 0.85rem; }
