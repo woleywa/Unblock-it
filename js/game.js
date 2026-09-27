@@ -60,6 +60,7 @@ function home() {
   $('sound').textContent = Sound.on ? '🔊 Sound on' : '🔇 Sound off';
   meChip();
   show('home');
+  if (typeof Social !== 'undefined') Social.helpBox();
 }
 const STAGES = [
   ['Warm-up', 'red'], ['Getting busy', 'orange'], ['Walls', 'purple'],
@@ -97,31 +98,41 @@ let idx = 0, level = null, st = null, moves = 0, history = [], busy = false;
 let cs = 48, gut = 24;
 // Set while playing a challenge level (social.js): { code, pos, again(), next(), back(), won(moves, stars) }.
 let chPlay = null;
+// Every drag this attempt, as { p: block, r, c, g: door id or 0 } — sent to a friend who asked for help.
+let sol = [];
+// helpCtx: solving a friend's help request { id, from, fromName }; answer: watching/following a friend's
+// solution { name, steps }; watching: the solution is playing itself (no stars saved).
+let helpCtx = null, answer = null, watching = false;
 
 function begin(lv, title, hint) {
   level = clone(lv);
   st = { pieces: clone(level.pieces), gates: clone(level.gates) };
-  moves = 0; history = []; busy = false;
+  moves = 0; history = []; busy = false; sol = []; watching = false;
   $('level-name').textContent = title;
   $('hint').textContent = hint || '';
   $('win').hidden = true;
   $('clock').hidden = !chPlay;
-  $('ask-friend').hidden = !!chPlay;
+  $('ask-friend').hidden = !!chPlay || !!answer;
+  ansBar();
   hintButton();
   show('game');
   layout();
   render();
 }
-function start(i) {
+function start(i, opts = {}) {
   chPlay = null;
   idx = i;
-  begin(LEVELS[i], `Level ${i + 1}`, i === 0 ? 'Drag each block out through the door of its colour.' : INTRO[LEVELS[i].intro]);
+  helpCtx = opts.help || null;
+  answer = opts.answer || null;
+  const hint = helpCtx ? `🤝 Helping ${helpCtx.fromName} — solve it and your moves go to them.`
+    : i === 0 ? 'Drag each block out through the door of its colour.' : INTRO[LEVELS[i].intro];
+  begin(LEVELS[i], `Level ${i + 1}`, hint);
 }
 
 function status() { $('moves').textContent = `${moves} move${moves === 1 ? '' : 's'} · par ${level.par}`; }
 
 function layout() {
-  const aw = Math.min(window.innerWidth, 560) - 24, ah = window.innerHeight - (chPlay ? 230 : 200);
+  const aw = Math.min(window.innerWidth, 560) - 24, ah = window.innerHeight - (chPlay ? 230 : 200) - (answer ? 50 : 0);
   cs = Math.floor(Math.min(aw / (level.W + 1), ah / (level.H + 1), 72));
   gut = Math.round(cs * 0.5);
 }
@@ -190,7 +201,7 @@ function exitFor(p, r, c, side) {
 }
 
 $('board').addEventListener('pointerdown', e => {
-  if (busy || drag) return;
+  if (busy || drag || watching) return;
   Sound.unlock();
   const d = e.target.closest('.block');
   if (!d) return;
@@ -282,8 +293,9 @@ function finishDrag(out) {
   d.classList.remove('dragging');
   const movedAtAll = out || r !== r0 || c !== c0;
   if (!movedAtAll) { place(d, r0, c0); settle(d); return; }
-  history.push({ st: clone(st), moves });
+  history.push({ st: clone(st), moves, n: sol.length });
   moves++;
+  sol.push({ p: p.id, r, c, g: out ? out.gt.id : 0 });
   st.pieces = st.pieces.map(x => x.id === p.id ? { ...x, r, c } : x);
   if (!out) { place(d, r, c); settle(d); status(); return; }
   leave(p.id, d, out.gt, r, c);
@@ -365,37 +377,95 @@ $('hint-btn').addEventListener('click', () => {
     $('hint-btn').disabled = false;
     const s = hintPlan.steps.shift();
     if (!s) { $('hint').textContent = 'No hint found from here — try undo or restart.'; return; }
-    const p = st.pieces.find(x => x.id === s.pieceId);
-    const route = Engine.path(level, s.before, s.pieceId, s.r, s.c);
-    const b = $('board');
-    const W = level.W * cs + 2 * gut, H = level.H * cs + 2 * gut;
-    // Where the finger goes: the block's heart cell along the route, then out through the door.
-    const [hr, hc] = Engine.cellsOf(p, 0, 0)[0];
-    const pts = route.map(([r, c]) => px(r + hr + 0.5, c + hc + 0.5));
-    if (s.kind === 'exit') {
-      const side = s.before.gates.find(g => g.id === s.gateId).side, [dr, dc] = SIDE_DIR[side], last = route[route.length - 1];
-      pts.push(px(last[0] + hr + 0.5 + dr * (gapTo(side, p, ...last) + 1), last[1] + hc + 0.5 + dc * (gapTo(side, p, ...last) + 1)));
-    }
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('class', 'hint-mark hint-path');
-    svg.setAttribute('width', W); svg.setAttribute('height', H);
-    const d = pts.map(([x, y], i) => (i ? 'L' : 'M') + x + ',' + y).join(' ');
-    const [ex, ey] = pts[pts.length - 1], [fx, fy] = pts[pts.length - 2] || pts[0];
-    const ang = Math.atan2(ey - fy, ex - fx), a = cs * 0.28;
-    const head = `M${ex - a * Math.cos(ang - 0.5)},${ey - a * Math.sin(ang - 0.5)} L${ex},${ey} L${ex - a * Math.cos(ang + 0.5)},${ey - a * Math.sin(ang + 0.5)}`;
-    svg.innerHTML = `<path d="${d}" class="route" stroke-width="${cs * 0.12}"/><path d="${head}" class="route head" stroke-width="${cs * 0.12}"/>`;
-    b.appendChild(svg);
-    // Where the block ends up (a ghost), unless it goes straight out.
-    if (s.kind === 'move') {
-      const ghost = blockEl({ ...p, r: s.r, c: s.c });
-      ghost.classList.add('hint-mark', 'ghost');
-      delete ghost.dataset.id;
-      b.appendChild(ghost);
-    }
-    const blk = b.querySelector(`.block[data-id="${p.id}"]`);
-    if (blk) { const m = el('hint-mark hint-glow'); blk.appendChild(m); }
+    drawStep({ pieceId: s.pieceId, r: s.r, c: s.c, side: s.kind === 'exit' ? s.before.gates.find(g => g.id === s.gateId).side : null });
     $('hint').textContent = s.kind === 'exit' ? 'Hint: this block can go out now.' : 'Hint: move this block here.';
   }, 30);
+});
+
+// Show one move on the board: a glow on the block, a dotted route with an arrow (on out through its door
+// for an exit, side = that door's side), and a ghost where it ends up.
+function drawStep({ pieceId, r, c, side }) {
+  const p = st.pieces.find(x => x.id === pieceId);
+  if (!p) return;
+  const route = Engine.path(level, st, pieceId, r, c);
+  const b = $('board');
+  const W = level.W * cs + 2 * gut, H = level.H * cs + 2 * gut;
+  const [hr, hc] = Engine.cellsOf(p, 0, 0)[0];
+  const pts = route.map(([y, x]) => px(y + hr + 0.5, x + hc + 0.5));
+  if (side) {
+    const [dr, dc] = SIDE_DIR[side], last = route[route.length - 1], k = gapTo(side, p, ...last) + 1;
+    pts.push(px(last[0] + hr + 0.5 + dr * k, last[1] + hc + 0.5 + dc * k));
+  }
+  if (pts.length < 2) pts.push(pts[0]);
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'hint-mark hint-path');
+  svg.setAttribute('width', W); svg.setAttribute('height', H);
+  const d = pts.map(([x, y], i) => (i ? 'L' : 'M') + x + ',' + y).join(' ');
+  const [ex, ey] = pts[pts.length - 1], [fx, fy] = pts[pts.length - 2] || pts[0];
+  const ang = Math.atan2(ey - fy, ex - fx), a = cs * 0.28;
+  const head = `M${ex - a * Math.cos(ang - 0.5)},${ey - a * Math.sin(ang - 0.5)} L${ex},${ey} L${ex - a * Math.cos(ang + 0.5)},${ey - a * Math.sin(ang + 0.5)}`;
+  svg.innerHTML = `<path d="${d}" class="route" stroke-width="${cs * 0.12}"/><path d="${head}" class="route head" stroke-width="${cs * 0.12}"/>`;
+  b.appendChild(svg);
+  if (!side) {
+    const ghost = blockEl({ ...p, r, c });
+    ghost.classList.add('hint-mark', 'ghost');
+    delete ghost.dataset.id;
+    b.appendChild(ghost);
+  }
+  const blk = b.querySelector(`.block[data-id="${p.id}"]`);
+  if (blk) blk.appendChild(el('hint-mark hint-glow'));
+}
+
+// ── A friend's solution: follow it move by move, or watch it play ─────────
+const stateKey = x => JSON.stringify([x.pieces.map(q => [q.id, q.r, q.c, q.color, q.ice || 0, q.fire || 0, q.lock || 0]).sort((u, v) => u[0] - v[0]), x.gates.map(g => g.frozen)]);
+// The board after the first n steps of a solution (null if a step doesn't fit this level).
+function replayTo(steps, n) {
+  const s2 = { pieces: clone(level.pieces), gates: clone(level.gates) };
+  for (const m of steps.slice(0, n)) {
+    const p = s2.pieces.find(x => x.id === m.p);
+    if (!p) return null;
+    s2.pieces = s2.pieces.map(x => x.id === m.p ? { ...x, r: m.r, c: m.c } : x);
+    if (m.g) { const gt = s2.gates.find(g => g.id === m.g); if (!gt) return null; Engine.applyExit(level, s2, m.p, m.r, m.c, gt); }
+  }
+  return s2;
+}
+function ansBar() {
+  const bar = $('ans-bar');
+  bar.hidden = !answer || !!chPlay;
+  if (bar.hidden) return;
+  $('ans-who').textContent = `${answer.name}’s solution · ${answer.steps.length} moves`;
+}
+$('ans-next').addEventListener('click', () => {
+  if (busy || drag || watching || !answer) return;
+  clearHint();
+  const n = moves, here = replayTo(answer.steps, n);
+  if (!here || stateKey(here) !== stateKey(st)) { $('hint').textContent = `You’ve left ${answer.name}’s path — tap ↻ to start over and follow it.`; return; }
+  const m = answer.steps[n];
+  if (!m) return;
+  drawStep({ pieceId: m.p, r: m.r, c: m.c, side: m.g ? st.gates.find(g => g.id === m.g).side : null });
+  $('hint').textContent = `Move ${n + 1} of ${answer.steps.length}`;
+});
+$('ans-watch').addEventListener('click', () => {
+  if (busy || drag || !answer) return;
+  const a = answer;
+  start(idx, { answer: a });
+  watching = true;
+  $('hint').textContent = `Watching ${a.name}…`;
+  let n = 0;
+  const step = () => {
+    if (!watching || answer !== a || $('game').hidden) return;
+    if (busy) return setTimeout(step, 120);
+    const m = a.steps[n++];
+    if (!m) return;
+    const d = document.querySelector(`.block[data-id="${m.p}"]`);
+    if (!d) { watching = false; $('hint').textContent = 'This solution doesn’t fit the level any more.'; return; }
+    moves++;
+    st.pieces = st.pieces.map(x => x.id === m.p ? { ...x, r: m.r, c: m.c } : x);
+    place(d, m.r, m.c); settle(d); status(); Sound.tick();
+    if (m.g) setTimeout(() => leave(m.p, d, st.gates.find(g => g.id === m.g), m.r, m.c), 260);
+    setTimeout(step, m.g ? 700 : 520);
+  };
+  setTimeout(step, 600);
 });
 
 // ── Win ──────────────────────────────────────────────────────
@@ -406,15 +476,25 @@ function win() {
   $('win-stars').innerHTML = [1, 2, 3].map(k => `<span class="star ${k <= s ? 'on' : 'off'}" style="--k:${k}"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8z"/></svg></span>`).join('');
   $('win-text').textContent = s === 3 ? `${moves} moves — perfect!` : `${moves} moves · ${level.par} for three stars`;
   $('win').hidden = false;
+  $('win-help').innerHTML = '';
   Art.confetti();
   $('to-ch').hidden = !chPlay;
   if (chPlay) { chPlay.won(moves, s); return; }
+  if (watching) {
+    // Just a replay: nothing is saved.
+    watching = false;
+    $('win-text').textContent = `That’s how ${answer.name} did it — ${moves} moves. Your turn!`;
+    $('win-best').innerHTML = '';
+    $('next').hidden = true;
+    return;
+  }
   progress.stars[idx] = Math.max(starsOf(idx), s);
   progress.moves[idx] = Math.min(progress.moves[idx] || Infinity, moves);
   saveProgress();
   if (window.Online) window.Online.putSave(progress).catch(e => console.warn(e));
   winBoard(idx, moves);
   $('next').hidden = idx >= LEVELS.length - 1;
+  if (helpCtx && typeof Social !== 'undefined') Social.sendSolution(helpCtx, sol.slice());
 }
 
 // ── Online: nickname and leaderboards (js/online.js sets window.Online) ────
@@ -537,23 +617,28 @@ window.addEventListener('online-ready', () => {
 window.addEventListener('online-user', () => { meChip(); syncProgress(); hintButton(); });
 
 // ── Sharing a level: a link that opens it for anyone, even if they haven't got that far ──
-$('ask-friend').addEventListener('click', async () => {
-  const n = idx + 1, url = `${Native.webBase()}?level=${n}`;
-  const text = `Can you solve Level ${n} in Happy Blocks? Par is ${LEVELS[idx].par} moves — I'm stuck!`;
+$('ask-friend').addEventListener('click', () => Social.askHelp(idx));
+// A plain link to the level (when there's no nickname / no connection for a proper request).
+async function shareLevel(i, helpId) {
+  const n = i + 1, url = `${Native.webBase()}?level=${n}${helpId ? '&help=' + helpId : ''}`;
+  const text = `Can you solve Level ${n} in Happy Blocks? Par is ${LEVELS[i].par} moves — I'm stuck!`;
   if (navigator.share) { try { await navigator.share({ title: `Happy Blocks — Level ${n}`, text, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
   try { await navigator.clipboard.writeText(`${text} ${url}`); $('hint').textContent = 'Link copied — paste it to your friends.'; }
   catch (e) { window.prompt('Copy this link', url); }
-});
-// ?level=18 (what the button shares; nothing drops it) or the older #level=18.
+}
 function openLevelLink() {
   const q = new URLSearchParams(location.search), h = location.hash.match(/^#level=(\d{1,3})$/);
-  const n = q.get('level') || (h && h[1]);
+  const n = q.get('level') || (h && h[1]), help = q.get('help');
   if (!n || !/^\d{1,3}$/.test(n)) return;
-  q.delete('level');
+  q.delete('level'); q.delete('help');
   window.history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : '') + (h ? '' : location.hash));
   const i = +n - 1;
-  if (i >= 0 && i < LEVELS.length) start(i);
+  if (i < 0 || i >= LEVELS.length) return;
+  start(i);
+  // From a help request: once online, it becomes "helping <friend>".
+  if (help && /^[A-Z0-9]{12}$/.test(help)) pendingHelp = { id: help, level: i };
 }
+let pendingHelp = null;
 window.addEventListener('hashchange', openLevelLink);
 
 // ── Buttons ──────────────────────────────────────────────────
@@ -565,10 +650,12 @@ $('sound').addEventListener('click', () => { Sound.toggle(); home(); });
 $('undo').addEventListener('click', () => {
   if (busy || !history.length) return;
   const h = history.pop();
+  sol.length = h.n ?? sol.length;
   st = h.st; moves = h.moves;
   render();
 });
-const again = () => chPlay ? chPlay.again() : start(idx);
+// Again keeps a friend's solution / help request loaded.
+const again = () => chPlay ? chPlay.again() : start(idx, { answer, help: helpCtx });
 $('restart').addEventListener('click', () => !busy && again());
 $('next').addEventListener('click', () => chPlay ? chPlay.next() : start(idx + 1));
 $('replay').addEventListener('click', again);

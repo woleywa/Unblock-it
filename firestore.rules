@@ -57,7 +57,8 @@ service cloud.firestore {
     // A player's totals; score = stars × 100000 − moves so the board sorts on one field.
     // `team` (optional) is the code of the team they're in.
     function validPlayer(d) {
-      return d.keys().hasOnly(['name', 'stars', 'moves', 'levels', 'score', 'best', 'updated', 'team'])
+      return d.keys().hasOnly(['name', 'stars', 'moves', 'levels', 'score', 'best', 'updated', 'team', 'helped'])
+        && (!('helped' in d) || (d.helped is int && d.helped >= 0 && d.helped <= 100000))
         && validName(d.name) && ownsName(d.name)
         && d.stars is int && d.stars >= 0 && d.stars <= 3000
         && d.moves is int && d.moves >= 0 && d.moves < 100000
@@ -90,6 +91,36 @@ service cloud.firestore {
         && request.resource.data.moves is int && request.resource.data.moves >= 1 && request.resource.data.moves <= 999
         && get(/databases/$(database)/documents/players/$(uid)).data.name == request.resource.data.name;
       allow delete: if signedIn() && request.auth.uid == uid;
+    }
+
+    // Help requests: "can you solve this level for me?" Listed only by the asker and the friends it
+    // was sent to; anyone who has the (random, 12-character) id from a shared link can open and answer it.
+    match /help/{id} {
+      allow get: if signedIn();
+      allow list: if signedIn() && (resource.data.from == me() || me() in resource.data.to);
+      allow create: if signedIn() && id.matches('^[A-Z0-9]{12}$')
+        && request.resource.data.keys().hasOnly(['from', 'fromName', 'level', 'par', 'to', 'created'])
+        && request.resource.data.from == me()
+        && request.resource.data.fromName == playerBefore(me()).name
+        && request.resource.data.level is int && request.resource.data.level >= 0 && request.resource.data.level < 1000
+        && request.resource.data.par is int && request.resource.data.par >= 1 && request.resource.data.par < 1000
+        && request.resource.data.to is list && request.resource.data.to.size() <= 20
+        && request.resource.data.created == request.time;
+      allow delete: if signedIn() && resource.data.from == me();
+
+      // A friend's solution: every drag as { p: block, r, c, g: door (0 = just a move) }.
+      match /answers/{uid} {
+        allow read: if signedIn() && (me() == uid || get(/databases/$(database)/documents/help/$(id)).data.from == me());
+        allow create, update: if signedIn() && me() == uid
+          && exists(/databases/$(database)/documents/help/$(id))
+          && get(/databases/$(database)/documents/help/$(id)).data.from != me()
+          && request.resource.data.keys().hasOnly(['name', 'moves', 'steps', 'created'])
+          && request.resource.data.name == playerBefore(uid).name
+          && request.resource.data.steps is list && request.resource.data.steps.size() >= 1 && request.resource.data.steps.size() <= 999
+          && request.resource.data.moves == request.resource.data.steps.size()
+          && request.resource.data.created == request.time;
+        allow delete: if false;
+      }
     }
 
     // Teams: the document id is the invite code. members ≤ 20; stars = the members' stars added up.

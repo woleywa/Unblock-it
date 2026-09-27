@@ -11,6 +11,8 @@
 //   challenges/{code}             { by, byName, team, teamName, created, start, window, playMin, levels,
 //                                   players, joined, seed }             — window/playMin in minutes, 0 = no limit
 //   saves/{uid}                   { stars, moves, friends, updated } — private: progress + friend list
+//   help/{id}                     { from, fromName, level, par, to: [uids], created } — "help me with this level"
+//   help/{id}/answers/{uid}       { name, moves, steps: [{ p, r, c, g }], created } — a friend's solution
 //   challenges/{code}/entries/{uid} { name, team, teamName, started, updated, stars, moves, solved, score, runs }
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import {
@@ -21,7 +23,7 @@ import {
 // to hold open), and a much smaller download.
 import {
   getFirestore, doc, getDoc, writeBatch, setDoc, collection, query, orderBy, limit, getDocs,
-  where, getCount, serverTimestamp, increment, updateDoc, Timestamp, arrayUnion, arrayRemove, documentId,
+  where, getCount, serverTimestamp, increment, updateDoc, Timestamp, arrayUnion, arrayRemove, documentId, deleteDoc,
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-lite.js';
 
 const firebaseConfig = {
@@ -158,6 +160,53 @@ async function removeFriend(f) {
   await setDoc(doc(db, 'saves', uid), { friends: arrayRemove(f), updated: serverTimestamp() }, { merge: true });
   save = { ...(save || {}), friends: ((save && save.friends) || []).filter(x => x !== f) };
 }
+// ── Help requests ──────────────────────────────────────────────
+// Ask friends (by uid) for help with a level; anyone with the id (a shared link) may answer too.
+const newHelpId = () => newCode() + newCode();
+async function askHelp(level, par, to, id = newHelpId()) {
+  await ready;
+  if (!me) throw new Error('Pick a nickname first');
+  await setDoc(doc(db, 'help', id), { from: uid, fromName: me.name, level, par, to: to.slice(0, 20), created: serverTimestamp() });
+  return id;
+}
+async function getHelp(id) {
+  await ready;
+  const s = await getDoc(doc(db, 'help', id));
+  return s.exists() ? { id, ...s.data(), created: ms(s.data().created) } : null;
+}
+const FORTNIGHT = 14 * 86400e3;
+// Requests from friends to me (newest first, last two weeks).
+async function incomingHelp() {
+  await ready;
+  const snap = await getDocs(query(collection(db, 'help'), where('to', 'array-contains', uid), limit(30)));
+  return snap.docs.map(d => ({ id: d.id, ...d.data(), created: ms(d.data().created) }))
+    .filter(h => h.from !== uid && Date.now() - h.created < FORTNIGHT).sort((a, b) => b.created - a.created);
+}
+// My own requests, each with the solutions friends sent.
+async function myHelp() {
+  await ready;
+  const snap = await getDocs(query(collection(db, 'help'), where('from', '==', uid), limit(20)));
+  const reqs = snap.docs.map(d => ({ id: d.id, ...d.data(), created: ms(d.data().created) }))
+    .filter(h => Date.now() - h.created < FORTNIGHT).sort((a, b) => b.created - a.created).slice(0, 8);
+  await Promise.all(reqs.map(async h => {
+    const a = await getDocs(collection(db, 'help', h.id, 'answers'));
+    h.answers = a.docs.map(d => ({ uid: d.id, ...d.data() })).sort((x, y) => x.moves - y.moves);
+  }));
+  return reqs;
+}
+// Send my solution (only if it's my first or a better one). Returns true when sent.
+async function answerHelp(id, steps, totals) {
+  await ready;
+  if (!me) throw new Error('Pick a nickname first');
+  const ref = doc(db, 'help', id, 'answers', uid);
+  const old = await getDoc(ref);
+  if (old.exists() && old.data().moves <= steps.length) return false;
+  await setDoc(ref, { name: me.name, moves: steps.length, steps, created: serverTimestamp() });
+  if (!old.exists()) { me.helped = (me.helped || 0) + 1; await retry(() => writePlayer(me.name, totals)); }
+  return true;
+}
+async function closeHelp(id) { await ready; await deleteDoc(doc(db, 'help', id)); }
+
 // You and your friends, best first.
 async function friendsBoard() {
   await ready; await loading;
@@ -178,6 +227,7 @@ const clean = n => (n || '').normalize('NFC').trim().replace(/\s+/g, ' ');
 // A player's doc from their totals; keeps their team.
 const playerData = (name, totals, team) => {
   const d = { name, ...totals, score: totals.stars * 100000 - totals.moves, updated: serverTimestamp() };
+  if (me && me.helped) d.helped = me.helped;   // how many friends they've helped
   if (team) d.team = team;
   return d;
 };
@@ -403,6 +453,8 @@ window.Online = {
   getSave: () => timed(getSave()), putSave: p => timed(putSave(p)),
   addFriend: n => timed(addFriend(n)), addFriendId: f => timed(addFriendId(f)), removeFriend: f => timed(removeFriend(f)), getFriendName: f => timed(getFriendName(f)),
   friendsBoard: () => timed(friendsBoard()),
+  newHelpId, askHelp: (l, p, t, id) => timed(askHelp(l, p, t, id)), getHelp: id => timed(getHelp(id)), incomingHelp: () => timed(incomingHelp()),
+  myHelp: () => timed(myHelp()), answerHelp: (id, s, t) => timed(answerHelp(id, s, t)), closeHelp: id => timed(closeHelp(id)),
   get account() { return account; },
   get canHint() { return canHint; },
   get uid() { return uid; },

@@ -588,7 +588,7 @@ const Social = (() => {
         <p class="err" id="fr-err"></p>
         <button class="ghost" id="fr-share">📨 Send my friend link</button></div>`;
       list.innerHTML = rows.length > 1 ? rows.map((r, i) =>
-        `<li class="${r.mine ? 'mine' : ''}"><span class="pos">${medal(i)}</span><span class="who">${esc(r.name)}</span><span class="st">★ ${r.stars}</span>`
+        `<li class="${r.mine ? 'mine' : ''}"><span class="pos">${medal(i)}</span><span class="who">${esc(r.name)}${r.helped ? ` <i class="helped" title="Friends helped">🤝${r.helped}</i>` : ''}</span><span class="st">★ ${r.stars}</span>`
         + (r.mine ? `<span class="mv">you</span>` : `<button class="unfriend" data-uid="${esc(r.uid)}" data-name="${esc(r.name)}" aria-label="Remove">✕</button>`) + '</li>').join('')
         : '<p class="note">Add friends by nickname, or send them your link — then you can race each other here.</p>';
       $('fr-add').addEventListener('submit', async e => {
@@ -620,6 +620,122 @@ const Social = (() => {
   }
   window.addEventListener('online-user', () => { cur = null; });
 
+  // ── Help requests: ask friends to solve a level; their solution comes back ──
+  const DONE = 'unblock_help_done';
+  let done = new Set();
+  try { done = new Set(JSON.parse(localStorage.getItem(DONE) || '[]')); } catch (e) {}
+  const markDone = id => { done.add(id); try { localStorage.setItem(DONE, JSON.stringify([...done].slice(-200))); } catch (e) {} };
+  let asking = null; // { level, id } while the "Ask for help" card is open
+  const picked = () => [...document.querySelectorAll('#help-friends input:checked')].map(x => x.value);
+
+  async function askHelp(i) {
+    const o = on();
+    if (!o || !(await o.ready)) return shareLevel(i);   // offline: just a link to the level
+    if (!o.name) { askName(() => askHelp(i)); return; }
+    asking = { level: i, id: null };
+    $('help-what').textContent = `Level ${i + 1} · par ${LEVELS[i].par}. The friends you pick see it on their home screen. When one solves it, their moves come back to you.`;
+    $('help-friends').innerHTML = '<p class="note small">Loading friends…</p>';
+    $('help-err').textContent = '';
+    $('help-send').hidden = true;
+    $('help-ask').hidden = false;
+    try {
+      const rows = (await o.friendsBoard()).filter(r => !r.mine);
+      $('help-friends').innerHTML = rows.length
+        ? rows.map(r => `<label class="pick"><input type="checkbox" value="${esc(r.uid)}" checked><span>${esc(r.name)}</span></label>`).join('')
+        : '<p class="note small">No friends yet — add them on Leaderboard → Friends, or share a link.</p>';
+      $('help-send').hidden = !rows.length;
+    } catch (e) { console.warn(e); $('help-friends').innerHTML = `<p class="note small">${esc(errText(e))}</p>`; }
+  }
+  $('help-cancel').addEventListener('click', () => { $('help-ask').hidden = true; asking = null; });
+  $('help-send').addEventListener('click', async () => {
+    const to = picked();
+    if (!to.length) { $('help-err').textContent = 'Pick at least one friend'; return; }
+    $('help-send').disabled = true;
+    try {
+      await on().askHelp(asking.level, LEVELS[asking.level].par, to);
+      $('help-ask').hidden = true;
+      toast(`Asked ${to.length} friend${to.length === 1 ? '' : 's'} — you’ll see their solution on the home screen`);
+    } catch (e) { console.warn(e); $('help-err').textContent = errText(e); }
+    $('help-send').disabled = false;
+  });
+  $('help-link').addEventListener('click', () => {
+    // The id is made here so the share sheet opens straight away (phones only allow it right after a tap).
+    const o = on(), a = asking;
+    if (!a.id) { a.id = o.newHelpId(); o.askHelp(a.level, LEVELS[a.level].par, picked(), a.id).catch(e => { console.warn(e); toast(errText(e)); }); }
+    shareLevel(a.level, a.id);
+  });
+
+  // Home screen: friends asking me, and solutions for my own requests.
+  let boxBusy = false;
+  async function helpBox() {
+    const box = $('help-box'), o = on();
+    if (!o || !o.name) { box.innerHTML = ''; return; }
+    if (boxBusy || !(await o.ready)) return;
+    boxBusy = true;
+    try {
+      const [inc, mine] = await Promise.all([o.incomingHelp(), o.myHelp()]);
+      const cards = [];
+      for (const h of inc) if (!done.has(h.id))
+        cards.push(`<div class="help-card"><span>🆘 <b>${esc(h.fromName)}</b> is stuck on <b>Level ${h.level + 1}</b> · par ${h.par}</span>
+          <button class="hc-go" data-help="${h.id}">Help</button><button class="hc-x" data-hide="${h.id}" aria-label="Hide">✕</button></div>`);
+      for (const h of mine) {
+        for (const a of h.answers) cards.push(`<div class="help-card got"><span>💡 <b>${esc(a.name)}</b> solved your <b>Level ${h.level + 1}</b> in ${a.moves} moves</span>
+          <button class="hc-go" data-see="${h.id}" data-who="${esc(a.uid)}">See how</button><button class="hc-x" data-close="${h.id}" aria-label="Done">✕</button></div>`);
+        if (!h.answers.length) cards.push(`<div class="help-card wait"><span>⏳ Waiting for help on <b>Level ${h.level + 1}</b></span>
+          <button class="hc-x" data-close="${h.id}" aria-label="Cancel">✕</button></div>`);
+      }
+      box.innerHTML = cards.slice(0, 5).join('');
+      box.querySelectorAll('[data-help]').forEach(b => b.addEventListener('click', () => {
+        const h = inc.find(x => x.id === b.dataset.help);
+        start(h.level, { help: { id: h.id, from: h.from, fromName: h.fromName } });
+      }));
+      box.querySelectorAll('[data-see]').forEach(b => b.addEventListener('click', () => {
+        const h = mine.find(x => x.id === b.dataset.see), a = h.answers.find(x => x.uid === b.dataset.who);
+        start(h.level, { answer: { name: a.name, steps: a.steps } });
+        $('hint').textContent = `Follow ${a.name}’s moves with 💡 Next move, or ▶ Watch them all.`;
+      }));
+      box.querySelectorAll('[data-hide]').forEach(b => b.addEventListener('click', () => { markDone(b.dataset.hide); b.closest('.help-card').remove(); }));
+      box.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', async () => {
+        if (!confirm('Remove this help request? Any solutions in it go too.')) return;
+        try { await o.closeHelp(b.dataset.close); } catch (e) { toast(errText(e)); }
+        boxBusy = false; helpBox();
+      }));
+    } catch (e) { console.warn(e); }
+    boxBusy = false;
+  }
+
+  // Solved a friend's level: send them my moves.
+  async function sendSolution(ctx, steps) {
+    const o = on(), box = $('win-help');
+    if (!o || ctx.from === o.uid) return;
+    const go = async () => {
+      box.innerHTML = '<p class="note small">🤝 Sending your solution…</p>';
+      try {
+        const sent = await o.answerHelp(ctx.id, steps, totals());
+        markDone(ctx.id);
+        box.innerHTML = `<p class="note small">🤝 ${sent ? `Sent to ${esc(ctx.fromName)} — thanks for helping!` : `${esc(ctx.fromName)} already has a solution from you with fewer moves.`}</p>`;
+      } catch (e) { console.warn(e); box.innerHTML = `<p class="note small">${esc(errText(e))}</p>`; }
+    };
+    if (o.name) return go();
+    box.innerHTML = `<button class="ghost join" id="help-nick">🤝 Pick a nickname to send it to ${esc(ctx.fromName)}</button>`;
+    $('help-nick').addEventListener('click', () => askName(go));
+  }
+
+  // Opened from a help link (?level=N&help=ID): once online, this is "helping <friend>".
+  async function takePendingHelp() {
+    const o = on();
+    if (!pendingHelp || !o || !(await o.ready)) return;
+    const ph = pendingHelp; pendingHelp = null;
+    try {
+      const h = await o.getHelp(ph.id);
+      if (!h || h.from === o.uid || $('game').hidden || idx !== ph.level) return;
+      helpCtx = { id: h.id, from: h.from, fromName: h.fromName };
+      $('hint').textContent = `🤝 Helping ${h.fromName} — solve it and your moves go to them.`;
+    } catch (e) { console.warn(e); }
+  }
+  window.addEventListener('online-ready', () => { takePendingHelp(); on().ready.then(() => { if (!$('home').hidden) helpBox(); }); });
+  window.addEventListener('online-user', () => { if (!$('home').hidden) helpBox(); });
+
   // ── Links: #join=CODE (team), #c=CODE (challenge), #f=UID (friend) ──
   function route() {
     const fm = location.hash.match(/^#f=([A-Za-z0-9]{10,40})$/);
@@ -646,5 +762,5 @@ const Social = (() => {
   $('ch-back').addEventListener('click', list);
   $('team-back').addEventListener('click', home);
 
-  return { rankTeams, rankFriends, offerFriend, account, openCh, list, team };
+  return { rankTeams, rankFriends, offerFriend, account, openCh, list, team, askHelp, helpBox, sendSolution };
 })();

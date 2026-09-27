@@ -101,6 +101,11 @@ version.
 - Exits: at its door with the way clear, a pull of ~0.18 cell toward it sends a block out; letting go
   at the door, or one cell away after moving toward it, or a flick (≥ 4 cells/s) from ≤ 4 cells away,
   does too. The leave animation starts from where the block is (no snap back).
+- Help requests: `help/{id}` (12-char id; listed by asker/`to` friends, readable by anyone with the id) +
+  `answers/{uid}` with the helper's drags `{p, r, c, g}` (game.js `sol`, recorded in finishDrag, trimmed
+  on undo). Home shows cards (social.js `helpBox`); a helper's win sends `Social.sendSolution`; the asker
+  follows it (`💡 Next move`, compares the board with `replayTo`) or watches it (`watching` = no stars).
+  Links `?level=N&help=ID` → `pendingHelp`. `players.helped` counts friends helped (🤝 on Friends tab).
 - Links: `#join=CODE` (team), `#c=CODE` (challenge), `#f=UID` (friend), `?level=N` or `#level=N` (opens campaign level N
   for anyone, even if locked — the "Ask a friend to solve this" button under the board). On iPhone a link opens Safari, which is a different
   account from the home-screen app — so codes can be typed in too.

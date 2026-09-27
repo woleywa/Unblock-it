@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=17">
+  <link rel="stylesheet" href="style.css?v=18">
 </head>
 <body>
   <div class="sky" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
@@ -32,6 +32,7 @@
       <button class="ghost" id="to-team">👥 Team</button>
     </div>
     <button class="ghost" id="to-board">🏆 Leaderboard</button>
+    <div id="help-box"></div>
     <button class="me-chip" id="me-chip" hidden></button>
     <p class="stars-total" id="stars-total"></p>
     <button class="ghost small" id="sound">🔊 Sound on</button>
@@ -108,8 +109,9 @@
     </header>
     <p id="hint"></p>
     <p id="clock" hidden></p>
+    <div id="ans-bar" hidden><span id="ans-who"></span><button class="ghost" id="ans-next">💡 Next move</button><button class="ghost" id="ans-watch">▶ Watch</button></div>
     <div id="board-wrap"><div id="board"></div></div>
-    <button class="ghost small" id="ask-friend">📨 Ask a friend to solve this</button>
+    <button class="ghost small" id="ask-friend">🆘 Ask a friend for help</button>
   </main>
 
   <div id="name-modal" class="overlay" hidden>
@@ -129,6 +131,7 @@
       <div class="win-stars" id="win-stars"></div>
       <p id="win-text"></p>
       <div id="win-best"></div>
+      <div id="win-help"></div>
       <button class="big" id="next">Next level</button>
       <button class="ghost" id="replay">Play again</button>
       <button class="ghost" id="to-ch" hidden>Back to challenge</button>
@@ -172,16 +175,28 @@
     </div>
   </div>
 
+  <div id="help-ask" class="overlay" hidden>
+    <div class="card form">
+      <h2>Ask for help</h2>
+      <p class="note small" id="help-what"></p>
+      <div id="help-friends"></div>
+      <p class="err" id="help-err"></p>
+      <button class="big" id="help-send" type="button">Send to friends</button>
+      <button class="ghost" id="help-link" type="button">📨 Share a link</button>
+      <button class="ghost" id="help-cancel" type="button">Cancel</button>
+    </div>
+  </div>
+
   <div id="toast" hidden></div>
 
-  <script src="js/native.js?v=17"></script>
-  <script src="js/engine.js?v=17"></script>
-  <script src="js/levels.js?v=17"></script>
-  <script src="js/audio.js?v=17"></script>
-  <script src="js/art.js?v=17"></script>
-  <script src="js/challenge-levels.js?v=17"></script>
-  <script src="js/game.js?v=17"></script>
-  <script src="js/social.js?v=17"></script>
-  <script type="module" src="js/online.js?v=17"></script>
+  <script src="js/native.js?v=18"></script>
+  <script src="js/engine.js?v=18"></script>
+  <script src="js/levels.js?v=18"></script>
+  <script src="js/audio.js?v=18"></script>
+  <script src="js/art.js?v=18"></script>
+  <script src="js/challenge-levels.js?v=18"></script>
+  <script src="js/game.js?v=18"></script>
+  <script src="js/social.js?v=18"></script>
+  <script type="module" src="js/online.js?v=18"></script>
 </body>
 </html>
