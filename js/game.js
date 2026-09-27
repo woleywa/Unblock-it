@@ -245,11 +245,21 @@ function leave(id, d, gt, r, c) {
   }
   if (navigator.vibrate) navigator.vibrate(12);
   const before = st.gates.filter(g => g.frozen).length, iced = st.pieces.filter(q => q.ice).length;
+  const icedIds = st.pieces.filter(q => q.ice).map(q => q.id);
   Engine.applyExit(level, st, id, r, c, gt);
   setTimeout(() => {
     busy = false;
     if (st.gates.filter(g => g.frozen).length < before || st.pieces.filter(q => q.ice).length < iced) Sound.thaw();
     render();
+    // Blocks whose ice just melted pop out in their colour.
+    for (const q of st.pieces.filter(q => !q.ice && icedIds.includes(q.id))) {
+      const e = document.querySelector(`.block[data-id="${q.id}"]`);
+      if (!e) continue;
+      e.classList.add('thawed');
+      const [x, y] = px(q.r + q.h / 2, q.c + q.w / 2);
+      Art.burst($('board'), x, y, 'ice', [0, -1]);
+      Art.burst($('board'), x, y, q.color, [0, 1]);
+    }
     if (!st.pieces.length) win();
   }, 280);
 }

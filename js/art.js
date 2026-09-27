@@ -11,6 +11,8 @@ const Art = (() => {
     pink:   ['#ffb0da', '#ff5fb2', '#ea3a92', '#b52470'],
     sky:    ['#a6eeff', '#3fd0ff', '#18aeee', '#0b83bc'],
   };
+  // Frozen blocks are ice all the way through: their colour stays hidden until they thaw.
+  const ICE = ['#ffffff', '#dff4ff', '#b6e0fa', '#8cc3e6'];
   const NS = 'http://www.w3.org/2000/svg';
 
   // Shared gradients, once per page.
@@ -19,7 +21,7 @@ const Art = (() => {
     const s = document.createElementNS(NS, 'svg');
     s.id = 'art-defs'; s.setAttribute('width', 0); s.setAttribute('height', 0); s.style.position = 'absolute';
     let h = '<defs>';
-    for (const [k, [l, b, d]] of Object.entries(PAL)) {
+    for (const [k, [l, b, d]] of Object.entries({ ...PAL, ice: ICE })) {
       h += `<linearGradient id="face-${k}" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" stop-color="${l}"/><stop offset="0.45" stop-color="${b}"/><stop offset="1" stop-color="${d}"/></linearGradient>`;
       h += `<radialGradient id="core-${k}" cx="0.4" cy="0.3" r="0.9"><stop offset="0" stop-color="${l}"/><stop offset="0.6" stop-color="${b}"/><stop offset="1" stop-color="${d}"/></radialGradient>`;
     }
@@ -114,14 +116,16 @@ const Art = (() => {
   function blockSVG(p, cs, { faceOn = true } = {}) {
     const offs = Engine.cellsOf(p, 0, 0);
     const W = p.w * cs, H = p.h * cs, inset = cs * 0.045, rad = cs * 0.24, depth = Math.max(3, cs * 0.09);
-    const [l, b, d, side] = PAL[p.color] || PAL.blue;
+    const frozen = p.ice > 0;
+    const [l, b, d, side] = frozen ? ICE : PAL[p.color] || PAL.blue;
+    const faceFill = frozen ? 'ice' : p.color;
     const shape = shapePath(offs, cs, inset, rad);
     const uid = 'c' + Math.random().toString(36).slice(2, 8);
     let s = `<svg class="jelly" width="${W}" height="${H + depth}" viewBox="0 0 ${W} ${H + depth}" overflow="visible">`;
     s += `<defs><clipPath id="${uid}"><path d="${shape}"/></clipPath></defs>`;
     s += `<path class="shadow" d="${shape}" transform="translate(0 ${depth * 1.6})" fill="#0b0624" opacity="0.35"/>`;
     s += `<path d="${shape}" transform="translate(0 ${depth})" fill="${side}"/>`;
-    s += `<path class="hit" d="${shape}" fill="url(#face-${p.color})"/>`;
+    s += `<path class="hit" d="${shape}" fill="url(#face-${faceFill})"/>`;
     s += `<g clip-path="url(#${uid})" pointer-events="none">`;
     // Soft light from the top and a round shine on every cell.
     s += `<rect x="0" y="0" width="${W}" height="${H * 0.5}" fill="url(#gloss)" opacity="0.55"/>`;
@@ -129,16 +133,16 @@ const Art = (() => {
     s += `<path d="${shape}" fill="none" stroke="${l}" stroke-width="${cs * 0.05}" opacity="0.7"/>`;
     s += `<path d="${shape}" fill="none" stroke="${d}" stroke-width="${cs * 0.035}" opacity="0.5" transform="translate(0 ${-cs * 0.02})"/>`;
     s += '</g>';
-    if (p.inner) {
+    if (p.inner && !frozen) {
       // Layered: a jewel-like core inside, the part that stays behind.
       const core = shapePath(offs, cs, cs * 0.27, cs * 0.14);
       s += `<path d="${core}" fill="#000" opacity="0.25" transform="translate(0 ${-cs * 0.025})" pointer-events="none"/>`;
       s += `<path d="${core}" fill="url(#core-${p.inner})" stroke="rgba(255,255,255,0.55)" stroke-width="${cs * 0.03}" pointer-events="none"/>`;
     }
     const [hr, hc] = heart(offs, !p.shape);
-    if (faceOn && !p.inner) s += face((hc + 0.5) * cs, (hr + 0.5) * cs, cs);
+    if (faceOn && !p.inner && !frozen) s += face((hc + 0.5) * cs, (hr + 0.5) * cs, cs);
     if (p.ice) {
-      s += `<g pointer-events="none"><path d="${shape}" fill="url(#ice)"/>`;
+      s += `<g pointer-events="none"><path d="${shape}" fill="url(#ice)" opacity="0.6"/>`;
       // Frost cracks and sparkles.
       for (const [r, c] of offs) {
         const x = c * cs, y = r * cs;
@@ -160,7 +164,6 @@ const Art = (() => {
     Object.assign(dEl.style, box);
     dEl.dataset.gate = gt.id;
     if (gt.frozen) {
-      dEl.style.setProperty('--c', b);
       dEl.innerHTML = `<span class="flake">❄</span><b>${gt.frozen}</b>`;
       dEl.style.fontSize = Math.max(11, Math.round(gut * 0.62)) + 'px';
       dEl.style.flexDirection = flat ? 'column' : 'row';
@@ -179,7 +182,7 @@ const Art = (() => {
 
   // Sparks bursting from where a block went out.
   function burst(host, x, y, color, dir) {
-    const [l, b] = PAL[color] || PAL.blue;
+    const [l, b] = color === 'ice' ? ['#ffffff', '#cdeeff'] : PAL[color] || PAL.blue;
     for (let i = 0; i < 18; i++) {
       const s = document.createElement('i');
       s.className = 'spark';

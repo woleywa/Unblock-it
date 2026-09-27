@@ -25,7 +25,8 @@ version.
 - Blocks are one SVG each (`Art.blockSVG`): the polyomino's true outline (edge tracing, inset, rounded
   outer corners, softer inner corners), a darker copy below for thickness, a drop shadow, a vertical
   gradient face, gloss and per-cell shines, a blinking face (an "o" mouth while dragged), a jewel core
-  for layered blocks, frosted ice with cracks and a count. Only the `.hit` face path takes touches.
+  for layered blocks, frosted ice with cracks and a count. Iced blocks and frozen doors hide their colour entirely
+  (ice palette for face and side, no face/core); thawing pops the block with sparks. Only the `.hit` face path takes touches.
 - Doors glow in their colour with marching chevrons; frozen doors are frosted with ❄ and a count.
 - Exits burst sparks; drops settle with a squash; wins pop stars in one by one plus confetti.
 - Font: Fredoka (Google Fonts), falls back to system rounded.
