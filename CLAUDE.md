@@ -107,6 +107,13 @@ version.
   by tapping a player on the Players tab, or with a friend link `#f=UID`.
 - Names/teams allow emoji and any letters (2–16 / 2–20 characters, counted with Intl.Segmenter); rules
   only refuse slashes, control characters and blanks. Any team member can rename the team.
+- Developer mode: accounts in `config/dev { uids }` (set with the service account). online.js stores
+  `unblock_dev` in localStorage; the privacy page's 🛠 Developer section (only then) has an on/off switch
+  (`unblock_dev_on`) and, in the app, the update status + "Check for updates" (applies at once). On:
+  every level is open (game.js `devOn`).
+- App updates: after a download the game shows "✨ New version ready · Tap to update" on the home screen /
+  level list only (never mid-level) → `Native.applyUpdate` (CapacitorUpdater.set). Also checks when the app
+  comes back to the foreground. GitHub serves update.json as octet-stream → native HTTP may return base64.
 - Hints (💡 in the game bar): only for registered players listed in `config/hints { uids }` (public
   read, no client writes — set it with the service account, scratchpad `sethints.cjs`-style PATCH).
   Never in challenges. The whole solution is cached; while the board matches the next step's start,

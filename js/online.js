@@ -50,18 +50,24 @@ let uid = null, me = null; // me = this player's doc (or null before a nickname 
 // Everyone starts signed in anonymously (a guest account on this device). Adding an email and password
 // keeps the same account; signing in with one on another device switches to that account, and the
 // game hears 'online-user' to reload what belongs to it.
-let account = null, canHint = false, save = null, loading = Promise.resolve(), resolveReady, started = false;
+let account = null, canHint = false, canDev = false, save = null, loading = Promise.resolve(), resolveReady, started = false;
 const ready = new Promise(r => { resolveReady = r; });
 onAuthStateChanged(auth, user => {
   if (!user) { signInAnonymously(auth).catch(e => { console.warn('sign-in failed', e); resolveReady(false); }); return; }
   uid = user.uid;
   account = user.isAnonymous ? null : user.email;
-  me = null; myTeam = null; save = null; canHint = false;
+  me = null; myTeam = null; save = null; canHint = false; canDev = false;
   loading = (async () => {
     try {
-      // Hints: registered players on the list in config/hints only.
-      if (!user.isAnonymous) getDoc(doc(db, 'config', 'hints')).then(h => {
-        canHint = uid === user.uid && h.exists() && (h.data().uids || []).includes(user.uid);
+      // Hints and developer mode: registered players on the lists in config/hints and config/dev only.
+      // The developer flag is also kept in localStorage for pages without online.js (the privacy page).
+      const setDev = on => { try { localStorage.setItem('unblock_dev', on ? '1' : '0'); } catch (e) {} };
+      if (user.isAnonymous) setDev(false);
+      else Promise.all([getDoc(doc(db, 'config', 'hints')), getDoc(doc(db, 'config', 'dev'))]).then(([h, d]) => {
+        if (uid !== user.uid) return;
+        canHint = h.exists() && (h.data().uids || []).includes(user.uid);
+        canDev = d.exists() && (d.data().uids || []).includes(user.uid);
+        setDev(canDev);
         window.dispatchEvent(new Event('online-hints'));
       }).catch(e => console.warn(e));
       const [p, v] = await Promise.all([getDoc(doc(db, 'players', uid)), getDoc(doc(db, 'saves', uid))]);
@@ -457,6 +463,7 @@ window.Online = {
   myHelp: () => timed(myHelp()), answerHelp: (id, s, t) => timed(answerHelp(id, s, t)), closeHelp: id => timed(closeHelp(id)),
   get account() { return account; },
   get canHint() { return canHint; },
+  get canDev() { return canDev; },
   get uid() { return uid; },
   get friends() { return (save && save.friends) || []; },
   get name() { return me && me.name; },

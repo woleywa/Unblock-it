@@ -381,3 +381,7 @@ a.linkish { display: block; text-align: center; }
 @keyframes shrink { 0%, 40% { transform: scale(1); } 100% { transform: scale(0.2, 0.05); } }
 .block.chomp .jelly { animation: chomp 0.13s ease-in-out 4 alternate; }
 @keyframes chomp { from { transform: scale(1); } to { transform: scale(1.08, 0.9); } }
+#upd-banner { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 28; max-width: 92vw;
+  padding: 11px 18px; border-radius: 999px; font-weight: 600; color: #4a2c00; background: linear-gradient(180deg, #ffe680, var(--accent));
+  box-shadow: 0 6px 0 var(--accent-d), 0 10px 26px rgba(0,0,0,0.35); animation: pop 0.4s cubic-bezier(.2,1.6,.4,1); white-space: nowrap; }
+#upd-banner[hidden] { display: none; }

@@ -35,7 +35,9 @@ let progress = { stars: {}, moves: {} };
 try { progress = { stars: {}, moves: {}, ...JSON.parse(localStorage.getItem(SAVE) || '{}') }; } catch (e) {}
 const saveProgress = () => { try { localStorage.setItem(SAVE, JSON.stringify(progress)); } catch (e) {} };
 const starsOf = i => progress.stars[i] || 0;
-const unlocked = i => i === 0 || starsOf(i - 1) > 0 || starsOf(i) > 0;
+// Developer mode (accounts on config/dev, switchable on the privacy page): every level is open.
+const devOn = () => { try { return localStorage.getItem('unblock_dev') === '1' && localStorage.getItem('unblock_dev_on') !== '0'; } catch (e) { return false; } };
+const unlocked = i => i === 0 || starsOf(i - 1) > 0 || starsOf(i) > 0 || devOn();
 // Totals for the leaderboard: stars, and the best move counts of the levels solved.
 const totals = () => {
   const done = Object.keys(progress.stars).filter(k => progress.stars[k] > 0);
@@ -50,6 +52,7 @@ const firstOpen = () => { const i = LEVELS.findIndex((_, k) => !starsOf(k)); ret
 // ── Screens ──────────────────────────────────────────────────
 function show(id) {
   ['home', 'levels', 'ranks', 'game', 'chs', 'ch', 'team'].forEach(s => $(s).hidden = s !== id);
+  updBanner();
   // Leaving the board (e.g. an invite link opened mid-game) closes its cards and challenge play.
   if (id !== 'game') { $('win').hidden = true; $('timeup').hidden = true; chPlay = null; }
   $('help-sheet').hidden = true;
@@ -409,7 +412,7 @@ function beaverEat(id, d) {
 
 // ── Hint (registered players on the hint list; not in challenges) ─────────
 function hintButton() { $('hint-btn').hidden = !(window.Online && window.Online.canHint) || !!chPlay; }
-window.addEventListener('online-hints', hintButton);
+window.addEventListener('online-hints', () => { hintButton(); if (!$('levels').hidden) levelList(); });
 let hintPlan = null;
 function clearHint() {
   document.querySelectorAll('.hint-mark').forEach(e => e.remove());
@@ -695,6 +698,12 @@ function openLevelLink() {
 }
 let pendingHelp = null;
 window.addEventListener('hashchange', openLevelLink);
+
+// App update downloaded: offer it on the home screen or level list, never in the middle of a level.
+var updReady = false;
+function updBanner() { $('upd-banner').hidden = !updReady || !(!$('home').hidden || !$('levels').hidden); }
+window.addEventListener('update-ready', () => { updReady = true; updBanner(); });
+$('upd-banner').addEventListener('click', () => { $('upd-banner').textContent = 'Updating…'; Native.applyUpdate(); });
 
 // ── Buttons ──────────────────────────────────────────────────
 $('play').addEventListener('click', () => { Sound.unlock(); start(firstOpen()); });

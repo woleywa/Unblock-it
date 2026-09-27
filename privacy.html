@@ -28,7 +28,13 @@
     p, li { color: var(--dim); }
     strong { color: var(--text); font-weight: 600; }
     a { color: #9be8ff; }
-    #upd { font-size: 0.8rem; color: var(--dim); margin: -4px 0 12px; }
+    #dev { font-size: 0.85rem; color: var(--dim); margin: 0 0 14px; padding: 10px 12px; border-radius: 14px; border: 1px dashed rgba(255,213,74,0.5); background: rgba(255,213,74,0.08); display: flex; flex-direction: column; gap: 6px; }
+    #dev[hidden] { display: none; }
+    #dev b { color: var(--accent); }
+    #dev.off { opacity: 0.7; }
+    #dev .small { font-size: 0.75rem; }
+    #dev button { font: inherit; font-weight: 600; color: var(--text); background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 4px 10px; }
+    #upd { font-size: 0.8rem; color: var(--dim); }
     #upd button { font: inherit; font-weight: 600; color: var(--text); background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 4px 10px; margin-left: 4px; }
     .ver { display: inline-block; margin: 0 0 10px; padding: 3px 12px; border-radius: 999px; font-size: 0.8rem; background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.14); }
     .meta { color: var(--dim); font-size: 0.9rem; margin: 0 0 18px; }
@@ -64,7 +70,11 @@
     <h1>Happy Blocks<br>Privacy Policy</h1>
   </header>
   <p class="meta ver" id="ver" hidden></p>
-  <div id="upd" hidden><span id="upd-state"></span> <button id="upd-go" type="button">Check for updates</button></div>
+  <div id="dev" hidden>
+    <b>🛠 Developer</b>
+    <div><button id="dev-toggle" type="button"></button> <span class="small">all levels open, and these tools</span></div>
+    <div id="upd" hidden><span id="upd-state"></span> <button id="upd-go" type="button">Check for updates</button></div>
+  </div>
   <p class="meta">Effective 27 September 2026 · applies to the Happy Blocks website, iPhone/iPad app and Android app.</p>
 
   <div class="summary">
@@ -159,8 +169,17 @@
 </main>
 <script src="js/native.js"></script>
 <script>
-  // In the app: the last update check, and a button to check (and switch to the new version) now.
-  if (typeof Native !== 'undefined' && Native.app) {
+  // Developer section (accounts on config/dev — the game notes that in localStorage).
+  const devAcct = (() => { try { return localStorage.getItem('unblock_dev') === '1'; } catch (e) { return false; } })();
+  if (devAcct) {
+    const dev = document.getElementById('dev'), tg = document.getElementById('dev-toggle');
+    const on = () => { try { return localStorage.getItem('unblock_dev_on') !== '0'; } catch (e) { return true; } };
+    const paint = () => { tg.textContent = on() ? 'Developer mode: on' : 'Developer mode: off'; dev.classList.toggle('off', !on()); };
+    tg.addEventListener('click', () => { try { localStorage.setItem('unblock_dev_on', on() ? '0' : '1'); } catch (e) {} paint(); });
+    dev.hidden = false; paint();
+  }
+  // In the app, for developers: the last update check, and a button to check (and switch to the new version) now.
+  if (devAcct && typeof Native !== 'undefined' && Native.app) {
     const show = v => { if (!v) return; const t = new Date(v.at); document.getElementById('upd-state').textContent =
       `Updates: ${v.state}${v.latest ? ` (newest: ${v.latest})` : ''} · checked ${t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`; };
     document.getElementById('upd').hidden = false;

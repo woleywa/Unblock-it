@@ -14,6 +14,8 @@ const Native = (() => {
       // This copy of the game started fine: keep it (otherwise the app rolls back to the last good one).
       quiet(P.CapacitorUpdater.notifyAppReady());
       setTimeout(() => checkForUpdate().catch(() => {}), 3000);
+      // Coming back to the app (people rarely close it fully) also checks.
+      if (P.App) P.App.addListener('appStateChange', s => { if (s.isActive && !ready) checkForUpdate().catch(() => {}); });
     }
     // Light text on the dark sky.
     if (P.StatusBar) {
@@ -32,6 +34,7 @@ const Native = (() => {
   // A newer game on GitHub? Download it quietly; it's used from the next time the app opens (or right
   // away with now = true). What happened is kept in localStorage so the privacy page can show it.
   const LOG = 'unblock_update';
+  let ready = null; // a downloaded update waiting to be switched to
   const note = o => { const v = { at: Date.now(), ...o }; try { localStorage.setItem(LOG, JSON.stringify(v)); } catch (e) {} return v; };
   // GitHub serves the file as a generic download, so the native HTTP call may hand it back base64-encoded.
   const readJson = d => {
@@ -55,6 +58,8 @@ const Native = (() => {
       const bundle = have || await U.download({ url: u.url, version });
       if (now) { note({ mine: mine.build, latest: u.build, state: 'Restarting with the new version…' }); await U.set({ id: bundle.id }); return; }
       await U.next({ id: bundle.id });
+      ready = bundle.id;
+      window.dispatchEvent(new CustomEvent('update-ready', { detail: { build: u.build } }));
       return note({ mine: mine.build, latest: u.build, state: 'Downloaded — used next time the app opens' });
     } catch (e) {
       console.warn('update check failed', e);
@@ -72,6 +77,8 @@ const Native = (() => {
     // The address to put in invite links (the app's own address only works inside the app).
     webBase: () => app ? WEB : location.origin + location.pathname,
     checkForUpdate,
+    // Switch to the downloaded update now (reloads the game).
+    applyUpdate: () => ready && P.CapacitorUpdater ? quiet(P.CapacitorUpdater.set({ id: ready })) : null,
     lastUpdateCheck: () => { try { return JSON.parse(localStorage.getItem(LOG) || 'null'); } catch (e) { return null; } },
   };
 })();
