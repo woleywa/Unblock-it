@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>Unblock It</title>
+  <meta name="description" content="Slide the blocks out through the doors of their colour.">
+  <meta name="theme-color" content="#1a1538">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Unblock It">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+  <main id="home" class="screen">
+    <div class="logo" aria-hidden="true">
+      <span class="lb c-red"></span><span class="lb c-blue"></span><span class="lb c-yellow"></span><span class="lb c-green"></span>
+    </div>
+    <h1>Unblock&nbsp;It</h1>
+    <p class="tag">Slide every block out through the door of its colour.</p>
+    <button class="big" id="play">Play</button>
+    <button class="ghost" id="to-levels">Levels</button>
+    <p class="stars-total" id="stars-total"></p>
+    <button class="ghost small" id="sound">🔊 Sound on</button>
+  </main>
+
+  <main id="levels" class="screen" hidden>
+    <header class="bar">
+      <button class="icon" id="levels-back" aria-label="Back">‹</button>
+      <h2>Levels</h2>
+      <span class="spacer"></span>
+    </header>
+    <div id="level-grid"></div>
+  </main>
+
+  <main id="game" class="screen" hidden>
+    <header class="bar">
+      <button class="icon" id="game-back" aria-label="Levels">‹</button>
+      <div class="title"><h2 id="level-name">Level 1</h2><span id="moves">0 moves · par 5</span></div>
+      <button class="icon" id="undo" aria-label="Undo">↶</button>
+      <button class="icon" id="restart" aria-label="Restart">↻</button>
+    </header>
+    <p id="hint"></p>
+    <div id="board-wrap"><div id="board"></div></div>
+  </main>
+
+  <div id="win" class="overlay" hidden>
+    <div class="card">
+      <h2>Unblocked!</h2>
+      <div class="win-stars" id="win-stars"></div>
+      <p id="win-text"></p>
+      <button class="big" id="next">Next level</button>
+      <button class="ghost" id="replay">Play again</button>
+    </div>
+  </div>
+
+  <script src="js/engine.js?v=2"></script>
+  <script src="js/levels.js?v=2"></script>
+  <script src="js/audio.js?v=2"></script>
+  <script src="js/game.js?v=2"></script>
+</body>
+</html>
