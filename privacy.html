@@ -28,6 +28,8 @@
     p, li { color: var(--dim); }
     strong { color: var(--text); font-weight: 600; }
     a { color: #9be8ff; }
+    #upd { font-size: 0.8rem; color: var(--dim); margin: -4px 0 12px; }
+    #upd button { font: inherit; font-weight: 600; color: var(--text); background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 4px 10px; margin-left: 4px; }
     .ver { display: inline-block; margin: 0 0 10px; padding: 3px 12px; border-radius: 999px; font-size: 0.8rem; background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.14); }
     .meta { color: var(--dim); font-size: 0.9rem; margin: 0 0 18px; }
     .summary { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 6px 18px; }
@@ -62,6 +64,7 @@
     <h1>Happy Blocks<br>Privacy Policy</h1>
   </header>
   <p class="meta ver" id="ver" hidden></p>
+  <div id="upd" hidden><span id="upd-state"></span> <button id="upd-go" type="button">Check for updates</button></div>
   <p class="meta">Effective 27 September 2026 · applies to the Happy Blocks website, iPhone/iPad app and Android app.</p>
 
   <div class="summary">
@@ -154,7 +157,19 @@
 
   <footer><a href="./" class="back-link">← Back to Happy Blocks</a></footer>
 </main>
+<script src="js/native.js"></script>
 <script>
+  // In the app: the last update check, and a button to check (and switch to the new version) now.
+  if (typeof Native !== 'undefined' && Native.app) {
+    const show = v => { if (!v) return; const t = new Date(v.at); document.getElementById('upd-state').textContent =
+      `Updates: ${v.state}${v.latest ? ` (newest: ${v.latest})` : ''} · checked ${t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`; };
+    document.getElementById('upd').hidden = false;
+    show(Native.lastUpdateCheck());
+    document.getElementById('upd-go').addEventListener('click', async e => {
+      e.target.disabled = true; document.getElementById('upd-state').textContent = 'Checking…';
+      show(await Native.checkForUpdate(true)); e.target.disabled = false;
+    });
+  }
   // Which copy of the game this is: the app or the website, and the game version (build number).
   fetch('version.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(v => {
     if (!v) return;
