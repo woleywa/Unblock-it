@@ -14,10 +14,19 @@ version.
 - The engine also supports keys/locks, tracks, arrows, stars, inner-wall doors (from the Block Out
   solver it started from); levels don't use them yet.
 
+- Fire (`fire: n`, colour 'fire', 1×1): an unmovable piece blocking its cell; each 'water' piece that
+  leaves lowers every fire by 1 and removes it at 0. Done = no pieces left except fires
+  (`Engine.done`). Fire levels (stage 7) leave out sky/blue (water is teal). The generator only keeps
+  fire levels where some move crosses a burning cell.
+
 ## Game (game.js)
 - Drag: the block slides cell by cell toward the finger (greedy, larger axis first), stopping at
   obstacles. Pushed past the board edge with a clear lane to a door of its colour → it leaves. Dropped
   touching such a door → it leaves. Each drag that moved = 1 move.
+- Dragging glides with the finger between cells (snapped cell moves on at half a cell), with a small
+  rubber-band give against obstacles; drawn in requestAnimationFrame.
+- Blocks are stacked by bottom row (`--z`) so a block's side/shadow tucks behind the one below; the face
+  is lifted by half the thickness so face + side fit inside the block's own cells.
 - Only a block's tiles take pointer events (the block div covers its bounding box).
 - Stars: ≤ par ★★★, ≤ ceil(par × 1.4) ★★, else ★. Progress in localStorage `unblock_progress_v1`.
 
@@ -56,7 +65,14 @@ version.
   `request.time`, 30 s grace); the client estimates skew from its own writes (`Online.now()`).
   Everyone's level order comes from the challenge `seed` (social.js `seqOf`, pool in
   challenge-levels.js, easy → hard). Entry `runs` = { position: best moves }; stars recomputed from par.
-- Links: `#join=CODE` (team), `#c=CODE` (challenge). On iPhone a link opens Safari, which is a different
+- Accounts: everyone starts as an anonymous guest; "Save my progress" links email + password to the same
+  uid; signing in elsewhere switches uid and fires `online-user` (game.js merges local ↔ `saves/{uid}`,
+  best of each). Email/password was enabled via the Identity Toolkit admin API with the service account.
+- Friends: one-way list in the private `saves/{uid}.friends`; Friends tab = you + them. Add by nickname,
+  by tapping a player on the Players tab, or with a friend link `#f=UID`.
+- Names/teams allow emoji and any letters (2–16 / 2–20 characters, counted with Intl.Segmenter); rules
+  only refuse slashes, control characters and blanks. Any team member can rename the team.
+- Links: `#join=CODE` (team), `#c=CODE` (challenge), `#f=UID` (friend). On iPhone a link opens Safari, which is a different
   account from the home-screen app — so codes can be typed in too.
 - Note: game.js has a global `history` (undo stack) — use `window.history` for the browser's.
 - **Deploying rules**: the user gave a Firebase service-account key (kept outside the repo; never

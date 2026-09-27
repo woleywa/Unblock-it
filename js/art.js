@@ -10,6 +10,7 @@ const Art = (() => {
     orange: ['#ffc58a', '#ff8a2b', '#ee6a12', '#bd4e07'],
     pink:   ['#ffb0da', '#ff5fb2', '#ea3a92', '#b52470'],
     sky:    ['#a6eeff', '#3fd0ff', '#18aeee', '#0b83bc'],
+    water:  ['#a8fff4', '#1fd6c6', '#0fb0a8', '#0a7d80'],
   };
   // Frozen blocks are ice all the way through: their colour stays hidden until they thaw.
   const ICE = ['#ffffff', '#dff4ff', '#b6e0fa', '#8cc3e6'];
@@ -113,23 +114,34 @@ const Art = (() => {
   }
 
   // The whole block as one SVG: shadow, side, face gradient, gloss, core, ice, face.
+  // The face is lifted by half the block's thickness so face + side sit inside its own cells, with a
+  // gap to the neighbours on every side (nothing hangs over the block below).
   function blockSVG(p, cs, { faceOn = true } = {}) {
     const offs = Engine.cellsOf(p, 0, 0);
-    const W = p.w * cs, H = p.h * cs, inset = cs * 0.045, rad = cs * 0.24, depth = Math.max(3, cs * 0.09);
+    const W = p.w * cs, H = p.h * cs, inset = cs * 0.06, rad = cs * 0.24, depth = Math.max(3, cs * 0.075);
     const frozen = p.ice > 0;
     const [l, b, d, side] = frozen ? ICE : PAL[p.color] || PAL.blue;
     const faceFill = frozen ? 'ice' : p.color;
     const shape = shapePath(offs, cs, inset, rad);
     const uid = 'c' + Math.random().toString(36).slice(2, 8);
-    let s = `<svg class="jelly" width="${W}" height="${H + depth}" viewBox="0 0 ${W} ${H + depth}" overflow="visible">`;
+    let s = `<svg class="jelly" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" overflow="visible">`;
     s += `<defs><clipPath id="${uid}"><path d="${shape}"/></clipPath></defs>`;
-    s += `<path class="shadow" d="${shape}" transform="translate(0 ${depth * 1.6})" fill="#0b0624" opacity="0.35"/>`;
+    s += `<g transform="translate(0 ${(-depth / 2).toFixed(2)})">`;
+    s += `<path class="shadow" d="${shape}" transform="translate(0 ${depth * 1.35})" fill="#0b0624" opacity="0.3"/>`;
     s += `<path d="${shape}" transform="translate(0 ${depth})" fill="${side}"/>`;
     s += `<path class="hit" d="${shape}" fill="url(#face-${faceFill})"/>`;
     s += `<g clip-path="url(#${uid})" pointer-events="none">`;
     // Soft light from the top and a round shine on every cell.
     s += `<rect x="0" y="0" width="${W}" height="${H * 0.5}" fill="url(#gloss)" opacity="0.55"/>`;
     for (const [r, c] of offs) s += `<ellipse cx="${(c + 0.32) * cs}" cy="${(r + 0.24) * cs}" rx="${cs * 0.16}" ry="${cs * 0.09}" fill="#fff" opacity="0.3" transform="rotate(-18 ${(c + 0.32) * cs} ${(r + 0.24) * cs})"/>`;
+    if (p.color === 'water' && !frozen) {
+      // Water: gentle waves and a few bubbles inside.
+      for (const [r, c] of offs) {
+        const x = c * cs, y = r * cs;
+        for (const k of [0.55, 0.8]) s += `<path d="M${x},${y + cs * k} q${cs * 0.125},${-cs * 0.08} ${cs * 0.25},0 t${cs * 0.25},0 t${cs * 0.25},0 t${cs * 0.25},0" fill="none" stroke="#fff" stroke-width="${cs * 0.035}" opacity="0.35" stroke-linecap="round"/>`;
+        s += `<circle cx="${x + cs * 0.78}" cy="${y + cs * 0.3}" r="${cs * 0.05}" fill="none" stroke="#fff" stroke-width="${cs * 0.02}" opacity="0.6"/><circle cx="${x + cs * 0.2}" cy="${y + cs * 0.42}" r="${cs * 0.03}" fill="#fff" opacity="0.5"/>`;
+      }
+    }
     s += `<path d="${shape}" fill="none" stroke="${l}" stroke-width="${cs * 0.05}" opacity="0.7"/>`;
     s += `<path d="${shape}" fill="none" stroke="${d}" stroke-width="${cs * 0.035}" opacity="0.5" transform="translate(0 ${-cs * 0.02})"/>`;
     s += '</g>';
@@ -152,7 +164,61 @@ const Art = (() => {
       const x = (hc + 0.5) * cs, y = (hr + 0.5) * cs, rr = cs * 0.24;
       s += `<circle cx="${x}" cy="${y}" r="${rr}" fill="#fff" opacity="0.92"/><text x="${x}" y="${y + rr * 0.42}" text-anchor="middle" font-size="${rr * 1.2}" font-weight="700" fill="#1f5b9c" font-family="Fredoka, system-ui, sans-serif">${p.ice}</text></g>`;
     }
-    return s + '</svg>';
+    return s + '</g></svg>';
+  }
+
+  // A fire on one cell: a glowing ember bed, three flickering flame layers, rising sparks, a count.
+  const FLAME = 'M50,6 C60,26 84,38 82,62 C80,84 66,95 50,95 C34,95 19,84 18,63 C17,45 32,37 35,20 C41,33 45,34 50,6 Z';
+  function fire(n, cs) {
+    const d = document.createElement('div');
+    d.className = 'fire';
+    const layer = (cls, fill, sc) => `<path class="fl ${cls}" d="${FLAME}" fill="${fill}" transform="translate(50 95) scale(${sc}) translate(-50 -95)"/>`;
+    let s = `<svg viewBox="0 0 100 100" width="${cs}" height="${cs}" overflow="visible">`;
+    s += '<defs><radialGradient id="ember" cx="0.5" cy="0.85" r="0.6"><stop offset="0" stop-color="#ffd35a" stop-opacity="0.9"/><stop offset="0.5" stop-color="#ff6a1a" stop-opacity="0.55"/><stop offset="1" stop-color="#ff3d00" stop-opacity="0"/></radialGradient>'
+      + '<linearGradient id="fl-o" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff4a12"/><stop offset="1" stop-color="#ff8a1f"/></linearGradient>'
+      + '<linearGradient id="fl-m" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#ff9a1f"/><stop offset="1" stop-color="#ffd23f"/></linearGradient>'
+      + '<linearGradient id="fl-i" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#fff3b0"/><stop offset="1" stop-color="#fffbe8"/></linearGradient></defs>';
+    s += '<ellipse cx="50" cy="84" rx="46" ry="22" fill="url(#ember)"/>';
+    s += '<g class="flames">' + layer('o', 'url(#fl-o)', 0.9) + layer('m', 'url(#fl-m)', 0.66) + layer('i', 'url(#fl-i)', 0.38) + '</g>';
+    for (let i = 0; i < 4; i++) s += `<circle class="ember-spark" cx="${30 + i * 13}" cy="70" r="${2.5 + (i % 2)}" fill="#ffd35a" style="--i:${i}"/>`;
+    s += '</svg>';
+    s += `<b class="fire-count">${n}</b>`;
+    d.innerHTML = s;
+    d.style.width = d.style.height = cs + 'px';
+    return d;
+  }
+
+  // Water drops flying in an arc from (x0, y0) to (x1, y1).
+  function sprinkle(host, x0, y0, x1, y1, delay = 0) {
+    for (let i = 0; i < 9; i++) {
+      const s = document.createElement('i');
+      s.className = 'drop';
+      host.appendChild(s);
+      const jx = (Math.random() - 0.5) * 18, jy = (Math.random() - 0.5) * 12, lift = 50 + Math.random() * 50;
+      const frames = [];
+      for (let k = 0; k <= 8; k++) {
+        const t = k / 8, x = x0 + (x1 + jx - x0) * t, y = y0 + (y1 + jy - y0) * t - lift * 4 * t * (1 - t);
+        frames.push({ transform: `translate(${x}px, ${y}px) translate(-50%,-50%) scale(${0.6 + 0.5 * Math.sin(t * Math.PI)})`, opacity: k === 8 ? 0.2 : 1 });
+      }
+      s.animate(frames, { duration: 420 + Math.random() * 120, delay: delay + i * 22, easing: 'ease-in', fill: 'both' }).onfinish = () => s.remove();
+    }
+  }
+
+  // A puff of steam where a fire went out (or a little one when it's only damped).
+  function steam(host, x, y, big) {
+    for (let i = 0; i < (big ? 10 : 4); i++) {
+      const s = document.createElement('i');
+      s.className = 'steam';
+      const size = (big ? 22 : 14) + Math.random() * 16;
+      Object.assign(s.style, { left: x + 'px', top: y + 'px', width: size + 'px', height: size + 'px' });
+      host.appendChild(s);
+      const dx = (Math.random() - 0.5) * 50, dy = -30 - Math.random() * (big ? 60 : 30);
+      s.animate([
+        { transform: 'translate(-50%,-50%) scale(0.4)', opacity: 0 },
+        { transform: `translate(calc(-50% + ${dx * 0.25}px), calc(-50% + ${dy * 0.2}px)) scale(1)`, opacity: 0.95, offset: 0.15 },
+        { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${big ? 2.6 : 1.7})`, opacity: 0 },
+      ], { duration: 1200 + Math.random() * 600, delay: i * 40, easing: 'ease-out', fill: 'both' }).onfinish = () => s.remove();
+    }
   }
 
   // A door: a glowing bar with arrows marching out, or a frosted tile with its count.
@@ -213,5 +279,5 @@ const Art = (() => {
     }
   }
 
-  return { PAL, defs, blockSVG, door, burst, confetti };
+  return { PAL, defs, blockSVG, door, burst, confetti, fire, sprinkle, steam };
 })();

@@ -16,7 +16,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
   <div class="sky" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
@@ -52,7 +52,7 @@
       <h2>Leaderboard</h2>
       <span class="spacer"></span>
     </header>
-    <div class="tabs" id="rank-tabs"><button data-tab="players" class="on">Players</button><button data-tab="teams">Teams</button></div>
+    <div class="tabs" id="rank-tabs"><button data-tab="players" class="on">Players</button><button data-tab="friends">Friends</button><button data-tab="teams">Teams</button></div>
     <div id="rank-me"></div>
     <ol id="rank-list"></ol>
   </main>
@@ -113,7 +113,7 @@
     <form class="card" id="name-form" autocomplete="off">
       <h2>Your nickname</h2>
       <p>It’s how you’ll show up on the leaderboard.</p>
-      <input id="name-input" maxlength="16" placeholder="e.g. BlockBoss" autocapitalize="off" spellcheck="false">
+      <input id="name-input" maxlength="40" placeholder="e.g. 🐻 BlockBoss" autocapitalize="off" spellcheck="false">
       <p class="err" id="name-err"></p>
       <button class="big" id="name-save" type="submit">Save</button>
       <button class="ghost" id="name-cancel" type="button">Not now</button>
@@ -160,15 +160,24 @@
     </form>
   </div>
 
+  <div id="acct" class="overlay" hidden>
+    <div class="card form">
+      <h2>You</h2>
+      <div class="acct-name"><span id="acct-nick"></span><button class="ghost" id="acct-rename" type="button">Change</button></div>
+      <div id="acct-body"></div>
+      <button class="ghost" id="acct-close" type="button">Close</button>
+    </div>
+  </div>
+
   <div id="toast" hidden></div>
 
-  <script src="js/engine.js?v=7"></script>
-  <script src="js/levels.js?v=7"></script>
-  <script src="js/audio.js?v=7"></script>
-  <script src="js/art.js?v=7"></script>
-  <script src="js/challenge-levels.js?v=7"></script>
-  <script src="js/game.js?v=7"></script>
-  <script src="js/social.js?v=7"></script>
-  <script type="module" src="js/online.js?v=7"></script>
+  <script src="js/engine.js?v=8"></script>
+  <script src="js/levels.js?v=8"></script>
+  <script src="js/audio.js?v=8"></script>
+  <script src="js/art.js?v=8"></script>
+  <script src="js/challenge-levels.js?v=8"></script>
+  <script src="js/game.js?v=8"></script>
+  <script src="js/social.js?v=8"></script>
+  <script type="module" src="js/online.js?v=8"></script>
 </body>
 </html>

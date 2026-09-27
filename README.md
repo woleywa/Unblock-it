@@ -2,10 +2,11 @@
 
 A sliding-block colour puzzle. Drag every block out through the door of its colour.
 
-- 30 levels in six stages: basics, bigger boards, walls, ice, frozen doors, layered blocks
+- 35 levels in seven stages: basics, bigger boards, walls, ice, frozen doors, layered blocks, fire
+  (water blocks put the fires out)
 - Every level was generated and checked by the built-in solver; its move count is the par (★★★)
 - Undo, restart, saved progress and stars, sound effects (synthesized, no audio files)
-- Nickname leaderboard, **teams** (up to 20 players; everyone's stars add up on the team leaderboard)
+- Accounts (email + password, optional — everyone starts as a guest), friends, nickname leaderboard, **teams** (up to 20 players; everyone's stars add up on the team leaderboard)
 - **Challenges**: anyone starts one and shares a link or 6-letter code. The creator picks when it starts,
   how long it's open, and optionally each player's play time, the number of levels (from a separate pool
   of 120) and how many players can join. Live scores for players and teams.

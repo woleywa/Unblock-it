@@ -136,19 +136,19 @@ h1 { font-size: 3.4rem; font-weight: 700; letter-spacing: -0.01em; line-height: 
 .door.pulse { animation: flash 0.5s ease-out; }
 @keyframes flash { 30% { filter: brightness(1.8) saturate(1.3); transform: scale(1.08); } }
 
-.block { position: absolute; transition: transform 110ms cubic-bezier(.3,.7,.4,1); will-change: transform; pointer-events: none; z-index: 1; }
+.block { position: absolute; transition: transform 170ms cubic-bezier(.25,1.2,.4,1); will-change: transform; pointer-events: none; z-index: var(--z, 1); }
 .block .jelly { display: block; overflow: visible; transition: transform 0.15s cubic-bezier(.3,1.6,.5,1); transform-origin: 50% 60%; }
 .block .jelly * { pointer-events: none; }
 .block .jelly .hit { pointer-events: visiblePainted; }
 .block .jelly .shadow { transition: transform 0.15s, opacity 0.15s; }
-.block.dragging { transition: none; z-index: 5; }
+.block.dragging { transition: none; z-index: 50; }
 .block.dragging .jelly { transform: scale(1.06) translateY(-3px); filter: brightness(1.06); }
 .block.dragging .jelly .shadow { transform: translate(0, 12px); opacity: 0.25; }
 .block.settle .jelly { animation: settle 0.35s cubic-bezier(.3,1.6,.5,1); }
 @keyframes settle { 0% { transform: scale(1.06, 0.94); } 50% { transform: scale(0.97, 1.03); } }
 .block.thawed .jelly { animation: thaw 0.6s cubic-bezier(.3,1.8,.5,1); }
 @keyframes thaw { 0% { transform: scale(0.85); filter: brightness(2.2) saturate(0.3); } 60% { transform: scale(1.08); } }
-.block.leaving { transition: transform 300ms cubic-bezier(.5,0,.8,.4), opacity 300ms ease-in; opacity: 0; z-index: 4; }
+.block.leaving { transition: transform 300ms cubic-bezier(.5,0,.8,.4), opacity 300ms ease-in; opacity: 0; z-index: 40; }
 .block.shake .jelly { animation: shake 0.3s; }
 @keyframes shake { 20% { transform: translateX(-4px) rotate(-2deg); } 60% { transform: translateX(4px) rotate(2deg); } }
 
@@ -159,7 +159,7 @@ h1 { font-size: 3.4rem; font-weight: 700; letter-spacing: -0.01em; line-height: 
 .block.dragging .face .oh { display: inline; }
 .block.dragging .face .smile { display: none; }
 
-.spark { position: absolute; border-radius: 3px; pointer-events: none; z-index: 6; box-shadow: 0 0 6px currentColor; }
+.spark { position: absolute; border-radius: 3px; pointer-events: none; z-index: 60; box-shadow: 0 0 6px currentColor; }
 
 /* ── Win ──────────────────────────────────────────────── */
 .overlay { position: fixed; inset: 0; background: rgba(8,4,26,0.55); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; z-index: 20; animation: fade 0.25s; }
@@ -273,3 +273,35 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 30px; }
 #ch-me { display: flex; flex-direction: column; gap: 12px; }
 #ch-me .big, #ch-me .ghost { min-width: 0; width: 100%; }
 #ch-me:empty { display: none; }
+.team-hero { position: relative; }
+.rename { position: absolute; right: 10px; top: 10px; font-size: 1rem; padding: 6px 8px; border-radius: 12px; background: rgba(255,255,255,0.12); }
+
+/* ── Fire & water ─────────────────────────────────────── */
+.fire { position: absolute; left: 0; top: 0; pointer-events: none; z-index: var(--z, 1); }
+.fire::before { content: ''; position: absolute; inset: 6%; border-radius: 22%; background: radial-gradient(circle at 50% 80%, rgba(255,120,30,0.55), rgba(255,60,0,0.15) 60%, transparent 75%);
+  box-shadow: 0 0 18px rgba(255,110,20,0.45); animation: glow 1.6s ease-in-out infinite alternate; }
+@keyframes glow { to { opacity: 0.65; transform: scale(0.96); } }
+.fire svg { position: relative; display: block; filter: drop-shadow(0 0 6px rgba(255,140,30,0.8)); }
+.fire .flames { transform-box: fill-box; transform-origin: 50% 100%; animation: sway 0.9s ease-in-out infinite alternate; }
+@keyframes sway { 0% { transform: scale(1, 1) skewX(0deg); } 40% { transform: scale(0.95, 1.07) skewX(3deg); } 100% { transform: scale(1.04, 0.94) skewX(-3deg); } }
+.fire .ember-spark { animation: rise 1.4s ease-out infinite; animation-delay: calc(var(--i) * -0.35s); }
+@keyframes rise { 0% { transform: translate(0, 0); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(calc((var(--i) - 1.5) * 6px), -70px); opacity: 0; } }
+.fire-count { position: absolute; right: 4%; top: 4%; min-width: 34%; height: 34%; border-radius: 999px; background: #fff; color: #d2400c;
+  font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 0 rgba(0,0,0,0.25); }
+.fire.hiss .flames { animation: damp 0.6s ease-out; }
+@keyframes damp { 0% { transform: scale(0.5, 0.35); filter: brightness(0.6); } 100% { transform: scale(1); } }
+.drop { position: absolute; left: 0; top: 0; width: 9px; height: 12px; border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; pointer-events: none; z-index: 60;
+  background: radial-gradient(circle at 35% 30%, #fff, #7ff3ff 40%, #16b9d8); box-shadow: 0 0 6px rgba(120,240,255,0.8); }
+.steam { position: absolute; border-radius: 50%; pointer-events: none; z-index: 60; background: radial-gradient(circle, rgba(255,255,255,0.95), rgba(225,235,250,0.6) 45%, transparent 70%); }
+.acct-name { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 16px; background: rgba(255,255,255,0.07); }
+.acct-name .ghost { min-width: 0 !important; width: auto !important; padding: 7px 14px; font-size: 0.9rem; }
+#acct-form { display: flex; flex-direction: column; gap: 8px; }
+#acct-form input { font: inherit; font-size: 1.05rem; font-weight: 600; color: var(--text); background: rgba(10,6,40,0.5); border: 2px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 11px 13px; outline: none; }
+#acct-form input:focus { border-color: var(--accent); }
+.linkish { color: var(--dim); text-decoration: underline; font-size: 0.88rem; padding: 4px; }
+.fr-top { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+.fr-top > .ghost { min-width: 0; width: 100%; }
+.fr-top .err:empty { display: none; }
+#rank-list li.tap { cursor: pointer; }
+.unfriend { width: 30px; height: 30px; border-radius: 10px; color: var(--dim); background: rgba(255,255,255,0.08); }
+.card.form .big { padding: 14px 20px; }

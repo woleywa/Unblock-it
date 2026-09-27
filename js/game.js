@@ -12,6 +12,7 @@ const INTRO = {
   ice: 'New: ice. It melts a step each time a block leaves.',
   frozen: 'New: frozen doors. They open after that many blocks leave.',
   layered: 'New: layered blocks. The outside leaves, the core stays behind.',
+  fire: 'New: fire! Each water block you drag out sprays every fire once. Out fire, open road.',
 };
 
 // ── Progress ─────────────────────────────────────────────────
@@ -62,7 +63,7 @@ function home() {
 }
 const STAGES = [
   ['Warm-up', 'red'], ['Getting busy', 'orange'], ['Walls', 'purple'],
-  ['On ice', 'sky'], ['Frosty doors', 'blue'], ['Layers', 'pink'],
+  ['On ice', 'sky'], ['Frosty doors', 'blue'], ['Layers', 'pink'], ['Fire', 'orange'],
 ];
 function levelList() {
   const g = $('level-grid');
@@ -137,11 +138,24 @@ function doorBox(gt) {
 function blockEl(p) {
   const d = el('block', { width: p.w * cs + 'px', height: p.h * cs + 'px' });
   d.dataset.id = p.id;
+  d.dataset.h = p.h;
   d.innerHTML = Art.blockSVG(p, cs);
   place(d, p.r, p.c);
   return d;
 }
-function place(d, r, c) { const [x, y] = px(r, c); d.style.transform = `translate(${x}px, ${y}px)`; }
+// Blocks lower on the board are drawn on top, so a block's side and shadow tuck behind the one below.
+function fireEl(p) {
+  const d = Art.fire(p.fire, cs);
+  d.dataset.fire = p.id;
+  d.dataset.h = 1;
+  place(d, p.r, p.c);
+  return d;
+}
+function place(d, r, c) {
+  const [x, y] = px(r, c);
+  d.style.transform = `translate(${x}px, ${y}px)`;
+  d.style.setProperty('--z', 1 + Math.round(r) + (+d.dataset.h || 1));
+}
 
 function render() {
   const b = $('board');
@@ -154,7 +168,7 @@ function render() {
     b.appendChild(el(walls.has(r + ',' + c) ? 'wall' : 'cell', { left: x + 3 + 'px', top: y + 3 + 'px', width: cs - 6 + 'px', height: cs - 6 + 'px', borderRadius: Math.round(cs * 0.2) + 'px' }));
   }
   for (const gt of st.gates) b.appendChild(Art.door(gt, doorBox(gt), gut));
-  for (const p of st.pieces) b.appendChild(blockEl(p));
+  for (const p of st.pieces) b.appendChild(p.fire ? fireEl(p) : blockEl(p));
   status();
 }
 
@@ -210,11 +224,24 @@ $('board').addEventListener('pointermove', e => {
     const out = exitFor(p, drag.r, drag.c, push);
     if (out) { finishDrag(out); return; }
   }
-  // Follow the finger a little past the snapped cell, for feel.
-  const fr = Math.max(-0.25, Math.min(0.25, tr - drag.r)), fc = Math.max(-0.25, Math.min(0.25, tc - drag.c));
+  // Glide with the finger between cells wherever there's room (the snapped cell moves on at half a
+  // cell); against something, give just a little, like pressing on jelly.
   const fits = (sr, sc) => Engine.fits(level, drag.g, p, drag.r + sr, drag.c + sc);
-  const [x, y] = px(drag.r + (fits(Math.sign(fr), 0) ? fr : 0), drag.c + (fits(0, Math.sign(fc)) ? fc : 0));
-  d.style.transform = `translate(${x}px, ${y}px)`;
+  const give = v => Math.sign(v) * Math.min(0.05, Math.abs(v) * 0.2);
+  const lean = (v, free) => free ? Math.max(-0.49, Math.min(0.49, v)) : give(v);
+  const dr = tr - drag.r, dc = tc - drag.c;
+  let fr = lean(dr, Math.abs(dr) > 0.01 && fits(Math.sign(dr), 0)), fc = lean(dc, Math.abs(dc) > 0.01 && fits(0, Math.sign(dc)));
+  // Both ways at once only if the diagonal cell is free too; otherwise the stronger pull wins.
+  if (Math.abs(fr) > 0.05 && Math.abs(fc) > 0.05 && !fits(Math.sign(fr), Math.sign(fc))) {
+    if (Math.abs(fr) > Math.abs(fc)) fc = give(dc); else fr = give(dr);
+  }
+  drag.fr = fr; drag.fc = fc;
+  if (!drag.raf) drag.raf = requestAnimationFrame(() => {
+    if (!drag) return;
+    drag.raf = 0;
+    const [x, y] = px(drag.r + drag.fr, drag.c + drag.fc);
+    drag.d.style.transform = `translate(${x}px, ${y}px)`;
+  });
 });
 
 const endDrag = () => {
@@ -227,7 +254,8 @@ $('board').addEventListener('pointerup', endDrag);
 $('board').addEventListener('pointercancel', endDrag);
 
 function finishDrag(out) {
-  const { p, d, r0, c0, r, c } = drag;
+  const { p, d, r0, c0, r, c, raf } = drag;
+  if (raf) cancelAnimationFrame(raf);
   drag = null;
   d.classList.remove('dragging');
   const movedAtAll = out || r !== r0 || c !== c0;
@@ -257,6 +285,13 @@ function leave(id, d, gt, r, c) {
   if (navigator.vibrate) navigator.vibrate(12);
   const before = st.gates.filter(g => g.frozen).length, iced = st.pieces.filter(q => q.ice).length;
   const icedIds = st.pieces.filter(q => q.ice).map(q => q.id);
+  // Water: drops fly from the door onto every fire.
+  const fires = p.color === 'water' ? st.pieces.filter(q => q.fire) : [];
+  if (fires.length && door) {
+    const x0 = door.offsetLeft + door.offsetWidth / 2, y0 = door.offsetTop + door.offsetHeight / 2;
+    fires.forEach((f, i) => { const [x, y] = px(f.r + 0.5, f.c + 0.5); Art.sprinkle($('board'), x0, y0, x, y, 120 + i * 60); });
+    setTimeout(Sound.splash, 150);
+  }
   Engine.applyExit(level, st, id, r, c, gt);
   setTimeout(() => {
     busy = false;
@@ -271,8 +306,18 @@ function leave(id, d, gt, r, c) {
       Art.burst($('board'), x, y, 'ice', [0, -1]);
       Art.burst($('board'), x, y, q.color, [0, 1]);
     }
-    if (!st.pieces.length) win();
-  }, 280);
+    // Fires the water reached: out in a puff of steam, or damped (one step lower).
+    let out = false;
+    for (const f of fires) {
+      const [x, y] = px(f.r + 0.5, f.c + 0.5);
+      const still = st.pieces.find(q => q.id === f.id);
+      Art.steam($('board'), x, y - cs * 0.1, !still);
+      if (!still) out = true;
+      else { const e = document.querySelector(`[data-fire="${f.id}"]`); if (e) e.classList.add('hiss'); }
+    }
+    if (fires.length) Sound.sizzle(out);
+    if (Engine.done(st)) win();
+  }, fires.length ? 560 : 280);
 }
 
 // ── Win ──────────────────────────────────────────────────────
@@ -289,6 +334,7 @@ function win() {
   progress.stars[idx] = Math.max(starsOf(idx), s);
   progress.moves[idx] = Math.min(progress.moves[idx] || Infinity, moves);
   saveProgress();
+  if (window.Online) window.Online.putSave(progress).catch(e => console.warn(e));
   winBoard(idx, moves);
   $('next').hidden = idx >= LEVELS.length - 1;
 }
@@ -301,7 +347,7 @@ try { askedName = localStorage.getItem('unblock_asked_name') === '1'; } catch (e
 function meChip() {
   const on = window.Online;
   $('me-chip').hidden = !on;
-  if (on) $('me-chip').textContent = on.name ? `👤 ${on.name} · change` : '👤 Pick a nickname';
+  if (on) $('me-chip').textContent = (on.name ? `👤 ${on.name}` : '👤 Pick a nickname') + (on.account ? ' ✓' : ' · guest');
 }
 
 let nameDone = null;
@@ -328,7 +374,7 @@ $('name-form').addEventListener('submit', async e => {
   $('name-save').disabled = false;
 });
 $('name-cancel').addEventListener('click', () => { $('name-modal').hidden = true; });
-$('me-chip').addEventListener('click', () => askName());
+$('me-chip').addEventListener('click', () => Social.account());
 
 // Win card: this level's best three, and an invitation to join the leaderboard.
 async function winBoard(level, m) {
@@ -364,6 +410,7 @@ async function ranks() {
   show('ranks');
   document.querySelectorAll('#rank-tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === rankTab));
   if (rankTab === 'teams') return Social.rankTeams();
+  if (rankTab === 'friends') return Social.rankFriends();
   const list = $('rank-list'), meBox = $('rank-me');
   const on = window.Online;
   list.innerHTML = ''; meBox.innerHTML = '';
@@ -377,8 +424,10 @@ async function ranks() {
       : '<button class="big" id="rank-join">Pick a nickname to join</button>';
     if (!on.name) $('rank-join').addEventListener('click', () => askName(ranks));
     list.innerHTML = rows.length ? rows.map((r, i) =>
-      `<li class="${r.mine ? 'mine' : ''}"><span class="pos">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><span class="who">${esc(r.name)}</span><span class="st">★ ${r.stars}</span><span class="mv">${r.moves} moves</span></li>`).join('')
+      `<li class="${r.mine ? 'mine' : 'tap'}" data-uid="${esc(r.uid)}" data-name="${esc(r.name)}"><span class="pos">${i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</span><span class="who">${esc(r.name)}</span><span class="st">★ ${r.stars}</span><span class="mv">${r.moves} moves</span></li>`).join('')
       : '<p class="note">No one yet — be the first!</p>';
+    // Tap someone to add them as a friend.
+    list.querySelectorAll('li.tap').forEach(li => li.addEventListener('click', () => Social.offerFriend(li.dataset.uid, li.dataset.name)));
   } catch (e) {
     console.warn(e);
     meBox.innerHTML = `<p class="note">${e.code === 'permission-denied' ? 'The leaderboard isn’t set up yet.' : 'Couldn’t load the leaderboard — check your connection.'}<br><button class="ghost small" id="rank-retry">Try again</button></p>`;
@@ -387,12 +436,27 @@ async function ranks() {
 }
 $('to-board').addEventListener('click', ranks);
 $('ranks-back').addEventListener('click', home);
+// Progress lives on this device and in the account's private save; merge both ways (best of each).
+async function syncProgress() {
+  const on = window.Online;
+  if (!on || !(await on.ready)) return;
+  try {
+    const s = await on.getSave();
+    const cs = s.stars || {}, cm = s.moves || {};
+    for (const k of Object.keys(cs)) if (cs[k] > starsOf(k)) progress.stars[k] = cs[k];
+    for (const k of Object.keys(cm)) if (!(progress.moves[k] <= cm[k])) progress.moves[k] = cm[k];
+    saveProgress();
+    const behind = Object.keys(progress.stars).some(k => !(cs[k] >= progress.stars[k])) || Object.keys(progress.moves).some(k => !(cm[k] <= progress.moves[k]));
+    if (behind) await on.putSave(progress);
+    if (on.name) on.submit(null, 0, totals()).catch(() => {});
+    if (!$('home').hidden) home();
+  } catch (e) { console.warn(e); }
+}
 window.addEventListener('online-ready', () => {
-  window.Online.ready.then(() => {
-    meChip();
-    if (window.Online.name) window.Online.submit(null, 0, totals()).catch(() => {});
-  });
+  window.Online.ready.then(ok => { meChip(); if (ok) syncProgress(); });
 });
+// Signed in or out: a different account now.
+window.addEventListener('online-user', () => { meChip(); syncProgress(); });
 
 // ── Buttons ──────────────────────────────────────────────────
 $('play').addEventListener('click', () => { Sound.unlock(); start(firstOpen()); });

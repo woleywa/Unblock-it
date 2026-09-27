@@ -409,7 +409,7 @@ const Social = (() => {
       if (o.team) {
         const t = o.team;
         const [members, rank] = await Promise.all([o.teamMembers(t.code), o.myTeamRank()]);
-        html += `<div class="hero team-hero"><small>Your team</small><b>${esc(t.name)}</b><small>★ ${t.stars} · #${rank} of all teams · ${t.members}/20 players</small></div>
+        html += `<div class="hero team-hero"><small>Your team</small><b>${esc(t.name)}</b><button class="rename" id="team-rename" aria-label="Rename team">✏️</button><small>★ ${t.stars} · #${rank} of all teams · ${t.members}/20 players</small></div>
           <button class="ghost" id="team-invite">📨 Invite · code <b>${t.code}</b></button>
           <h3 class="sec">Players</h3><ol class="rank-list">${members.map((m, i) =>
             `<li class="${m.mine ? 'mine' : ''}"><span class="pos">${medal(i)}</span><span class="who">${esc(m.name)}</span><span class="st">★ ${m.stars}</span><span class="mv">${m.levels} lvl</span></li>`).join('')}</ol>
@@ -418,7 +418,7 @@ const Social = (() => {
       } else if (!invite) {
         html += `<p class="note">Team up! Everyone’s stars add up on the team leaderboard, and your challenges show up for each other.</p>
           <form class="panel" id="team-new" autocomplete="off"><h3>Start a team</h3>
-            <input id="team-new-name" maxlength="20" placeholder="Team name" spellcheck="false"><button class="big" type="submit">Create team</button></form>
+            <input id="team-new-name" maxlength="40" placeholder="Team name, e.g. 🦙 Llamas" spellcheck="false"><button class="big" type="submit">Create team</button></form>
           <form class="panel" id="team-join" autocomplete="off"><h3>Join a team</h3>
             <input id="team-join-code" maxlength="8" placeholder="Invite code" autocapitalize="characters" spellcheck="false"><button class="ghost" type="submit">Join</button></form>
           <p class="err" id="team-err"></p>`;
@@ -439,6 +439,11 @@ const Social = (() => {
       act('team-join', el => busyDo(el, 'team-err', () => o.joinTeam($('team-join-code').value, totals())));
       act('team-invite', () => share('Unblock It team', `Join my team “${o.team.name}” in Unblock It! Code ${o.team.code}.`, link('join', o.team.code)));
       act('team-chs', () => list());
+      act('team-rename', () => {
+        const n = window.prompt('New team name', o.team.name);
+        if (n == null || n.trim() === o.team.name) return;
+        o.renameTeam(n).then(() => { toast('Team renamed'); team(); }).catch(e => toast(errText(e)));
+      });
       act('team-leave', el => { if (confirm(`Leave ${o.team.name}? Your stars leave with you.`)) busyDo(el.parentNode, null, () => o.leaveTeam(totals())); });
     } catch (e) {
       console.warn(e);
@@ -472,16 +477,140 @@ const Social = (() => {
     }
   }
 
-  // ── Links: #join=CODE (team) and #c=CODE (challenge) ──────
+  // ── Account: nickname, email + password, sign in/out ──────
+  let acctMode = 'save';
+  function account() {
+    const o = on();
+    if (!o) { toast('This needs an internet connection'); return; }
+    $('acct-nick').innerHTML = o.name ? `Nickname: <b>${esc(o.name)}</b>` : 'No nickname yet';
+    $('acct-rename').textContent = o.name ? 'Change' : 'Pick one';
+    const body = $('acct-body');
+    if (o.account) {
+      body.innerHTML = `<p class="note small">Signed in as <b>${esc(o.account)}</b>. Your stars, team and friends are saved to your account — sign in with it on any device.</p>
+        <button class="ghost" id="acct-out" type="button">Sign out on this device</button>`;
+      $('acct-out').addEventListener('click', async () => {
+        if (!confirm('Sign out? This device goes back to a fresh guest. Your account keeps everything.')) return;
+        try {
+          progress = { stars: {}, moves: {} }; saveProgress();
+          store = { known: [], runs: {} }; persist();
+          await o.signOut();
+          $('acct').hidden = true; home(); toast('Signed out');
+        } catch (e) { toast(errText(e)); }
+      });
+    } else {
+      const signin = acctMode === 'signin';
+      body.innerHTML = `<p class="note small">${signin
+        ? 'Sign in to the account you made on another device. What you’ve played here is added to it.'
+        : 'You’re playing as a guest on this device. Add an email and password to keep your progress safe and play on other devices — even the home-screen app and Safari.'}</p>
+        <form id="acct-form" autocomplete="on">
+          <input type="email" id="acct-email" placeholder="Email" autocomplete="email" autocapitalize="off" spellcheck="false">
+          <input type="password" id="acct-pw" placeholder="${signin ? 'Password' : 'Password (6+ characters)'}" autocomplete="${signin ? 'current-password' : 'new-password'}">
+          <button class="big" type="submit" id="acct-go">${signin ? 'Sign in' : 'Save my progress'}</button>
+        </form>
+        <p class="err" id="acct-err"></p>
+        ${signin ? '<button class="linkish" id="acct-forgot" type="button">Forgot your password?</button>' : ''}
+        <button class="linkish" id="acct-mode" type="button">${signin ? 'New here? Save this device’s progress instead' : 'I already have an account — sign in'}</button>`;
+      $('acct-mode').addEventListener('click', () => { acctMode = signin ? 'save' : 'signin'; account(); });
+      if (signin) $('acct-forgot').addEventListener('click', async () => {
+        const email = $('acct-email').value;
+        if (!email.trim()) { $('acct-err').textContent = 'Type your email first'; return; }
+        try { await o.resetPassword(email); $('acct-err').textContent = ''; toast('Check your email for a reset link'); } catch (e) { $('acct-err').textContent = e.message; }
+      });
+      $('acct-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const email = $('acct-email').value, pw = $('acct-pw').value;
+        $('acct-go').disabled = true; $('acct-err').textContent = '';
+        try {
+          if (signin) {
+            // Guest runs on this device don't belong to the account.
+            store = { known: store.known, runs: {} }; persist();
+            await o.signIn(email, pw);
+            toast(o.name ? `Welcome back, ${o.name}!` : 'Signed in');
+          } else {
+            await o.createAccount(email, pw);
+            toast('Saved! Sign in with this email on your other devices');
+          }
+          acctMode = 'save';
+          $('acct').hidden = true;
+          meChip();
+        } catch (err) { console.warn(err); $('acct-err').textContent = err.message || errText(err); }
+        if ($('acct-go')) $('acct-go').disabled = false;
+      });
+    }
+    $('acct').hidden = false;
+  }
+  $('acct-close').addEventListener('click', () => { $('acct').hidden = true; });
+  $('acct-rename').addEventListener('click', () => { $('acct').hidden = true; askName(account); });
+
+  // ── Friends ───────────────────────────────────────────────
+  async function rankFriends() {
+    const list = $('rank-list'), meBox = $('rank-me');
+    list.innerHTML = '';
+    meBox.innerHTML = '<p class="note">Loading…</p>';
+    const o = on();
+    if (!o || !(await o.ready)) { meBox.innerHTML = '<p class="note">Friends need an internet connection.</p>'; return; }
+    if (!o.name) {
+      meBox.innerHTML = '<button class="big" id="fr-nick">Pick a nickname to add friends</button>';
+      $('fr-nick').addEventListener('click', () => askName(ranks));
+      return;
+    }
+    try {
+      await o.submit(null, 0, totals());
+      const rows = await o.friendsBoard();
+      meBox.innerHTML = `<div class="fr-top">
+        <form class="code-row" id="fr-add" autocomplete="off"><input id="fr-name" placeholder="Friend’s nickname" spellcheck="false" autocapitalize="off"><button class="ghost" type="submit">Add</button></form>
+        <p class="err" id="fr-err"></p>
+        <button class="ghost" id="fr-share">📨 Send my friend link</button></div>`;
+      list.innerHTML = rows.length > 1 ? rows.map((r, i) =>
+        `<li class="${r.mine ? 'mine' : ''}"><span class="pos">${medal(i)}</span><span class="who">${esc(r.name)}</span><span class="st">★ ${r.stars}</span>`
+        + (r.mine ? `<span class="mv">you</span>` : `<button class="unfriend" data-uid="${esc(r.uid)}" data-name="${esc(r.name)}" aria-label="Remove">✕</button>`) + '</li>').join('')
+        : '<p class="note">Add friends by nickname, or send them your link — then you can race each other here.</p>';
+      $('fr-add').addEventListener('submit', async e => {
+        e.preventDefault();
+        $('fr-err').textContent = '';
+        try { const n = await o.addFriend($('fr-name').value); toast(`${n} added`); rankFriends(); }
+        catch (err) { $('fr-err').textContent = err.message || errText(err); }
+      });
+      $('fr-share').addEventListener('click', () => share('Unblock It', `Add me as a friend on Unblock It — I’m ${o.name}!`, link('f', o.uid)));
+      list.querySelectorAll('.unfriend').forEach(b => b.addEventListener('click', async () => {
+        if (!confirm(`Remove ${b.dataset.name} from your friends?`)) return;
+        try { await o.removeFriend(b.dataset.uid); rankFriends(); } catch (e) { toast(errText(e)); }
+      }));
+    } catch (e) {
+      console.warn(e);
+      meBox.innerHTML = `<p class="note">${esc(errText(e))}<br><button class="ghost small" id="rank-retry">Try again</button></p>`;
+      $('rank-retry').addEventListener('click', ranks);
+    }
+  }
+  // From the players board, or a friend link.
+  function offerFriend(f, name) {
+    needName(async () => {
+      const o = on();
+      if (f === o.uid) return;
+      if (o.friends.includes(f)) { toast(`${name || 'They'} ${name ? 'is' : 'are'} already your friend`); return; }
+      if (!confirm(`Add ${name || 'this player'} as a friend?`)) return;
+      try { const n = await o.addFriendId(f); toast(`${n} added to your friends`); } catch (e) { toast(e.message || errText(e)); }
+    });
+  }
+  window.addEventListener('online-user', () => { cur = null; });
+
+  // ── Links: #join=CODE (team), #c=CODE (challenge), #f=UID (friend) ──
   function route() {
+    const fm = location.hash.match(/^#f=([A-Za-z0-9]{10,40})$/);
     const m = location.hash.match(/^#(join|c)=([A-Za-z0-9]{6})$/);
-    if (!m) return;
+    if (!m && !fm) return;
     window.history.replaceState(null, '', location.pathname + location.search);
+    if (fm) {
+      on().ready.then(async () => {
+        try { const p = await on().getFriendName(fm[1]); offerFriend(fm[1], p); } catch (e) { offerFriend(fm[1]); }
+      });
+      return;
+    }
     const code = m[2].toUpperCase();
     if (m[1] === 'join') { pendingJoin = code; team(); } else openCh(code);
   }
   window.addEventListener('hashchange', route);
-  if (/^#(join|c)=/.test(location.hash)) {
+  if (/^#(join|c|f)=/.test(location.hash)) {
     if (window.Online) route(); else window.addEventListener('online-ready', route, { once: true });
   }
 
@@ -491,5 +620,5 @@ const Social = (() => {
   $('ch-back').addEventListener('click', list);
   $('team-back').addEventListener('click', home);
 
-  return { rankTeams, openCh, list, team };
+  return { rankTeams, rankFriends, offerFriend, account, openCh, list, team };
 })();

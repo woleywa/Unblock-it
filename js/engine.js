@@ -11,9 +11,13 @@
 // level: { W, H, walls: [[r, c], …], tracks: [[r, c, color], …], pieces, gates, tickPerCell }
 //   a track cell only lets pieces of its colour move across it
 // Ice and frozen exits count down once per piece that leaves (ice: per cell with tickPerCell).
+// Fire (fire: n) is a 1×1 piece that never moves and blocks its cell; every water piece (color
+// 'water') that leaves sprays all fires once, and a fire at 0 goes out (the cell is free). A level is
+// done when every block has left; fires still burning then don't matter.
 const Engine = (() => {
   const clone = s => JSON.parse(JSON.stringify(s));
-  const movable = p => !p.ice && !p.lock && p.color !== '?';
+  const movable = p => !p.ice && !p.lock && !p.fire && p.color !== '?';
+  const done = st => !st.pieces.some(p => p.color !== '?' && !p.fire);
 
   const rects = new Map();
   function offsets(p) {
@@ -134,6 +138,7 @@ const Engine = (() => {
     }
     if (p.inner) st.pieces = st.pieces.map(x => x.id === pieceId ? { ...x, r, c, color: x.inner, inner: undefined, key: false } : x);
     else st.pieces = st.pieces.filter(x => x.id !== pieceId);
+    if (p.color === 'water') st.pieces = st.pieces.filter(q => !q.fire || q.fire > 1).map(q => q.fire ? { ...q, fire: q.fire - 1 } : q);
     const tick = level.tickPerCell ? offsets(p).length : 1;
     for (const q of st.pieces) {
       if (q.ice) q.ice = Math.max(0, q.ice - tick);
@@ -466,7 +471,7 @@ const Engine = (() => {
     let st = { pieces: clone(level.pieces), gates: clone(level.gates) };
     const steps = [];
     while (true) {
-      if (!st.pieces.some(p => p.color !== '?')) return { ok: true, steps, final: st };
+      if (done(st)) return { ok: true, steps, final: st };
       const ex = findExit(level, st);
       if (ex) {
         const p = st.pieces.find(x => x.id === ex.pieceId);
@@ -504,7 +509,7 @@ const Engine = (() => {
     return out;
   }
 
-  return { solve, movable, path, cellsOf, fastSearch, grid, reachable, fits, gateFor, laneOf, applyExit };
+  return { solve, movable, done, path, cellsOf, fastSearch, grid, reachable, fits, gateFor, laneOf, applyExit };
 })();
 
 if (typeof module !== 'undefined') module.exports = Engine;

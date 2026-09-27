@@ -27,6 +27,8 @@ const STAGES = [
   { n: 5, W: [6, 6], H: [7, 8], colors: 4, fill: 0.72, ice: true, shapes: ['dot', 'bar2h', 'bar2v', 'sq', 'l1', 'l2', 'l3', 'l4', 't'], extra: [3, 7], note: 'ice' },
   { n: 5, W: [6, 7], H: [8, 9], colors: 4, fill: 0.72, ice: true, frozen: true, walls: true, shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z'], extra: [4, 10], note: 'frozen' },
   { n: 5, W: [7, 7], H: [8, 10], colors: 5, fill: 0.74, ice: true, frozen: true, layered: true, walls: true, shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z', 'big'], extra: [6, 14], note: 'layered' },
+  // Fire: 2–4 burning cells; water blocks put them out as they leave.
+  { n: 5, W: [6, 7], H: [7, 9], colors: 3, fill: 0.66, fire: true, ice: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't'], extra: [3, 9], note: 'fire' },
 ];
 
 function shapeBox(sh) { return { h: Math.max(...sh.map(q => q[0])) + 1, w: Math.max(...sh.map(q => q[1])) + 1 }; }
@@ -46,7 +48,9 @@ function makeLevel(st) {
   }
   const occ = Array.from({ length: H }, () => Array(W).fill(0));
   walls.forEach(([r, c]) => occ[r][c] = -1);
-  const colors = COLORS.slice().sort(() => rand() - 0.5).slice(0, st.colors);
+  // Water is blue-green, so fire levels leave out the blues.
+  const colors = COLORS.filter(c => !st.fire || (c !== 'sky' && c !== 'blue')).sort(() => rand() - 0.5).slice(0, st.colors);
+  if (st.fire) colors.push('water', 'water');
   const pieces = [];
   const free = H * W - walls.length;
   let used = 0, tries = 0;
@@ -61,12 +65,25 @@ function makeLevel(st) {
     pieces.push(p);
     used += sh.length;
   }
-  const inUse = [...new Set(pieces.map(p => p.color))];
+  if (st.fire) {
+    const water = pieces.filter(p => p.color === 'water').length;
+    if (water < 2 || water > 4) return null;
+    // Fires go on empty cells, not in the outer ring (so they block the middle, not the doors).
+    const k = int(2, 4);
+    for (let i = 0, tries = 0; i < k && tries < 100; tries++) {
+      const r = int(1, H - 2), c = int(1, W - 2);
+      if (occ[r][c] !== 0) continue;
+      occ[r][c] = -3;
+      pieces.push({ id: pieces.length + 1, color: 'fire', fire: int(1, Math.min(2, water)), r, c, h: 1, w: 1, key: false, lock: 0, ice: 0 });
+      i++;
+    }
+  }
+  const inUse = [...new Set(pieces.filter(p => !p.fire).map(p => p.color))];
   // One exit per colour, wide enough for every piece of that colour on the side it's on.
   const gates = [];
   const taken = { L: new Set(), R: new Set(), T: new Set(), B: new Set() };
   for (const col of inUse) {
-    const mine = pieces.filter(p => p.color === col);
+    const mine = pieces.filter(p => p.color === col && !p.fire);
     for (let attempt = 0; attempt < 30; attempt++) {
       const side = pick(['L', 'R', 'T', 'B']);
       const flat = side === 'L' || side === 'R';
@@ -84,7 +101,7 @@ function makeLevel(st) {
     }
   }
   if (gates.length !== inUse.length) return null;
-  if (st.ice) for (const p of pieces) if (rand() < 0.2) p.ice = int(1, 3);
+  if (st.ice) for (const p of pieces) if (!p.fire && p.color !== 'water' && rand() < (st.fire ? 0.1 : 0.2)) p.ice = int(1, 3);
   if (st.frozen) for (const g of gates) if (rand() < 0.35) g.frozen = int(1, 3);
   if (st.layered) for (const p of pieces) if (rand() < 0.2 && (p.shape ? p.shape.length : p.h * p.w) >= 2) {
     const other = inUse.filter(c => c !== p.color);
@@ -99,6 +116,13 @@ function check(level, st) {
   // Difficulty = moves that only make room (not a block leaving).
   const moves = res.steps.length, extra = res.steps.filter(x => x.kind !== 'exit').length;
   if (extra < st.extra[0] || extra > st.extra[1]) return null;
+  // Fire must matter: some block has to cross a cell that was burning.
+  if (level.pieces.some(p => p.fire)) {
+    const burning = new Set(level.pieces.filter(p => p.fire).map(p => p.r + ',' + p.c));
+    const crosses = res.steps.some(s => Engine.path(level, s.before, s.pieceId, s.r, s.c)
+      .some(([r, c]) => Engine.cellsOf(s.before.pieces.find(p => p.id === s.pieceId), r, c).some(q => burning.has(q.join(',')))));
+    if (!crosses) return null;
+  }
   return moves;
 }
 

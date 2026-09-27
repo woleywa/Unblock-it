@@ -7,8 +7,11 @@ service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() { return request.auth != null; }
     function me() { return request.auth.uid; }
-    function validName(n) { return n is string && n.matches('^[A-Za-z0-9 _.-]{3,16}$'); }
-    function validTeamName(n) { return n is string && n.matches('^[A-Za-z0-9 _.!-]{3,20}$'); }
+    // Names may use any letters, numbers, emoji and punctuation (the app keeps them to 2–16/20
+    // characters); no slashes (the nickname is a document id), control characters or blank names.
+    function okText(n, max) { return n is string && n.size() >= 1 && n.size() <= max && n.matches('^[^/\\x00-\\x1f\\x7f]+$') && !n.matches('^\\s*$'); }
+    function validName(n) { return okText(n, 64); }
+    function validTeamName(n) { return okText(n, 80); }
     function ownsName(n) {
       return getAfter(/databases/$(database)/documents/names/$(n.lower())).data.uid == request.auth.uid;
     }
@@ -31,6 +34,17 @@ service cloud.firestore {
         && validName(request.resource.data.name)
         && key == request.resource.data.name.lower();
       allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // Private: a player's progress (so it follows their account) and friend list.
+    match /saves/{uid} {
+      allow read: if signedIn() && me() == uid;
+      allow create, update: if signedIn() && me() == uid
+        && request.resource.data.keys().hasOnly(['stars', 'moves', 'friends', 'updated'])
+        && (!('stars' in request.resource.data) || (request.resource.data.stars is map && request.resource.data.stars.size() <= 1000))
+        && (!('moves' in request.resource.data) || (request.resource.data.moves is map && request.resource.data.moves.size() <= 1000))
+        && (!('friends' in request.resource.data) || (request.resource.data.friends is list && request.resource.data.friends.size() <= 200));
+      allow delete: if false;
     }
 
     // A player's totals; score = stars × 100000 − moves so the board sorts on one field.
@@ -81,10 +95,14 @@ service cloud.firestore {
         && request.resource.data.created == request.time
         && teamOf(playerAfter(me())) == t
         && request.resource.data.stars == playerAfter(me()).stars;
-      allow update: if signedIn()
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'stars'])
-        && request.resource.data.members <= 20
-        && memberChange(t);
+      allow update: if signedIn() && (
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'stars'])
+          && request.resource.data.members <= 20
+          && memberChange(t))
+        // Any member can rename the team.
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
+          && validTeamName(request.resource.data.name)
+          && teamOf(playerBefore(me())) == t));
       allow delete: if false;
     }
 
