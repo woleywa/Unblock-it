@@ -75,8 +75,6 @@ function home() {
   const total = Object.values(progress.stars).reduce((a, b) => a + b, 0);
   $('stars-total').textContent = total ? `★ ${total}/${LEVELS.length * 3}` : '';
   $('play').textContent = total ? 'Continue' : 'Play';
-  $('sound').textContent = Sound.on ? '🔊' : '🔇';
-  $('sound').setAttribute('aria-label', Sound.on ? 'Sound on' : 'Sound off');
   meChip();
   show('home');
   if (typeof Social !== 'undefined') Social.helpBox();
@@ -752,7 +750,18 @@ $('play').addEventListener('click', () => { Sound.unlock(); start(firstOpen()); 
 $('to-levels').addEventListener('click', levelList);
 $('levels-back').addEventListener('click', home);
 $('game-back').addEventListener('click', () => chPlay ? chPlay.back() : levelList());
-$('sound').addEventListener('click', () => { Sound.toggle(); home(); });
+// ── Settings (from home and from a level) ───────────────────
+function settings() {
+  $('set-sound').textContent = Sound.on ? '🔊 Sound: on' : '🔇 Sound: off';
+  $('set-buzz').textContent = Native.buzzOn() ? '📳 Vibration: on' : '📴 Vibration: off';
+  $('settings').hidden = false;
+}
+$('settings-home').addEventListener('click', () => { Sound.unlock(); settings(); });
+$('settings-game').addEventListener('click', () => { Sound.unlock(); settings(); });
+$('set-sound').addEventListener('click', () => { Sound.toggle(); settings(); });
+$('set-buzz').addEventListener('click', () => { Native.setBuzz(!Native.buzzOn()); Native.buzz(); settings(); });
+$('set-tips').addEventListener('click', () => { Intro.reset(); $('set-tips').textContent = '✓ You’ll see them again'; });
+$('settings-done').addEventListener('click', () => { $('settings').hidden = true; $('set-tips').textContent = '💡 Show the “New!” tips again'; });
 $('undo').addEventListener('click', () => {
   if (busy || !history.length) return;
   const h = history.pop();

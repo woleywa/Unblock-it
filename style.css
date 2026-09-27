@@ -416,3 +416,15 @@ a.linkish { display: block; text-align: center; }
   padding-top: calc(12px + env(safe-area-inset-top)); padding-bottom: 10px; justify-content: center;
   background: rgba(34, 26, 96, 0.82); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 6px 18px rgba(0,0,0,0.25); }
 #levels .bar > * { max-width: 560px; }
+
+/* Settings */
+#settings { z-index: 27; }
+.settings-card { min-width: min(300px, 88vw); gap: 10px; }
+.settings-card .setting { width: 100%; }
+.setting-link { color: var(--dim); font-weight: 600; font-size: 0.9rem; margin: 2px 0 4px; }
+.settings-card { max-width: calc(100vw - 36px); box-sizing: border-box; }
+/* Level bar: room for up to five buttons without the title wrapping. */
+#game .bar { gap: 6px; }
+#game .bar .icon { width: 42px; height: 42px; flex: none; }
+#game .bar .title h2 { white-space: nowrap; font-size: clamp(1.05rem, 5vw, 1.35rem); }
+#game .bar .title span { white-space: nowrap; font-size: clamp(0.72rem, 3.3vw, 0.85rem); }

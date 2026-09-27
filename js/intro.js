@@ -277,5 +277,5 @@ const Intro = (() => {
   }
   document.getElementById('intro-ok').addEventListener('click', close);
 
-  return { show, close, has: k => !!SCENES[k] };
+  return { show, close, has: k => !!SCENES[k], reset: () => { try { localStorage.removeItem(SEEN); } catch (e) {} } };
 })();

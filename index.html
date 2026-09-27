@@ -25,12 +25,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=32">
+  <link rel="stylesheet" href="style.css?v=33">
 </head>
 <body>
   <div class="sky" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
   <main id="home" class="screen">
-    <button class="icon sound-btn" id="sound" aria-label="Sound">🔊</button>
+    <button class="icon sound-btn" id="settings-home" aria-label="Settings">⚙️</button>
     <div class="logo" aria-hidden="true">
     </div>
     <h1>Happy&nbsp;Blocks</h1>
@@ -113,6 +113,7 @@
       <button class="icon" id="hint-btn" aria-label="Hint" hidden>💡</button>
       <button class="icon" id="undo" aria-label="Undo">↶</button>
       <button class="icon" id="restart" aria-label="Restart">↻</button>
+      <button class="icon" id="settings-game" aria-label="Settings">⚙️</button>
     </header>
     <p id="hint"></p>
     <p id="clock" hidden></p>
@@ -132,6 +133,16 @@
     </form>
   </div>
 
+  <div id="settings" class="overlay" hidden>
+    <div class="card settings-card">
+      <h2>Settings</h2>
+      <button class="ghost setting" id="set-sound"></button>
+      <button class="ghost setting" id="set-buzz"></button>
+      <button class="ghost setting" id="set-tips">💡 Show the “New!” tips again</button>
+      <a class="setting-link" href="privacy.html">Privacy</a>
+      <button class="big" id="settings-done">Done</button>
+    </div>
+  </div>
   <div id="intro" class="overlay" hidden>
     <div class="card intro-card">
       <span class="new-tag">NEW!</span>
@@ -214,15 +225,15 @@
   <button id="upd-banner" hidden>✨ New version ready · <b>Tap to update</b></button>
   <div id="toast" hidden></div>
 
-  <script src="js/native.js?v=32"></script>
-  <script src="js/engine.js?v=32"></script>
-  <script src="js/levels.js?v=32"></script>
-  <script src="js/audio.js?v=32"></script>
-  <script src="js/art.js?v=32"></script>
-  <script src="js/challenge-levels.js?v=32"></script>
-  <script src="js/intro.js?v=32"></script>
-  <script src="js/game.js?v=32"></script>
-  <script src="js/social.js?v=32"></script>
-  <script type="module" src="js/online.js?v=32"></script>
+  <script src="js/native.js?v=33"></script>
+  <script src="js/engine.js?v=33"></script>
+  <script src="js/levels.js?v=33"></script>
+  <script src="js/audio.js?v=33"></script>
+  <script src="js/art.js?v=33"></script>
+  <script src="js/challenge-levels.js?v=33"></script>
+  <script src="js/intro.js?v=33"></script>
+  <script src="js/game.js?v=33"></script>
+  <script src="js/social.js?v=33"></script>
+  <script type="module" src="js/online.js?v=33"></script>
 </body>
 </html>

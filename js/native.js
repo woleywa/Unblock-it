@@ -33,6 +33,7 @@ const Native = (() => {
   }
   // A newer game on GitHub? Download it quietly; it's used from the next time the app opens (or right
   // away with now = true). What happened is kept in localStorage so the privacy page can show it.
+  const buzzOn = () => { try { return localStorage.getItem('unblock_buzz') !== 'off'; } catch (e) { return true; } };
   const LOG = 'unblock_update';
   let ready = null; // a downloaded update waiting to be switched to
   const note = o => { const v = { at: Date.now(), ...o }; try { localStorage.setItem(LOG, JSON.stringify(v)); } catch (e) {} return v; };
@@ -71,12 +72,15 @@ const Native = (() => {
     app,
     // A little tap in the hand when a block goes out.
     buzz() {
+      if (!buzzOn()) return;
       if (app && P.Haptics) quiet(P.Haptics.impact({ style: 'LIGHT' }));
       else if (navigator.vibrate) navigator.vibrate(12);
     },
     // The address to put in invite links (the app's own address only works inside the app).
     webBase: () => app ? WEB : location.origin + location.pathname,
     checkForUpdate,
+    buzzOn,
+    setBuzz: on => { try { localStorage.setItem('unblock_buzz', on ? 'on' : 'off'); } catch (e) {} },
     // Switch to the downloaded update now (reloads the game).
     applyUpdate: () => ready && P.CapacitorUpdater ? quiet(P.CapacitorUpdater.set({ id: ready })) : null,
     lastUpdateCheck: () => { try { return JSON.parse(localStorage.getItem(LOG) || 'null'); } catch (e) { return null; } },
