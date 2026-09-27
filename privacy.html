@@ -28,6 +28,7 @@
     p, li { color: var(--dim); }
     strong { color: var(--text); font-weight: 600; }
     a { color: #9be8ff; }
+    .ver { display: inline-block; margin: 0 0 10px; padding: 3px 12px; border-radius: 999px; font-size: 0.8rem; background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.14); }
     .meta { color: var(--dim); font-size: 0.9rem; margin: 0 0 18px; }
     .summary { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 6px 18px; }
     .summary li { margin: 8px 0; }
@@ -60,6 +61,7 @@
     <img src="icons/icon-192.png" alt="">
     <h1>Happy Blocks<br>Privacy Policy</h1>
   </header>
+  <p class="meta ver" id="ver" hidden></p>
   <p class="meta">Effective 27 September 2026 · applies to the Happy Blocks website, iPhone/iPad app and Android app.</p>
 
   <div class="summary">
@@ -153,6 +155,14 @@
   <footer><a href="./" class="back-link">← Back to Happy Blocks</a></footer>
 </main>
 <script>
+  // Which copy of the game this is: the app or the website, and the game version (build number).
+  fetch('version.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(v => {
+    if (!v) return;
+    const app = window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform();
+    const e = document.getElementById('ver');
+    e.textContent = `${app ? (Capacitor.getPlatform() === 'ios' ? 'iPhone app' : 'Android app') : 'Website'} · game version ${v.build}`;
+    e.hidden = false;
+  }).catch(() => {});
   // Opened from the game: go back to where you were (same screen, no reload). Opened directly: go to the game.
   document.querySelectorAll('#back, .back-link').forEach(a => a.addEventListener('click', e => {
     if (history.length > 1 && document.referrer && new URL(document.referrer).origin === location.origin) { e.preventDefault(); history.back(); }

@@ -29,6 +29,12 @@ const STAGES = [
   { n: 5, W: [7, 7], H: [8, 10], colors: 5, fill: 0.74, ice: true, frozen: true, layered: true, walls: true, shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z', 'big'], extra: [6, 14], note: 'layered' },
   // Fire: 2–4 burning cells; water blocks put them out as they leave.
   { n: 5, W: [6, 7], H: [7, 9], colors: 3, fill: 0.66, fire: true, ice: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't'], extra: [3, 9], note: 'fire' },
+  // Mixed bag: every mechanic at once.
+  { n: 5, W: [7, 7], H: [8, 9], colors: 3, fill: 0.7, fire: true, ice: true, frozen: true, walls: true, layered: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z'], extra: [6, 12] },
+  // Big boards: lots of blocks, lots of colours.
+  { n: 5, W: [8, 8], H: [9, 10], colors: 6, fill: 0.72, ice: true, frozen: true, walls: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z', 'big'], extra: [8, 16] },
+  // Expert: tight, deep puzzles.
+  { n: 5, W: [7, 8], H: [9, 10], colors: 5, fill: 0.76, ice: true, frozen: true, walls: true, layered: true, shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z', 'big'], extra: [12, 22] },
 ];
 
 function shapeBox(sh) { return { h: Math.max(...sh.map(q => q[0])) + 1, w: Math.max(...sh.map(q => q[1])) + 1 }; }

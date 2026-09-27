@@ -80,6 +80,7 @@ function home() {
 const STAGES = [
   ['Warm-up', 'red'], ['Getting busy', 'orange'], ['Walls', 'purple'],
   ['On ice', 'sky'], ['Frosty doors', 'blue'], ['Layers', 'pink'], ['Fire', 'orange'],
+  ['Mixed bag', 'green'], ['Big boards', 'purple'], ['Expert', 'red'],
 ];
 function levelList() {
   const g = $('level-grid');
@@ -679,9 +680,6 @@ window.addEventListener('resize', () => { if (!$('game').hidden) { layout(); ren
 
 Art.defs();
 home();
-// Which version of the game this is (the build number from the GitHub build; hidden when unknown).
-fetch('version.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : null)
-  .then(v => { if (v) $('ver').textContent = `version ${v.build}`; }).catch(() => {});
 openLevelLink();
 // Offline cache for the web version; the apps carry their files already (and a cache could go stale).
 if ('serviceWorker' in navigator && !Native.app) navigator.serviceWorker.register('sw.js').catch(() => {});
