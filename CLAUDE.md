@@ -101,7 +101,7 @@ version.
 - Exits: at its door with the way clear, a pull of ~0.18 cell toward it sends a block out; letting go
   at the door, or one cell away after moving toward it, or a flick (≥ 4 cells/s) from ≤ 4 cells away,
   does too. The leave animation starts from where the block is (no snap back).
-- Links: `#join=CODE` (team), `#c=CODE` (challenge), `#f=UID` (friend), `#level=N` (opens campaign level N
+- Links: `#join=CODE` (team), `#c=CODE` (challenge), `#f=UID` (friend), `?level=N` or `#level=N` (opens campaign level N
   for anyone, even if locked — the "Ask a friend to solve this" button under the board). On iPhone a link opens Safari, which is a different
   account from the home-screen app — so codes can be typed in too.
 - Note: game.js has a global `history` (undo stack) — use `window.history` for the browser's.

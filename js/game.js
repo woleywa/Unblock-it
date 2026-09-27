@@ -538,17 +538,20 @@ window.addEventListener('online-user', () => { meChip(); syncProgress(); hintBut
 
 // ── Sharing a level: a link that opens it for anyone, even if they haven't got that far ──
 $('ask-friend').addEventListener('click', async () => {
-  const n = idx + 1, url = `${Native.webBase()}#level=${n}`;
+  const n = idx + 1, url = `${Native.webBase()}?level=${n}`;
   const text = `Can you solve Level ${n} in Happy Blocks? Par is ${LEVELS[idx].par} moves — I'm stuck!`;
   if (navigator.share) { try { await navigator.share({ title: `Happy Blocks — Level ${n}`, text, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
   try { await navigator.clipboard.writeText(`${text} ${url}`); $('hint').textContent = 'Link copied — paste it to your friends.'; }
   catch (e) { window.prompt('Copy this link', url); }
 });
+// ?level=18 (what the button shares; nothing drops it) or the older #level=18.
 function openLevelLink() {
-  const m = location.hash.match(/^#level=(\d{1,3})$/);
-  if (!m) return;
-  window.history.replaceState(null, '', location.pathname + location.search);
-  const i = +m[1] - 1;
+  const q = new URLSearchParams(location.search), h = location.hash.match(/^#level=(\d{1,3})$/);
+  const n = q.get('level') || (h && h[1]);
+  if (!n || !/^\d{1,3}$/.test(n)) return;
+  q.delete('level');
+  window.history.replaceState(null, '', location.pathname + (q.toString() ? '?' + q : '') + (h ? '' : location.hash));
+  const i = +n - 1;
   if (i >= 0 && i < LEVELS.length) start(i);
 }
 window.addEventListener('hashchange', openLevelLink);
