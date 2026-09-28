@@ -533,44 +533,42 @@ $('hint-btn').addEventListener('click', () => {
     const s = hintPlan.steps.shift();
     if (!s) { $('hint').textContent = 'No hint found from here — try undo or restart.'; return; }
     drawStep({ pieceId: s.pieceId, r: s.r, c: s.c, side: s.kind === 'exit' ? s.before.gates.find(g => g.id === s.gateId).side : null });
-    $('hint').textContent = s.kind === 'exit' ? 'Hint: this block can go out now.' : 'Hint: move this block here.';
+    $('hint').textContent = s.kind === 'exit' ? 'Hint: this block can go out now — like this.' : 'Hint: move the glowing block like this.';
   }, 30);
 });
 
-// Show one move on the board: a glow on the block, a dotted route with an arrow (on out through its door
-// for an exit, side = that door's side), and a ghost where it ends up.
+// Show one move on the board as a little film: a see-through copy of the block glides the exact route
+// (on out through its door for an exit, side = that door's side; onto the trees for a beaver) and
+// fades, again and again, until the player moves. The real block glows.
 function drawStep({ pieceId, r, c, side }) {
   const p = st.pieces.find(x => x.id === pieceId);
   if (!p) return;
-  const route = Engine.path(level, st, pieceId, r, c);
   const b = $('board');
-  const W = level.W * cs + 2 * gut, H = level.H * cs + 2 * gut;
-  const [hr, hc] = Engine.cellsOf(p, 0, 0)[0];
-  const pts = route.map(([y, x]) => px(y + hr + 0.5, x + hc + 0.5));
+  const route = Engine.path(level, st, pieceId, r, c);
+  const pos = route.length ? route.slice() : [[p.r, p.c], [r, c]];
   if (side) {
-    const [dr, dc] = SIDE_DIR[side], last = route[route.length - 1], k = gapTo(side, p, ...last) + 1;
-    pts.push(px(last[0] + hr + 0.5 + dr * k, last[1] + hc + 0.5 + dc * k));
+    const [dr, dc] = SIDE_DIR[side], [lr, lc] = pos[pos.length - 1], k = gapTo(side, p, lr, lc) + Math.max(p.h, p.w) + 0.5;
+    pos.push([lr + dr * k, lc + dc * k]);
   } else if (p.color === 'beaver') {
-    // …and then onto the trees.
     const way = Object.values(SIDE_DIR).find(([sr, sc]) => woodAt(p, r, c, sr, sc));
-    if (way) pts.push(px(r + hr + 0.5 + way[0], c + hc + 0.5 + way[1]));
+    if (way) pos.push([r + way[0], c + way[1]]);
   }
-  if (pts.length < 2) pts.push(pts[0]);
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('class', 'hint-mark hint-path');
-  svg.setAttribute('width', W); svg.setAttribute('height', H);
-  const d = pts.map(([x, y], i) => (i ? 'L' : 'M') + x + ',' + y).join(' ');
-  const [ex, ey] = pts[pts.length - 1], [fx, fy] = pts[pts.length - 2] || pts[0];
-  const ang = Math.atan2(ey - fy, ex - fx), a = cs * 0.28;
-  const head = `M${ex - a * Math.cos(ang - 0.5)},${ey - a * Math.sin(ang - 0.5)} L${ex},${ey} L${ex - a * Math.cos(ang + 0.5)},${ey - a * Math.sin(ang + 0.5)}`;
-  svg.innerHTML = `<path d="${d}" class="route" stroke-width="${cs * 0.12}"/><path d="${head}" class="route head" stroke-width="${cs * 0.12}"/>`;
-  b.appendChild(svg);
-  if (!side) {
-    const ghost = blockEl({ ...p, r, c });
-    ghost.classList.add('hint-mark', 'ghost');
-    delete ghost.dataset.id;
-    b.appendChild(ghost);
-  }
+  if (pos.length < 2) pos.push(pos[0]);
+  const ghost = blockEl({ ...p });
+  ghost.classList.add('hint-mark', 'hint-ghost');
+  delete ghost.dataset.id;
+  ghost.style.transition = 'none';
+  b.appendChild(ghost);
+  // Even speed: each stretch gets time for its length; a short hold at the start and the end.
+  const len = pos.slice(1).map((q, i) => Math.hypot(q[0] - pos[i][0], q[1] - pos[i][1]));
+  const total = len.reduce((x, y) => x + y, 0) || 1, move = Math.min(2200, 380 + total * 200), hold = 450, dur = move + 2 * hold;
+  const tf = ([y, x]) => { const [X, Y] = px(y, x); return `translate(${X}px, ${Y}px)`; };
+  let t = 0;
+  const frames = [{ transform: tf(pos[0]), opacity: 0, offset: 0 }, { transform: tf(pos[0]), opacity: 0.75, offset: hold * 0.5 / dur }, { transform: tf(pos[0]), opacity: 0.75, offset: hold / dur }];
+  pos.slice(1).forEach((q, i) => { t += len[i]; frames.push({ transform: tf(q), opacity: 0.75, offset: (hold + move * t / total) / dur }); });
+  frames[frames.length - 1].opacity = side ? 0 : 0.75;
+  frames.push({ transform: tf(pos[pos.length - 1]), opacity: 0, offset: 1 });
+  ghost.animate(frames, { duration: dur, iterations: Infinity, easing: 'ease-in-out' });
   const blk = b.querySelector(`.block[data-id="${p.id}"]`);
   if (blk) blk.appendChild(el('hint-mark hint-glow'));
 }
