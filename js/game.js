@@ -134,7 +134,7 @@ let usedUndo = false, startedAt = 0; // for medals: no undo, fast solves
 function begin(lv, title, hint) {
   level = clone(lv);
   st = { pieces: clone(level.pieces), gates: clone(level.gates) };
-  moves = 0; history = []; busy = false; sol = []; watching = false; usedUndo = false; startedAt = 0;
+  moves = 0; history = []; busy = false; sol = []; watching = false; usedUndo = false; startedAt = 0; combo = 0; lastExit = 0;
   $('level-name').textContent = title;
   $('hint').textContent = hint || '';
   $('win').hidden = true;
@@ -410,6 +410,21 @@ function finishDrag(out, eat) {
 
 function settle(d) { d.classList.remove('settle'); void d.offsetWidth; d.classList.add('settle'); }
 
+// Blocks going out quickly one after another make a combo.
+let lastExit = 0, combo = 0;
+function comboPop(x, y) {
+  const now = performance.now();
+  combo = now - lastExit < 2200 ? combo + 1 : 1;
+  lastExit = now;
+  if (combo < 2 || watching) return;
+  const e = document.createElement('div');
+  e.className = 'combo';
+  e.textContent = combo >= 5 ? `🔥 Combo ×${combo}!` : `Combo ×${combo}!`;
+  Object.assign(e.style, { left: x + 'px', top: y + 'px', fontSize: Math.min(1.1 + combo * 0.12, 1.8) + 'rem' });
+  $('board').appendChild(e);
+  e.addEventListener('animationend', () => e.remove());
+}
+
 function leave(id, d, gt, r, c) {
   busy = true;
   Sound.exit();
@@ -422,6 +437,7 @@ function leave(id, d, gt, r, c) {
     door.classList.remove('pulse'); void door.offsetWidth; door.classList.add('pulse');
     const dir = { L: [-1, 0], R: [1, 0], T: [0, -1], B: [0, 1] }[gt.side];
     Art.burst($('board'), door.offsetLeft + door.offsetWidth / 2, door.offsetTop + door.offsetHeight / 2, p.color, dir);
+    comboPop(Math.min(Math.max(door.offsetLeft + door.offsetWidth / 2, 70), $('board').offsetWidth - 70), Math.min(Math.max(door.offsetTop + door.offsetHeight / 2, 30), $('board').offsetHeight - 30));
   }
   Native.buzz();
   const before = st.gates.filter(g => g.frozen).length, iced = st.pieces.filter(q => q.ice).length;

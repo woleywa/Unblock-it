@@ -80,6 +80,7 @@ const Extras = (() => {
   // The home screen button: today's number, the streak, and a tick once it's done.
   function homeButton() {
     chestButton();
+    nudge();
     const mc = Object.keys(meta.ach || {}).length, st = $('stars-total');
     if (st && st.textContent) st.textContent = st.textContent.split('  ·  🏅')[0] + `  ·  🏅 ${mc}`;
     const d = today(), done = meta.daily[d], n = streakNow();
@@ -249,6 +250,26 @@ const Extras = (() => {
   }
   $('medals-done').addEventListener('click', () => { $('medals').hidden = true; });
   $('stars-total').addEventListener('click', medals);
+
+  // ── Friends: who's just ahead of you (a friendly push), or that you lead ──
+  let nudgeAt = 0;
+  async function nudge() {
+    const o = window.Online, e = $('nudge');
+    if (!e || !o || !o.name || !(o.friends || []).length || Date.now() - nudgeAt < 60000) return;
+    nudgeAt = Date.now();
+    try {
+      const rows = await o.friendsBoard(), me = rows.find(r => r.mine);
+      if (!me) return;
+      const ahead = rows.filter(r => !r.mine && r.stars > me.stars).sort((a, b) => a.stars - b.stars)[0];
+      const behind = rows.filter(r => !r.mine && r.stars <= me.stars).sort((a, b) => b.stars - a.stars)[0];
+      e.textContent = ahead ? `🏁 ${ahead.name} is ${ahead.stars - me.stars} ★ ahead of you — catch up!`
+        : behind ? `👑 You lead your friends! ${behind.name} is ${me.stars - behind.stars} ★ behind.` : '';
+      e.classList.toggle('on', !!e.textContent);
+    } catch (err) { console.warn('nudge', err); }
+  }
+  $('nudge').addEventListener('click', () => { rankTab = 'friends'; ranks(); });
+  window.addEventListener('online-user', () => { nudgeAt = 0; setTimeout(nudge, 800); });
+  window.addEventListener('online-ready', () => setTimeout(nudge, 1500));
 
   applyStyle();
   $('to-daily').addEventListener('click', () => { Sound.unlock(); play(); });
