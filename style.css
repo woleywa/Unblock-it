@@ -534,3 +534,58 @@ button.stars-total { background: none; border: 0; padding: 4px 6px; cursor: poin
 .combo { position: absolute; transform: translate(-50%, -50%); z-index: 70; pointer-events: none; white-space: nowrap; font-weight: 700; color: #fff;
   text-shadow: 0 3px 0 #b36b00, 0 0 14px rgba(255,200,60,0.9); animation: combo 1s cubic-bezier(.3,1.6,.5,1) forwards; }
 @keyframes combo { 0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; } 25% { transform: translate(-50%, -80%) scale(1.15); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(-50%, -160%) scale(1); opacity: 0; } }
+
+/* ── Story mode ── */
+.story-btn { background: linear-gradient(180deg, rgba(126,214,255,0.25), rgba(180,140,255,0.2)); border-color: rgba(180,200,255,0.5); }
+#story { padding: 0; }
+#story-stage { position: fixed; inset: 0; overflow: hidden; background: #1b2458; }
+.st-bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.st-bg .blade { transform-box: fill-box; transform-origin: 50% 100%; animation: sway 2.6s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -0.4s); }
+.st-bg .sun { animation: nextup 4s ease-in-out infinite; }
+.st-bg .twinkle { animation: nextup 2.4s ease-in-out infinite; animation-delay: calc(var(--i) * -0.5s); }
+.st-bg .window { animation: nextup 3s ease-in-out infinite; }
+.st-chars { position: absolute; left: 0; right: 0; bottom: calc(14vh + env(safe-area-inset-bottom)); height: 0; }
+.st-char { position: absolute; bottom: 0; width: calc(min(33vw, 170px) * var(--s)); transform: translateX(-50%); }
+.st-char .st-svg { width: 100%; height: auto; display: block; overflow: visible; filter: drop-shadow(0 6px 4px rgba(0,0,0,0.3)); }
+.st-body { transform-origin: 50% 100%; animation: breathe 2.8s ease-in-out infinite; }
+@keyframes breathe { 0%,100% { transform: scale(1, 1); } 50% { transform: scale(1.015, 0.985); } }
+.st-char .eyes { animation: blink 4.5s infinite; }
+@keyframes blink { 0%, 94%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
+.st-char .ant { transform-box: fill-box; transform-origin: 50% 100%; animation: sway 1.8s ease-in-out infinite alternate; }
+.st-char .oh { display: none; }
+.st-char.speaking .st-body { animation: talk 0.35s ease-in-out infinite alternate; }
+@keyframes talk { from { transform: translateY(0) scale(1); } to { transform: translateY(-3px) scale(1.02, 0.99); } }
+.st-char.walking .st-body { animation: walk 0.32s ease-in-out infinite alternate; }
+@keyframes walk { from { transform: translateY(0) rotate(-3deg); } to { transform: translateY(-8px) rotate(3deg); } }
+.st-body.a-jump { animation: hop 0.6s cubic-bezier(.3,1.6,.5,1); }
+@keyframes hop { 0%,100% { transform: translateY(0); } 40% { transform: translateY(-40px) scale(0.96, 1.05); } }
+.st-body.a-gasp { animation: gasp 0.6s ease-out; }
+@keyframes gasp { 0% { transform: scale(1); } 30% { transform: scale(1.08, 0.94) translateY(-6px); } 100% { transform: scale(1); } }
+.st-body.a-gasp .oh, .st-body.a-scream .oh { display: inline; } .st-body.a-gasp .smile, .st-body.a-scream .smile { display: none; }
+.st-body.a-scream { animation: scream 0.12s linear 10; } .st-body.a-scream .oh { transform-box: fill-box; transform-origin: center; transform: scale(1.6); }
+@keyframes scream { 0% { transform: translateX(-3px) scale(1.04); } 50% { transform: translateX(3px) scale(1.06, 0.98); } 100% { transform: translateX(-3px); } }
+.st-body.a-point .arm-r, .st-body.a-salute .arm-r { transition: transform 0.2s; }
+.st-body.a-point .arm-r { transform: rotate(-70deg); } .st-body.a-salute .arm-r { transform: rotate(-150deg); }
+.st-body.a-stop .arm-r { transform: rotate(-100deg); }
+.st-body.a-wiggle { animation: wiggle 0.5s ease-in-out 2; }
+.st-char.pop-in { animation: popin 0.6s cubic-bezier(.3,1.6,.5,1); }
+@keyframes popin { from { transform: translate(-50%, 30%) scale(0.2); opacity: 0; } }
+#story-stage.shake { animation: shakeit 0.4s linear 3; }
+@keyframes shakeit { 0%,100% { transform: translate(0,0); } 25% { transform: translate(-6px, 3px); } 75% { transform: translate(6px, -3px); } }
+.st-tapzone { position: absolute; inset: 0; background: none; border: 0; z-index: 2; cursor: pointer; }
+.st-top { position: absolute; top: calc(10px + env(safe-area-inset-top)); left: 12px; right: 12px; display: flex; align-items: center; gap: 10px; z-index: 5; }
+.st-title { flex: 1; font-weight: 700; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+.st-skip { margin-top: 0 !important; background: rgba(0,0,0,0.25) !important; }
+.st-say { position: absolute; left: 14px; right: 14px; top: calc(70px + env(safe-area-inset-top)); z-index: 3; pointer-events: none; padding: 14px 18px 18px; border-radius: 22px;
+  background: #fffaf2; color: #2a1740; font-size: 1.12rem; font-weight: 600; line-height: 1.35; box-shadow: 0 6px 0 rgba(0,0,0,0.18), 0 14px 30px rgba(0,0,0,0.3); }
+.st-say.talk::after { content: ''; position: absolute; bottom: -14px; left: clamp(24px, var(--tail), calc(100% - 24px)); transform: translateX(-50%); border: 14px solid transparent; border-top-color: #fffaf2; border-bottom: 0; }
+.st-say.narr { background: rgba(20,15,51,0.78); color: #fffaf2; font-style: italic; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.st-say.offstage { transform: rotate(-2deg); font-size: 1.4rem; }
+.st-say b { display: block; font-size: 0.85rem; color: #b36b00; margin-bottom: 2px; }
+#st-tap { position: absolute; right: 16px; bottom: 6px; font-size: 0.8rem; opacity: 0.6; animation: nextup 1s infinite; }
+#st-end { position: absolute; left: 0; right: 0; bottom: calc(40px + env(safe-area-inset-bottom)); display: flex; justify-content: center; z-index: 4; }
+.st-award { position: absolute; left: 50%; top: 34%; transform: translateX(-50%); z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 6px; color: #ffe27a; font-weight: 700; text-shadow: 0 2px 6px #000;
+  animation: awarddown 1.2s cubic-bezier(.3,1.4,.5,1); }
+.st-award svg { width: 110px; height: 110px; filter: drop-shadow(0 0 18px rgba(255,213,74,0.9)); animation: nextup 1.2s ease-in-out infinite; }
+@keyframes awarddown { from { transform: translate(-50%, -160%) rotate(-40deg) scale(0.4); opacity: 0; } }
+.st-award.eaten { transition: transform 0.8s ease-in, opacity 0.8s; transform: translate(-50%, 140%) scale(0.2); opacity: 0; }

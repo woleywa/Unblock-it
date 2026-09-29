@@ -107,14 +107,16 @@ const Extras = (() => {
     for (const [k, v] of Object.entries(m.ach || {})) if (!meta.ach[k]) { meta.ach[k] = v; changed = true; }
     for (const k of Object.keys(meta.ach)) if (!(m.ach || {})[k]) mine = true;
     for (const [k, v] of Object.entries(m.count || {})) if (v > (meta.count[k] || 0)) { meta.count[k] = v; changed = true; }
+    if (m.story && m.story.ch1 === 'done' && (meta.story || {}).ch1 !== 'done') { meta.story = { ...(meta.story || {}), ch1: 'done' }; changed = true; }
     if ((m.chests || 0) > meta.chests) { meta.chests = m.chests; changed = true; } else if ((m.chests || 0) < meta.chests) mine = true;
     if (m.style && !meta.style.skin && !meta.style.sky && (m.style.skin || m.style.sky)) { meta.style = m.style; changed = true; applyStyle(); }
     if (changed) { try { localStorage.setItem(KEY, JSON.stringify(meta)); } catch (e) {} homeButton(); }
     return mine;
   }
 
-  // ── Star chests: every 30 stars opens one, with the next style in line ──
-  const EVERY = 30;
+  // ── Star chests: one at each step of AT stars, with the next style in line ──
+  // Chests get rarer as you go: the stars needed for each one (the last needs every level perfect).
+  const AT = [40, 90, 140, 190, 240, 290, 330, 360];
   const REWARDS = [
     { id: 'sunset', kind: 'sky', name: 'Sunset sky', sw: 'linear-gradient(180deg,#ff8a5c,#b8386e 55%,#2a0f33)' },
     { id: 'cat', kind: 'skin', name: 'Cat ears' },
@@ -128,7 +130,7 @@ const Extras = (() => {
   meta.chests = meta.chests || 0;               // how many chests have been opened
   meta.style = meta.style || { skin: '', sky: '' };
   const stars = () => Object.values(progress.stars).reduce((a, b) => a + b, 0);
-  const waiting = () => Math.max(0, Math.min(REWARDS.length, Math.floor(stars() / EVERY)) - meta.chests);
+  const waiting = () => Math.max(0, AT.filter(n => stars() >= n).length - meta.chests);
   const owned = id => REWARDS.findIndex(r => r.id === id) < meta.chests;
 
   function applyStyle() {
@@ -151,7 +153,7 @@ const Extras = (() => {
     if (!waiting()) return;
     const r = REWARDS[meta.chests];
     $('chest-title').textContent = 'A star chest!';
-    $('chest-body').innerHTML = `<div class="chest-big" id="chest-lid">🎁</div><p>You collected ${EVERY * (meta.chests + 1)} ★ — tap to open!</p>`;
+    $('chest-body').innerHTML = `<div class="chest-big" id="chest-lid">🎁</div><p>You collected ${AT[meta.chests]} ★ — tap to open!</p>`;
     $('chest-btns').innerHTML = '';
     $('chest').hidden = false;
     $('chest-lid').onclick = () => {
@@ -180,8 +182,8 @@ const Extras = (() => {
       const on = (meta.style[kind] || '') === (r ? r.id : '');
       if (!r) return `<button class="opt ${on ? 'on' : ''}" data-k="${kind}" data-id="">${kind === 'sky' ? '<div class="sw" style="background:linear-gradient(180deg,#3b2a8f,#22185a 55%,#120c2e)"></div>' : preview({ id: '', kind: 'skin' }, 44)}</button>`;
       const i = REWARDS.indexOf(r), got = owned(r.id);
-      return `<button class="opt ${on ? 'on' : ''} ${got ? '' : 'locked'}" data-k="${kind}" data-id="${got ? r.id : ''}" data-lock="${got ? '' : EVERY * (i + 1)}" title="${r.name}">${
-        kind === 'sky' ? `<div class="sw" style="background:${r.sw}"></div>` : preview(r, 44)}${got ? '' : `<b style="position:absolute">🔒${EVERY * (i + 1)}</b>`}</button>`;
+      return `<button class="opt ${on ? 'on' : ''} ${got ? '' : 'locked'}" data-k="${kind}" data-id="${got ? r.id : ''}" data-lock="${got ? '' : AT[i]}" title="${r.name}">${
+        kind === 'sky' ? `<div class="sw" style="background:${r.sw}"></div>` : preview(r, 44)}${got ? '' : `<b style="position:absolute">🔒${AT[i]}</b>`}</button>`;
     };
     box.innerHTML = `<h3>🎨 Block style</h3><div class="row">${opt(null, 'skin')}${REWARDS.filter(r => r.kind === 'skin').map(r => opt(r, 'skin')).join('')}</div>`
       + `<h3>🌌 Sky</h3><div class="row">${opt(null, 'sky')}${REWARDS.filter(r => r.kind === 'sky').map(r => opt(r, 'sky')).join('')}</div>`;
@@ -216,6 +218,7 @@ const Extras = (() => {
     { id: 'streak30', icon: '🌋', name: 'Unstoppable', text: '30-day daily streak', ok: () => (meta.streak.best || 0) >= 30 },
     { id: 'helper', icon: '🤝', name: 'Good friend', text: 'Solve a level for a friend who asked for help', ok: () => (meta.count.helped || 0) >= 1 },
     { id: 'style', icon: '🎨', name: 'Fashionista', text: 'Open 4 star chests', ok: () => meta.chests >= 4 },
+    { id: 'biscuit', icon: '🍪', name: 'Golden biscuit', text: 'Finish Mörfi’s first Very Important Mission', ok: () => (meta.count.story1 || 0) >= 1 },
   ];
   let popT = 0;
   function check() {
@@ -278,7 +281,7 @@ const Extras = (() => {
   // A shared result links to ?daily: open today's puzzle.
   if (new URLSearchParams(location.search).has('daily')) setTimeout(play, 300);
 
-  return { play, homeButton, merge, meta: () => meta, today, stylePicker, event, onWin, medals, check };
+  return { play, homeButton, merge, meta: () => meta, today, stylePicker, event, onWin, medals, check, save: persist };
 })();
 window.Extras = Extras;
 Extras.homeButton();

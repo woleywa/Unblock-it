@@ -65,9 +65,13 @@ version.
   startClock() starts on the first drag; at 0 an ask() card offers Try again / Levels. ⏱ badge in the list.
 - js/extras.js (Extras): daily puzzle (DAILY_LEVELS from `node tools/generate.js daily`, board of the day
   = POOL[(day-1)*37 % n], day #1 = 29 Sep 2026, runs through chPlay with `daily: true`), 🔥 streak with one
-  freeze a week, star chests (every 30 ★ → next of 8 styles/skies; window.SKIN read by Art.blockSVG, sky via
+  freeze a week, star chests (at 40/90/140/190/240/290/330/360 ★ → next of 8 styles/skies; window.SKIN read by Art.blockSVG, sky via
   html.sky-*), medals (MEDALS list, Extras.event()/onWin() hooks in game.js), friend nudge, all in one `meta`
   record (localStorage unblock_meta, synced in saves/{uid}.meta; merge() keeps the best of both).
+- Story mode: js/story.js (Story). Characters (Mörfi, Puddy, Lilca, beetle, flower) and scenes are SVG
+  drawn in code; a chapter is a list of steps (bg, show, walk, say, narr, act, puzzle, award, end). Puzzles
+  use CHALLENGE_LEVELS through chPlay `{ story: true }`; progress in Extras meta.story (resumes at the
+  last puzzle). Finishing chapter 1 gives the 🍪 Golden biscuit medal.
 - "New!" pop-ups: js/intro.js (`Intro.show(key, again)`), one looping mini-board scene per feature
   (basics, walls, ice, frozen, layered, fire, beaver) drawn with the real Art functions and a 👆 finger.
   start() shows it once per feature (localStorage `unblock_seen_intros`) and adds "▶ Show me" to the hint.

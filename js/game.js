@@ -56,7 +56,7 @@ const firstOpen = () => { const i = LEVELS.findIndex((_, k) => !starsOf(k)); ret
 
 // ── Screens ──────────────────────────────────────────────────
 function show(id) {
-  ['home', 'levels', 'ranks', 'game', 'chs', 'ch', 'team'].forEach(s => $(s).hidden = s !== id);
+  ['home', 'levels', 'ranks', 'game', 'chs', 'ch', 'team', 'story'].forEach(s => $(s).hidden = s !== id);
   updBanner();
   // Leaving the board (e.g. an invite link opened mid-game) closes its cards and challenge play.
   if (id !== 'game') stopClock();
