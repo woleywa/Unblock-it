@@ -589,7 +589,7 @@ const Social = (() => {
         <button class="ghost" id="fr-share">📨 Send my friend link</button></div>`;
       list.innerHTML = rows.length > 1 ? rows.map((r, i) =>
         `<li class="${r.mine ? 'mine' : ''}"><span class="pos">${medal(i)}</span><span class="who">${esc(r.name)}${r.helped ? ` <i class="helped" title="Friends helped">🤝${r.helped}</i>` : ''}</span><span class="st">★ ${r.stars}</span>`
-        + (r.mine ? `<span class="mv">you</span>` : `<button class="unfriend" data-uid="${esc(r.uid)}" data-name="${esc(r.name)}" aria-label="Remove">✕</button>`) + '</li>').join('')
+        + (r.mine ? `<span class="mv">you</span>` : `<button class="gift-btn" data-uid="${esc(r.uid)}" data-name="${esc(r.name)}" aria-label="Send a gift">🎁</button><button class="unfriend" data-uid="${esc(r.uid)}" data-name="${esc(r.name)}" aria-label="Remove">✕</button>`) + '</li>').join('')
         : '<p class="note">Add friends by nickname, or send them your link — then you can race each other here.</p>';
       $('fr-add').addEventListener('submit', async e => {
         e.preventDefault();
@@ -598,6 +598,7 @@ const Social = (() => {
         catch (err) { $('fr-err').textContent = err.message || errText(err); }
       });
       $('fr-share').addEventListener('click', () => share('Happy Blocks', `Add me as a friend on Happy Blocks — I’m ${o.name}!`, link('f', o.uid)));
+      list.querySelectorAll('.gift-btn').forEach(b => b.addEventListener('click', () => Extras.giftPicker(b.dataset.uid, b.dataset.name)));
       list.querySelectorAll('.unfriend').forEach(b => b.addEventListener('click', async () => {
         if (!await ask(`Remove ${b.dataset.name} from your friends?`, { ok: 'Remove', danger: true })) return;
         try { await o.removeFriend(b.dataset.uid); rankFriends(); } catch (e) { toast(errText(e)); }

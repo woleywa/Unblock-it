@@ -96,6 +96,25 @@ service cloud.firestore {
 
     // Help requests: "can you solve this level for me?" Listed only by the asker and the friends it
     // was sent to; anyone who has the (random, 12-character) id from a shared link can open and answer it.
+    // Little gifts between friends: one per sender, friend and day (the id says so, and a sent gift
+    // can't be changed), seen by the friend and then cleared.
+    match /gifts/{id} {
+      allow get, list: if signedIn() && (resource.data.to == me() || resource.data.from == me());
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['from', 'fromName', 'to', 'kind', 'day', 'created', 'seen'])
+        && request.resource.data.from == me()
+        && request.resource.data.fromName == playerBefore(me()).name
+        && request.resource.data.to is string && request.resource.data.to != me()
+        && request.resource.data.kind in ['clap', 'love', 'fire', 'haha', 'brain', 'biscuit', 'freeze']
+        && request.resource.data.day is int && request.resource.data.day >= 1 && request.resource.data.day < 100000
+        && id == me() + '_' + request.resource.data.to + '_' + string(request.resource.data.day)
+        && request.resource.data.seen == false
+        && request.resource.data.created == request.time;
+      allow update: if signedIn() && resource.data.to == me()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen']) && request.resource.data.seen == true;
+      allow delete: if signedIn() && (resource.data.to == me() || resource.data.from == me());
+    }
+
     match /help/{id} {
       allow get: if signedIn();
       allow list: if signedIn() && (resource.data.from == me() || me() in resource.data.to);

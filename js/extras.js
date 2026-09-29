@@ -23,10 +23,13 @@ const Extras = (() => {
 
   // The streak as it stands today: still alive if the last solve was yesterday (or the day before,
   // when this week's freeze is unused).
+  // Freezes that can cover missed days: this week's free one, plus any a friend gave you (❄ gift).
+  const freezesLeft = d => (meta.streak.freeze !== week(d) ? 1 : 0) + (meta.freezes || 0);
   function streakNow() {
     const s = meta.streak, d = today();
     if (s.last === d || s.last === d - 1) return s.n;
-    if (s.last === d - 2 && s.freeze !== week(d)) return s.n;
+    const missed = d - 1 - s.last;
+    if (s.last && missed <= freezesLeft(d)) return s.n;
     return 0;
   }
 
@@ -52,8 +55,16 @@ const Extras = (() => {
     let note = '';
     if (first) {
       const st = meta.streak;
+      const missed = d - 1 - st.last;
       if (st.last === d - 1) st.n++;
-      else if (st.last === d - 2 && st.freeze !== week(d)) { st.n++; st.freeze = week(d); note = ' ❄ Your weekly streak freeze saved it!'; }
+      else if (st.last && missed > 0 && missed <= freezesLeft(d)) {
+        // Use the weekly freeze first, then gifted ones.
+        let need = missed;
+        if (st.freeze !== week(d)) { st.freeze = week(d); need--; }
+        meta.freezes = Math.max(0, (meta.freezes || 0) - need);
+        st.n++;
+        note = ` ❄ ${missed === 1 ? 'A streak freeze' : missed + ' streak freezes'} saved it!`;
+      }
       else if (st.last !== d) st.n = 1;
       st.last = d;
       st.best = Math.max(st.best || 0, st.n);
@@ -83,6 +94,7 @@ const Extras = (() => {
   function homeButton() {
     chestButton();
     nudge();
+    checkGifts();
     const mc = Object.keys(meta.ach || {}).length, st = $('stars-total');
     if (st && st.textContent) st.textContent = st.textContent.split('  ·  🏅')[0] + `  ·  🏅 ${mc}`;
     const d = today(), done = meta.daily[d], n = streakNow();
@@ -108,6 +120,8 @@ const Extras = (() => {
     for (const k of Object.keys(meta.ach)) if (!(m.ach || {})[k]) mine = true;
     for (const [k, v] of Object.entries(m.count || {})) if (v > (meta.count[k] || 0)) { meta.count[k] = v; changed = true; }
     if (m.story && m.story.ch1 === 'done' && (meta.story || {}).ch1 !== 'done') { meta.story = { ...(meta.story || {}), ch1: 'done' }; changed = true; }
+    if ((m.freezes || 0) > meta.freezes) { meta.freezes = m.freezes; changed = true; }
+    if ((m.biscuits || 0) > meta.biscuits) { meta.biscuits = m.biscuits; changed = true; }
     if ((m.chests || 0) > meta.chests) { meta.chests = m.chests; changed = true; } else if ((m.chests || 0) < meta.chests) mine = true;
     if (m.style && !meta.style.skin && !meta.style.sky && (m.style.skin || m.style.sky)) { meta.style = m.style; changed = true; applyStyle(); }
     if (changed) { try { localStorage.setItem(KEY, JSON.stringify(meta)); } catch (e) {} homeButton(); }
@@ -218,6 +232,8 @@ const Extras = (() => {
     { id: 'streak30', icon: '🌋', name: 'Unstoppable', text: '30-day daily streak', ok: () => (meta.streak.best || 0) >= 30 },
     { id: 'helper', icon: '🤝', name: 'Good friend', text: 'Solve a level for a friend who asked for help', ok: () => (meta.count.helped || 0) >= 1 },
     { id: 'style', icon: '🎨', name: 'Fashionista', text: 'Open 4 star chests', ok: () => meta.chests >= 4 },
+    { id: 'generous', icon: '🎁', name: 'Generous', text: 'Send 5 gifts to friends', ok: () => (meta.count.gifts || 0) >= 5 },
+    { id: 'loved', icon: '💝', name: 'Well loved', text: 'Get 10 gifts from friends', ok: () => (meta.count.gotGifts || 0) >= 10 },
     { id: 'biscuit', icon: '🍪', name: 'Golden biscuit', text: 'Finish Mörfi’s first Very Important Mission', ok: () => (meta.count.story1 || 0) >= 1 },
   ];
   let popT = 0;
@@ -276,12 +292,82 @@ const Extras = (() => {
   window.addEventListener('online-user', () => { nudgeAt = 0; setTimeout(nudge, 800); });
   window.addEventListener('online-ready', () => setTimeout(nudge, 1500));
 
+  // ── Gifts for friends: reactions and a couple of special ones ──
+  const GIFTS = {
+    clap: { icon: '👏', name: 'Applause', say: 'is applauding you!' },
+    love: { icon: '💖', name: 'Love', say: 'sent you love!' },
+    fire: { icon: '🔥', name: 'You’re on fire', say: 'says you’re on fire!' },
+    haha: { icon: '😂', name: 'Haha', say: 'is laughing with you!' },
+    brain: { icon: '🤯', name: 'Big brain', say: 'thinks you’re a big brain!' },
+    biscuit: { icon: '🍪', name: 'A biscuit', say: 'sent you a biscuit! Mörfi approves.', special: true },
+    freeze: { icon: '❄️', name: 'Streak freeze', say: 'sent you a streak freeze — it saves your daily streak if you miss a day.', special: true },
+  };
+  meta.freezes = meta.freezes || 0;
+  meta.biscuits = meta.biscuits || 0;
+  function giftCard(title, body, btns) {
+    $('gift-title').textContent = title;
+    $('gift-body').innerHTML = body;
+    $('gift-btns').innerHTML = btns;
+    $('gift').hidden = false;
+  }
+  const closeGift = () => { $('gift').hidden = true; };
+  function giftPicker(to, name) {
+    const row = keys => keys.map(k => `<button class="gift-opt ${GIFTS[k].special ? 'special' : ''}" data-k="${k}"><span>${GIFTS[k].icon}</span><small>${GIFTS[k].name}</small></button>`).join('');
+    giftCard(`🎁 A gift for ${name}`, `<p class="note">One gift per friend a day.</p><h3 class="gift-h">Reactions</h3><div class="gift-grid">${row(['clap', 'love', 'fire', 'haha', 'brain'])}</div>
+      <h3 class="gift-h">Something special</h3><div class="gift-grid two">${row(['biscuit', 'freeze'])}</div>`, '<button class="ghost" id="gift-cancel">Cancel</button>');
+    $('gift-cancel').onclick = closeGift;
+    document.querySelectorAll('.gift-opt').forEach(b => b.onclick = async () => {
+      const k = b.dataset.k;
+      b.classList.add('sending');
+      try {
+        const ok = await window.Online.sendGift(to, k, today());
+        if (!ok) { giftCard('Already sent today', `<p>You’ve already sent ${name} a gift today — try again tomorrow! 🌙</p>`, '<button class="big" id="gift-ok">OK</button>'); $('gift-ok').onclick = closeGift; return; }
+        event('gifts');
+        giftCard('Sent!', `<div class="gift-big">${GIFTS[k].icon}</div><p>${GIFTS[k].name} is on its way to ${name}.</p>`, '<button class="big" id="gift-ok">Yay</button>');
+        $('gift-ok').onclick = closeGift;
+        Sound.win && Sound.win();
+      } catch (e) {
+        giftCard('Couldn’t send', `<p>${e.message || 'No connection right now — try again in a moment.'}</p>`, '<button class="big" id="gift-ok">OK</button>'); $('gift-ok').onclick = closeGift;
+      }
+    });
+  }
+  // Gifts waiting for me: shown one by one when the game opens (or you come back home).
+  let giftsAt = 0, giftQueue = [];
+  async function checkGifts() {
+    const o = window.Online;
+    if (!o || !o.name || Date.now() - giftsAt < 45000 || !$('gift').hidden) return;
+    giftsAt = Date.now();
+    try { giftQueue = await o.incomingGifts(); } catch (e) { return console.warn('gifts', e); }
+    showGift();
+  }
+  function showGift() {
+    const g = giftQueue.shift();
+    if (!g) return;
+    const k = GIFTS[g.kind] || GIFTS.love;
+    if (g.kind === 'freeze') meta.freezes++;
+    if (g.kind === 'biscuit') meta.biscuits++;
+    meta.count.gotGifts = (meta.count.gotGifts || 0) + 1;
+    persist();
+    window.Online.giftSeen(g.id).catch(() => {});
+    giftCard('🎁 A gift!', `<div class="gift-big bounce">${k.icon}</div><p><b>${esc(g.fromName)}</b> ${k.say}</p>${g.kind === 'freeze' ? `<p class="note">You have ❄ ${meta.freezes} saved.</p>` : g.kind === 'biscuit' ? `<p class="note">🍪 ${meta.biscuits} biscuit${meta.biscuits === 1 ? '' : 's'} collected.</p>` : ''}`,
+      `<button class="ghost" id="gift-close">Close</button><button class="big" id="gift-thanks">💖 Say thanks</button>`);
+    Art.confetti();
+    const next = () => { closeGift(); setTimeout(showGift, 350); check(); };
+    $('gift-close').onclick = next;
+    $('gift-thanks').onclick = async () => {
+      try { await window.Online.sendGift(g.from, 'love', today()); } catch (e) {}
+      next();
+    };
+  }
+  window.addEventListener('online-ready', () => setTimeout(checkGifts, 2500));
+  window.addEventListener('online-user', () => { giftsAt = 0; setTimeout(checkGifts, 1500); });
+
   applyStyle();
   $('to-daily').addEventListener('click', () => { Sound.unlock(); play(); });
   // A shared result links to ?daily: open today's puzzle.
   if (new URLSearchParams(location.search).has('daily')) setTimeout(play, 300);
 
-  return { play, homeButton, merge, meta: () => meta, today, stylePicker, event, onWin, medals, check, save: persist };
+  return { play, homeButton, merge, meta: () => meta, today, stylePicker, event, onWin, medals, check, save: persist, giftPicker };
 })();
 window.Extras = Extras;
 Extras.homeButton();

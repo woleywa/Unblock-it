@@ -11,6 +11,7 @@
 //   challenges/{code}             { by, byName, team, teamName, created, start, window, playMin, levels,
 //                                   players, joined, seed }             — window/playMin in minutes, 0 = no limit
 //   saves/{uid}                   { stars, moves, friends, updated } — private: progress + friend list
+//   gifts/{from_to_day}           { from, fromName, to, kind, day, created, seen } — a little gift for a friend
 //   help/{id}                     { from, fromName, level, par, to: [uids], created } — "help me with this level"
 //   help/{id}/answers/{uid}       { name, moves, steps: [{ p, r, c, g, e }], created } — a friend's solution
 //   challenges/{code}/entries/{uid} { name, team, teamName, started, updated, stars, moves, solved, score, runs }
@@ -183,6 +184,21 @@ async function getHelp(id) {
 }
 const FORTNIGHT = 14 * 86400e3;
 // Requests from friends to me (newest first, last two weeks).
+// Gifts: one per friend per day (the doc id), so a second one the same day is refused.
+async function sendGift(to, kind, day) {
+  await ready;
+  if (!me) throw new Error('Pick a nickname first');
+  try {
+    await setDoc(doc(db, 'gifts', `${uid}_${to}_${day}`), { from: uid, fromName: me.name, to, kind, day, created: serverTimestamp(), seen: false });
+    return true;
+  } catch (e) { if (e.code === 'permission-denied') return false; throw e; }
+}
+async function incomingGifts() {
+  await ready;
+  const snap = await getDocs(query(collection(db, 'gifts'), where('to', '==', uid), where('seen', '==', false), limit(20)));
+  return snap.docs.map(d => ({ id: d.id, ...d.data(), created: ms(d.data().created) })).sort((a, b) => a.created - b.created);
+}
+async function giftSeen(id) { await ready; await updateDoc(doc(db, 'gifts', id), { seen: true }); }
 async function incomingHelp() {
   await ready;
   const snap = await getDocs(query(collection(db, 'help'), where('to', 'array-contains', uid), limit(30)));
@@ -459,6 +475,9 @@ window.Online = {
   resetPassword: e => timed(resetPassword(e)), deleteAccount: (p, n) => timed(deleteAccount(p, n), 30000),
   getSave: () => timed(getSave()), putSave: p => timed(putSave(p)),
   addFriend: n => timed(addFriend(n)), addFriendId: f => timed(addFriendId(f)), removeFriend: f => timed(removeFriend(f)), getFriendName: f => timed(getFriendName(f)),
+  sendGift: (to, kind, day) => timed(sendGift(to, kind, day)),
+  incomingGifts: () => timed(incomingGifts()),
+  giftSeen: id => timed(giftSeen(id)),
   friendsBoard: () => timed(friendsBoard()),
   newHelpId, askHelp: (l, p, t, id) => timed(askHelp(l, p, t, id)), getHelp: id => timed(getHelp(id)), incomingHelp: () => timed(incomingHelp()),
   myHelp: () => timed(myHelp()), answerHelp: (id, s, t) => timed(answerHelp(id, s, t)), closeHelp: id => timed(closeHelp(id)),
