@@ -71,18 +71,18 @@ const Story = (() => {
       <g class="legs"><rect x="46" y="150" width="8" height="8" fill="#e0b24a"/><rect x="66" y="150" width="8" height="8" fill="#e0b24a"/>
         <path d="M43,157 h13 v8 q0,4 -4,4 h-11 q-3,0 -3,-3 q0,-4 5,-5 z" fill="${INK}"/><path d="M64,157 h13 v12 h-11 q-4,0 -4,-4 z" fill="${INK}"/></g>
       ${(props || []).map(p => PROPS[p] || '').join('')}`,
-    // Puddy: a white cat with dark tabby patches on his back and a tabby "cap" on his head.
-    puddy: props => cat({ base: '#fbf8f2', shade: '#e6e0d6', patch: '#4b3b30', stripe: '#241a14', eye: '#a8c44a', muzzle: '#fbf8f2', props,
+    // Puddy: a brown tabby with big ears, long whiskers and amber eyes (and a biscuit).
+    puddy: props => cat({ base: '#a8875f', shade: '#8a6c48', patch: null, stripe: '#3f2c1c', eye: '#d9a53a', muzzle: '#e6d2ae', props, big: true,
+      patches: `<path d="M40,102 q6,8 2,20 M52,98 q5,10 1,24 M68,98 q-5,10 -1,24 M80,102 q-6,8 -2,20" stroke="#3f2c1c" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+      cap: `<path d="M46,40 q3,8 -1,14 M60,37 v15 M74,40 q-3,8 1,14 M30,60 q8,0 12,6 M90,60 q-8,0 -12,6 M31,72 q7,0 10,4 M89,72 q-7,0 -10,4" stroke="#3f2c1c" stroke-width="2.6" fill="none" stroke-linecap="round"/>`,
+      tail: '#a8875f', tailStripes: true }),
+    // Lilca: a white cat with dark tabby patches on her back and a tabby "cap" on her head, always with a book.
+    lilca: props => cat({ base: '#fbf8f2', shade: '#e6e0d6', patch: '#4b3b30', stripe: '#241a14', eye: '#a8c44a', muzzle: '#fbf8f2', props,
       patches: `<path d="M34,104 Q40,92 60,92 Q82,92 88,106 L90,132 Q76,122 62,126 Q46,130 32,124 Z" fill="#4b3b30"/>
         <path d="M42,100 q4,10 0,22 M54,96 q4,12 0,26 M68,96 q4,12 0,26 M80,100 q4,10 0,20" stroke="#241a14" stroke-width="3.5" fill="none" stroke-linecap="round"/>`,
       cap: `<path d="M27,70 Q26,38 60,36 Q94,38 93,70 Q86,62 78,64 Q72,54 60,56 Q50,54 44,64 Q34,62 27,70 Z" fill="#4b3b30"/>
         <path d="M44,40 q2,8 -2,14 M60,37 v14 M76,40 q-2,8 2,14 M34,52 q6,2 8,8 M86,52 q-6,2 -8,8" stroke="#241a14" stroke-width="2.6" fill="none" stroke-linecap="round"/>`,
       tail: '#4b3b30' }),
-    // Lilca: a brown tabby with big ears, long whiskers and amber eyes, always with a book.
-    lilca: props => cat({ base: '#a8875f', shade: '#8a6c48', patch: null, stripe: '#3f2c1c', eye: '#d9a53a', muzzle: '#e6d2ae', props, big: true,
-      patches: `<path d="M40,102 q6,8 2,20 M52,98 q5,10 1,24 M68,98 q-5,10 -1,24 M80,102 q-6,8 -2,20" stroke="#3f2c1c" stroke-width="3" fill="none" stroke-linecap="round"/>`,
-      cap: `<path d="M46,40 q3,8 -1,14 M60,37 v15 M74,40 q-3,8 1,14 M30,60 q8,0 12,6 M90,60 q-8,0 -12,6 M31,72 q7,0 10,4 M89,72 q-7,0 -10,4" stroke="#3f2c1c" stroke-width="2.6" fill="none" stroke-linecap="round"/>`,
-      tail: '#a8875f', tailStripes: true }),
     // The beetle: small, shiny and a bit embarrassed.
     beetle: () => `
       <g class="legs"><path d="M40,150 l-10,10 M50,154 l-6,12 M70,154 l6,12 M80,150 l10,10" stroke="${INK}" stroke-width="3" stroke-linecap="round"/></g>
