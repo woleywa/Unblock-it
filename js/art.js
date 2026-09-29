@@ -134,6 +134,17 @@ const Art = (() => {
       const [er, ec] = heart(offs, !p.shape);
       for (const dx of [-0.24, 0.24]) s += `<circle cx="${(ec + 0.5 + dx) * cs}" cy="${(er + 0.1) * cs}" r="${cs * 0.12}" fill="${side}"/><circle cx="${(ec + 0.5 + dx) * cs}" cy="${(er + 0.1) * cs}" r="${cs * 0.06}" fill="#e9b98c"/>`;
     }
+    const skin = !frozen && !p.inner && p.color !== 'beaver' && typeof window !== 'undefined' ? window.SKIN : '';
+    if (skin === 'cat') {
+      // Cat ears on top of the block's face cell.
+      // They sit on the top edge above the face, poking out.
+      const [, ec] = heart(offs, !p.shape), col = Math.round(ec - 0.001);
+      const top = Math.min(...offs.filter(q => q[1] === col || !p.shape).map(q => q[0]));
+      for (const dx of [-0.26, 0.26]) {
+        const x = (ec + 0.5 + dx) * cs, y = top * cs + cs * 0.02;
+        s += `<path d="M${x - cs * 0.13},${y + cs * 0.1} L${x},${y - cs * 0.14} L${x + cs * 0.13},${y + cs * 0.1} Z" fill="${d}" stroke="${side}" stroke-width="${cs * 0.03}" stroke-linejoin="round"/><path d="M${x - cs * 0.06},${y + cs * 0.06} L${x},${y - cs * 0.05} L${x + cs * 0.06},${y + cs * 0.06} Z" fill="#ff9ec4"/>`;
+      }
+    }
     s += `<path d="${shape}" transform="translate(0 ${depth})" fill="${side}"/>`;
     s += `<path class="hit" d="${shape}" fill="url(#face-${faceFill})"/>`;
     s += `<g clip-path="url(#${uid})" pointer-events="none">`;
@@ -148,6 +159,11 @@ const Art = (() => {
         s += `<circle cx="${x + cs * 0.78}" cy="${y + cs * 0.3}" r="${cs * 0.05}" fill="none" stroke="#fff" stroke-width="${cs * 0.02}" opacity="0.6"/><circle cx="${x + cs * 0.2}" cy="${y + cs * 0.42}" r="${cs * 0.03}" fill="#fff" opacity="0.5"/>`;
       }
     }
+    if (skin === 'candy') for (let k = -H; k < W + H; k += cs * 0.34) s += `<path d="M${k},${H} L${k + H},0" stroke="#fff" stroke-width="${cs * 0.11}" opacity="0.28"/>`;
+    if (skin === 'sparkle') for (const [r, c] of offs) for (const [fx, fy, k] of [[0.72, 0.28, 0.07], [0.22, 0.7, 0.05], [0.8, 0.78, 0.04]]) {
+      const x = (c + fx) * cs, y = (r + fy) * cs, q = cs * k;
+      s += `<path d="M${x},${y - q * 2} Q${x},${y} ${x + q * 2},${y} Q${x},${y} ${x},${y + q * 2} Q${x},${y} ${x - q * 2},${y} Q${x},${y} ${x},${y - q * 2} Z" fill="#fff" opacity="0.8"/>`;
+    }
     s += `<path d="${shape}" fill="none" stroke="${l}" stroke-width="${cs * 0.05}" opacity="0.7"/>`;
     s += `<path d="${shape}" fill="none" stroke="${d}" stroke-width="${cs * 0.035}" opacity="0.5" transform="translate(0 ${-cs * 0.02})"/>`;
     s += '</g>';
@@ -159,6 +175,12 @@ const Art = (() => {
     }
     const [hr, hc] = heart(offs, !p.shape);
     if (faceOn && !p.inner && !frozen) s += face((hc + 0.5) * cs, (hr + 0.5) * cs, cs);
+    if (faceOn && skin === 'shades') {
+      // Cool sunglasses over the eyes.
+      const x = (hc + 0.5) * cs, y = (hr + 0.5) * cs - cs * 0.05, e = cs * 0.15;
+      s += `<g pointer-events="none"><path d="M${x - e - cs * 0.12},${y - cs * 0.07} H${x + e + cs * 0.12}" stroke="#15102b" stroke-width="${cs * 0.035}"/>`
+        + [-1, 1].map(k => `<rect x="${x + k * e - cs * 0.105}" y="${y - cs * 0.08}" width="${cs * 0.21}" height="${cs * 0.15}" rx="${cs * 0.06}" fill="#15102b"/><path d="M${x + k * e - cs * 0.07},${y - cs * 0.045} l${cs * 0.05},0" stroke="#fff" stroke-width="${cs * 0.025}" stroke-linecap="round" opacity="0.8"/>`).join('') + '</g>';
+    }
     if (p.color === 'beaver' && !frozen) {
       // Buck teeth and a little nose.
       const x = (hc + 0.5) * cs, y = (hr + 0.5) * cs;

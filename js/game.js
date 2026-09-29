@@ -878,6 +878,7 @@ function startClock() {
 function settings() {
   $('set-sound').textContent = Sound.on ? '🔊 Sound: on' : '🔇 Sound: off';
   $('set-buzz').textContent = Native.buzzOn() ? '📳 Vibration: on' : '📴 Vibration: off';
+  if (typeof Extras !== 'undefined') Extras.stylePicker();
   $('settings').hidden = false;
 }
 $('settings-home').addEventListener('click', () => { Sound.unlock(); settings(); });
