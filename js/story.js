@@ -540,6 +540,10 @@ const Story = (() => {
       if (s.flash) { stage().classList.remove('flash'); void stage().offsetWidth; stage().classList.add('flash'); Sound.tick(); }
       if (s.shake) { stage().classList.remove('shake'); void stage().offsetWidth; stage().classList.add('shake'); Native.buzz(); }
       if (s.walk) {
+        // Let the scene be drawn in its starting spot first (it may have only just been shown, e.g.
+        // right after a puzzle); otherwise everyone would jump straight to the end of the walk.
+        Object.keys(s.walk).concat(Object.keys(s.move || {})).forEach(k => { if (chars[k]) { chars[k].style.transition = 'none'; void chars[k].offsetWidth; } });
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
         for (const [k, x] of Object.entries(s.walk)) { const e = chars[k]; if (!e) continue; e.classList.add('walking'); e.style.transition = `left ${s.t || 1200}ms linear`; e.style.left = x + '%'; }
         // Something falling or floating at the same time (y in vh above the ground).
         for (const [k, o] of Object.entries(s.move || {})) { const e = chars[k]; if (!e) continue; e.style.transition = `bottom ${s.t || 1200}ms cubic-bezier(.5,0,.8,.4), transform ${s.t || 1200}ms`; e.style.bottom = o.y + 'vh'; e.style.transform = 'translateX(-50%) rotate(200deg)'; }
