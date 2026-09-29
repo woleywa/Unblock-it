@@ -72,6 +72,8 @@ version.
   drawn in code; a chapter is a list of steps (bg, show, walk, say, narr, act, puzzle, award, end). Puzzles
   use CHALLENGE_LEVELS through chPlay `{ story: true }`; progress in Extras meta.story (resumes at the
   last puzzle). Finishing chapter 1 gives the 🍪 Golden biscuit medal.
+  Series: `morfi` (the ISA belongs to Mörfi's stories only; isaLogo() SVG) and `bear` (Bear & Kloenchen: CH2,
+  the Etappe 2 bike tour Schönefeld → Wannsee, scenes field/path/forest/lake/map, riders on bikes, the lake cat).
 - "New!" pop-ups: js/intro.js (`Intro.show(key, again)`), one looping mini-board scene per feature
   (basics, walls, ice, frozen, layered, fire, beaver) drawn with the real Art functions and a 👆 finger.
   start() shows it once per feature (localStorage `unblock_seen_intros`) and adds "▶ Show me" to the hint.

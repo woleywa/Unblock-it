@@ -678,3 +678,26 @@ button.stars-total { background: none; border: 0; padding: 4px 6px; cursor: poin
 .gift-grid { grid-template-columns: repeat(5, 1fr); gap: 6px; } .gift-grid.two { grid-template-columns: repeat(2, 1fr); }
 .gift-grid .gift-opt { padding: 8px 2px; min-width: 0; } .gift-opt span { font-size: 1.7rem; }
 .gift-grid.two .gift-opt { flex-direction: row; justify-content: center; gap: 8px; padding: 10px; } .gift-grid.two .gift-opt small { font-size: 0.85rem; }
+
+/* Story home: a section per series, compact chapter cards */
+.sh-series { display: flex; align-items: center; gap: 10px; text-align: left; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.45); margin-top: 2px; }
+.sh-series b { display: block; font-size: 1.1rem; } .sh-series small { font-weight: 600; opacity: 0.9; font-size: 0.8rem; }
+.sh-isa { width: 74px; flex: none; color: #fff; filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4)); } .sh-isa .isa-logo { width: 100%; height: auto; display: block; }
+.isa-logo .tw { transform-box: fill-box; transform-origin: center; animation: nextup 2s ease-in-out infinite; }
+.sh-emoji { width: 74px; flex: none; text-align: center; font-size: 2rem; }
+.sh-card { flex-wrap: nowrap; padding: 10px 12px; }
+.sh-card .num { width: 42px; height: 42px; font-size: 1.3rem; flex: none; }
+.sh-card .txt small { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.sh-card .sh-play { width: auto; min-width: 0; flex: none; padding: 10px 16px; font-size: 1rem; }
+.sh-restart { font-size: 0.78rem; color: var(--dim); text-decoration: underline; cursor: pointer; }
+.sh-head h1 { font-size: min(2.2rem, 9vw); }
+/* Chapter 2 animations */
+.st-char.walking .wheel { animation: wheelspin 0.5s linear infinite; }
+.st-char .flap { animation: flap 0.22s ease-in-out infinite alternate; } @keyframes flap { from { transform: scaleY(1); } to { transform: scaleY(-0.6); } }
+.st-bg .cloud { animation: drift2 18s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -3s); } @keyframes drift2 { to { transform: translateX(26px); } }
+.st-bg .wave { animation: drift2 5s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -1s); }
+.st-bg .route { stroke-dasharray: 520; stroke-dashoffset: 520; animation: drawroute 2.6s ease-in-out 0.3s forwards; } @keyframes drawroute { to { stroke-dashoffset: 0; } }
+.st-bg .pin { opacity: 0; animation: pinin 0.4s cubic-bezier(.3,1.8,.5,1) forwards; animation-delay: calc(0.6s + var(--i) * 0.45s); transform-box: fill-box; transform-origin: center; } @keyframes pinin { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
+#story-stage.flash::after { content: ''; position: absolute; inset: 0; background: #fff; z-index: 6; pointer-events: none; animation: camflash 0.7s ease-out forwards; } @keyframes camflash { from { opacity: 1; } to { opacity: 0; } }
+.st-body.a-wave .arm-r { transform: rotate(-140deg); animation: waving 0.3s ease-in-out 4 alternate; } @keyframes waving { from { transform: rotate(-120deg); } to { transform: rotate(-160deg); } }
+.st-award.big svg { width: 180px; height: 150px; }
