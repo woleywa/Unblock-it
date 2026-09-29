@@ -374,7 +374,7 @@ const Story = (() => {
     chPlay = {
       story: true,
       again: () => puzzle(s),
-      back: () => { chPlay = null; $('win').hidden = true; home(); },
+      back: () => { chPlay = null; $('win').hidden = true; storyHome(); },
       next: () => { chPlay = null; $('win').hidden = true; at++; openStage(); run(); },
       won: () => {
         $('win-text').textContent = 'Mission step complete! 🕵️';
@@ -422,15 +422,35 @@ const Story = (() => {
     }
     run();
   }
-  async function menu() {
-    const s = saved()['ch1'];
-    if (s === 'done') {
-      const again = await ask('Chapter 1 — Mörfi and the Very Important Mission. Watch it again?', { title: '📖 Story', ok: 'Play chapter 1', cancel: 'Not now' });
-      if (again) start(true);
-      return;
+  // ── The Story home: a cosy scene with the crew hanging out, and a card per chapter ──
+  const SOON = [{ id: 2, title: 'The Case of the Missing Spoon', icon: '🥄' }, { id: 3, title: 'Snitch Commander', icon: '🎖️' }];
+  function storyHome() {
+    show('storyhome');
+    const bg = document.querySelector('.sh-bg');
+    if (!bg.dataset.done) { bg.innerHTML = BG.village(); bg.dataset.done = 1; }
+    const box = document.querySelector('.sh-chars');
+    if (!box.dataset.done) {
+      box.dataset.done = 1;
+      for (const [k, x, props] of [['puddy', 22, ['biscuit']], ['morfi', 50, ['tea']], ['lilca', 78, ['book']]]) {
+        const e = document.createElement('div');
+        e.className = 'st-char';
+        e.style.left = x + '%'; e.style.setProperty('--s', SIZE[k]);
+        e.innerHTML = `<div class="st-body"><svg viewBox="-10 -10 140 185" class="st-svg">${ART[k](props)}</svg></div>`;
+        e.onclick = () => { const b = e.querySelector('.st-body'); b.classList.remove('a-jump'); void b.offsetWidth; b.classList.add('a-jump'); Sound.tick(); };
+        box.appendChild(e);
+      }
     }
-    start(false);
+    const st = saved()['ch1'];
+    const status = st === 'done' ? '<span class="tag done">✅ Completed</span>' : typeof st === 'number' && st > 0 ? '<span class="tag go">In progress</span>' : '<span class="tag new">New!</span>';
+    $('sh-cards').innerHTML = `<div class="sh-card">
+        <div class="num">1</div><div class="txt"><small>Chapter 1</small><b>${CHAPTERS[0].title}</b>${status}</div>
+        <div class="btns"><button class="big" id="sh-play">${st === 'done' ? '↻ Replay' : typeof st === 'number' && st > 0 ? '▶ Continue' : '▶ Play'}</button>
+        ${typeof st === 'number' && st > 0 ? '<button class="ghost small" id="sh-restart">↻ From the start</button>' : ''}</div></div>`
+      + `<div class="sh-soon">🔒 Coming soon: ${SOON.map(c => `${c.icon} <b>${c.title}</b>`).join(' · ')}</div>`;
+    $('sh-play').onclick = () => { Sound.unlock(); start(st === 'done'); };
+    if ($('sh-restart')) $('sh-restart').onclick = () => start(true);
   }
+  function menu() { storyHome(); }
 
   $('st-stage-tap').addEventListener('click', tap);
   $('st-skip').addEventListener('click', () => {
@@ -444,9 +464,10 @@ const Story = (() => {
     }
     run();
   });
-  $('st-back').addEventListener('click', () => { clearInterval(typing); home(); });
-  $('st-end-home').addEventListener('click', () => home());
-  $('to-story').addEventListener('click', () => { Sound.unlock(); menu(); });
+  $('st-back').addEventListener('click', () => { clearInterval(typing); storyHome(); });
+  $('st-end-home').addEventListener('click', () => storyHome());
+  $('tab-story').addEventListener('click', () => { Sound.unlock(); storyHome(); });
+  $('tab-puzzles').addEventListener('click', () => home());
 
-  return { start, menu };
+  return { start, menu, home: storyHome };
 })();

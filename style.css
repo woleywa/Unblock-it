@@ -613,3 +613,44 @@ button.stars-total { background: none; border: 0; padding: 4px 6px; cursor: poin
 /* Long level titles don't push the buttons off the screen */
 #game .bar .title { min-width: 0; }
 #game .bar .title h2 { overflow: hidden; text-overflow: ellipsis; }
+
+/* ── Bottom tabs: Puzzles / Story ── */
+#tabs { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 15; display: flex; gap: 6px; padding: 6px;
+  border-radius: 999px; background: rgba(20,15,51,0.72); border: 1px solid rgba(255,255,255,0.14); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+#tabs button { display: flex; align-items: center; gap: 7px; padding: 10px 20px; border-radius: 999px; font-weight: 700; font-size: 0.98rem; color: var(--dim); background: none; border: 0; }
+#tabs button span { font-size: 1.15rem; }
+#tabs button.on { background: linear-gradient(180deg, #ffe27a, #ffb300); color: #5a2d00; box-shadow: 0 3px 0 #a86a00; }
+#home { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+#home .home-foot { position: absolute; bottom: calc(76px + env(safe-area-inset-bottom)); left: 0; right: 0; }
+
+/* ── Story home ── */
+#storyhome { position: fixed; inset: 0; overflow: hidden; padding: 0; }
+.sh-bg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.sh-bg .blade { transform-box: fill-box; transform-origin: 50% 100%; animation: sway 2.6s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -0.4s); }
+.sh-bg .sun { animation: nextup 4s ease-in-out infinite; } .sh-bg .window { animation: nextup 3s ease-in-out infinite; }
+.sh-chars { position: absolute; left: 0; right: 0; bottom: calc(96px + env(safe-area-inset-bottom)); height: 0; }
+.sh-chars .st-char { cursor: pointer; width: calc(min(28vw, 140px) * var(--s)); }
+.sh-content { position: absolute; left: 0; right: 0; top: calc(16px + env(safe-area-inset-top)); display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 0 16px; }
+.sh-head { text-align: center; }
+.sh-head .isa { display: inline-block; padding: 3px 12px; border-radius: 999px; background: #1d1a26; color: #ffd54a; font-weight: 700; letter-spacing: 0.2em; font-size: 0.75rem; border: 2px solid #ffd54a; }
+.sh-head h1 { font-size: min(2.6rem, 10vw); margin-top: 6px; background: linear-gradient(180deg, #fff, #ffe3a8); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 3px 0 rgba(90,40,90,0.6)); }
+.sh-head p { color: #fff; opacity: 0.85; font-weight: 600; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
+.sh-cards { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 10px; }
+.sh-card { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px; border-radius: 22px; background: rgba(30,20,70,0.72); border: 1px solid rgba(255,255,255,0.16);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+.sh-card .num { width: 48px; height: 48px; border-radius: 16px; display: grid; place-items: center; font-weight: 700; font-size: 1.5rem; color: #5a2d00; background: linear-gradient(180deg, #ffe27a, #ffb300); box-shadow: 0 3px 0 #a86a00; }
+.sh-card .txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; text-align: left; }
+.sh-card .txt small { color: var(--dim); font-weight: 700; } .sh-card .txt b { color: #fff; font-size: 1.05rem; line-height: 1.2; }
+.sh-card .tag { align-self: flex-start; font-size: 0.75rem; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+.tag.new { background: #ff5a8a; color: #fff; } .tag.go { background: #3fd0ff; color: #0a3a52; } .tag.done { background: rgba(47,207,111,0.25); color: #9ff5c0; } .tag.soon { background: rgba(255,255,255,0.12); color: var(--dim); }
+.sh-card .btns { width: 100%; display: flex; flex-direction: column; gap: 6px; }
+.sh-card .btns .big { width: 100%; min-width: 0; }
+.sh-card .btns .small { margin-top: 0; }
+.sh-card.locked { opacity: 0.7; } .sh-card.locked .num { background: rgba(255,255,255,0.12); box-shadow: none; font-size: 1.4rem; }
+.sh-soon { text-align: center; font-size: 0.85rem; font-weight: 600; color: #fff; opacity: 0.9; padding: 8px 14px; border-radius: 16px; background: rgba(30,20,70,0.5); text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+.sh-soon b { font-weight: 700; }
+@media (max-height: 720px) {
+  .sh-head h1 { font-size: min(2.1rem, 9vw); } .sh-head p { font-size: 0.85rem; }
+  .sh-chars .st-char { width: calc(min(22vw, 110px) * var(--s)); }
+  .sh-card { padding: 10px 12px; }
+}

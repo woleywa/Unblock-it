@@ -25,7 +25,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap">
-  <link rel="stylesheet" href="style.css?v=57">
+  <link rel="stylesheet" href="style.css?v=58">
 </head>
 <body>
   <div class="sky" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
@@ -43,10 +43,7 @@
       <button class="ghost" id="to-chs">⚡ Challenges</button>
       <button class="ghost" id="to-team">👥 Team</button>
     </div>
-    <div class="pair">
-      <button class="ghost story-btn" id="to-story">📖 Story</button>
-      <button class="ghost" id="to-board">🏆 Leaderboard</button>
-    </div>
+    <button class="ghost" id="to-board">🏆 Leaderboard</button>
     <button class="help-pill" id="help-pill" hidden></button>
     <button class="nudge" id="nudge"></button>
     <div class="me-row"><button class="me-chip" id="me-chip" hidden></button><button class="stars-total" id="stars-total"></button><button class="chest-btn" id="chest-btn" hidden>🎁</button></div>
@@ -62,6 +59,20 @@
     <div id="level-grid"></div>
   </main>
 
+  <main id="storyhome" class="screen" hidden>
+    <svg class="sh-bg" viewBox="0 0 400 700" preserveAspectRatio="xMidYMax slice"></svg>
+    <div class="sh-chars"></div>
+    <div class="sh-content">
+      <div class="sh-head"><span class="isa">ISA</span><h1>Mörfi’s Missions</h1><p>Top secret stories of a Super Mega Snitch</p></div>
+      <div class="sh-cards" id="sh-cards"></div>
+    </div>
+  </main>
+
+  <nav id="tabs" hidden>
+    <button id="tab-puzzles" class="on"><span>🧩</span>Puzzles</button>
+    <button id="tab-story"><span>📖</span>Story</button>
+  </nav>
+
   <main id="story" class="screen" hidden>
     <div id="story-stage">
       <svg class="st-bg" viewBox="0 0 400 700" preserveAspectRatio="xMidYMax slice"></svg>
@@ -70,7 +81,7 @@
       <button class="st-tapzone" id="st-stage-tap" aria-label="Continue"></button>
       <div class="st-top"><button class="icon" id="st-back" aria-label="Home">‹</button><span class="st-title">📖 Mörfi · Chapter 1</span><button class="ghost small st-skip" id="st-skip">Skip ⏭</button></div>
       <div class="st-say narr" id="st-say"><b id="st-who" hidden></b><p id="st-text"></p><span id="st-tap" hidden>tap ▸</span></div>
-      <div id="st-end" hidden><button class="big" id="st-end-home">Back home</button></div>
+      <div id="st-end" hidden><button class="big" id="st-end-home">Back to the stories</button></div>
     </div>
   </main>
 
@@ -268,18 +279,18 @@
   <button id="upd-banner" hidden>✨ New version ready · <b>Tap to update</b></button>
   <div id="toast" hidden></div>
 
-  <script src="js/native.js?v=57"></script>
-  <script src="js/engine.js?v=57"></script>
-  <script src="js/levels.js?v=57"></script>
-  <script src="js/audio.js?v=57"></script>
-  <script src="js/art.js?v=57"></script>
-  <script src="js/challenge-levels.js?v=57"></script>
-  <script src="js/intro.js?v=57"></script>
-  <script src="js/game.js?v=57"></script>
-  <script src="js/daily-levels.js?v=57"></script>
-  <script src="js/extras.js?v=57"></script>
-  <script src="js/story.js?v=57"></script>
-  <script src="js/social.js?v=57"></script>
-  <script type="module" src="js/online.js?v=57"></script>
+  <script src="js/native.js?v=58"></script>
+  <script src="js/engine.js?v=58"></script>
+  <script src="js/levels.js?v=58"></script>
+  <script src="js/audio.js?v=58"></script>
+  <script src="js/art.js?v=58"></script>
+  <script src="js/challenge-levels.js?v=58"></script>
+  <script src="js/intro.js?v=58"></script>
+  <script src="js/game.js?v=58"></script>
+  <script src="js/daily-levels.js?v=58"></script>
+  <script src="js/extras.js?v=58"></script>
+  <script src="js/story.js?v=58"></script>
+  <script src="js/social.js?v=58"></script>
+  <script type="module" src="js/online.js?v=58"></script>
 </body>
 </html>
