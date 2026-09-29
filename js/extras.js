@@ -64,6 +64,7 @@ const Extras = (() => {
     $('win-best').innerHTML = `<div class="streak-big"><b>🔥 ${n}</b><span>day streak${n === 1 ? '' : ' — keep it going tomorrow!'}</span></div>${note ? `<p class="note">${note}</p>` : ''}`;
     $('next').hidden = false;
     $('to-ch').hidden = false;
+    $('next').className = 'big'; $('replay').className = 'ghost'; $('replay').textContent = 'Play again'; $('next').style.order = $('to-ch').style.order = '';
   }
 
   async function share(d) {

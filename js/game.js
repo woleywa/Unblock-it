@@ -106,7 +106,7 @@ function levelList() {
     }
     const color = (STAGES[Math.floor(i / 5)] || STAGES[0])[1];
     const b = document.createElement('button');
-    b.className = 'lvl' + (unlocked(i) ? '' : ' locked') + (i === next && !starsOf(i) ? ' next' : '');
+    b.className = 'lvl' + (unlocked(i) ? '' : ' locked') + (i === next && !starsOf(i) ? ' next' : '') + (starsOf(i) === 2 && progress.moves[i] - LEVELS[i].par <= 2 ? ' almost' : '');
     if (unlocked(i)) b.style.setProperty('--c', Art.PAL[color][1]), b.style.setProperty('--l', Art.PAL[color][0]), b.style.setProperty('--d', Art.PAL[color][3]);
     const st3 = [1, 2, 3].map(k => `<i class="${k <= starsOf(i) ? 'on' : ''}">★</i>`).join('');
     b.innerHTML = unlocked(i) ? `<b>${i + 1}</b><small>${st3}</small>` : '<b>🔒</b>';
@@ -638,6 +638,14 @@ function win() {
   Sound.win();
   $('win-stars').innerHTML = [1, 2, 3].map(k => `<span class="star ${k <= s ? 'on' : 'off'}" style="--k:${k}"><svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.8-4.9 4.5 1.3 6.5L12 17l-5.9 3.3 1.3-6.5L2.5 9.3l6.6-.8z"/></svg></span>`).join('');
   $('win-text').textContent = s === 3 ? `${moves} moves — perfect!` : `${moves} moves · ${level.par} for three stars`;
+  // So close: how many moves from the next star, and "Play again" becomes the big button.
+  const toNext = s === 2 ? moves - level.par : s === 1 ? moves - Math.ceil(level.par * 1.4) : 0;
+  const close = s < 3 && toNext <= 3;
+  if (close) $('win-text').textContent = `${moves} moves — only ${toNext} move${toNext === 1 ? '' : 's'} from ${'⭐'.repeat(s + 1)}!`;
+  $('replay').className = close ? 'big' : 'ghost';
+  $('next').className = close ? 'ghost' : 'big';
+  $('replay').textContent = close ? `↻ Try for ${s + 1} stars` : 'Play again';
+  $('next').style.order = close ? 1 : ''; $('to-ch').style.order = close ? 2 : '';
   $('win').hidden = false;
   $('win-help').innerHTML = '';
   Art.confetti();
