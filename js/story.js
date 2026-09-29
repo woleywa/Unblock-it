@@ -323,19 +323,19 @@ const Story = (() => {
     { puzzle: 4, scene: 'grass', title: 'Creep through the grass', hint: 'Clear a path so Mörfi can sneak through the grass!' },
     // …and off they sneak, through the grass.
     { bg: 'grass', front: 'grass', show: { morfi: { x: -12, props: ['satchel'] }, puddy: { x: -26, props: ['spoon'] }, lilca: { x: -40, props: ['book'] } } },
-    { walk: { morfi: 118, puddy: 106, lilca: 94 }, t: 4200 },
+    { walk: { morfi: 118, puddy: 106, lilca: 94 }, t: 3000 },
     { bg: 'leaf', show: { morfi: { x: 20, props: ['satchel'] }, puddy: { x: 45, props: ['spoon'] }, lilca: { x: 70, props: ['book'] } } },
     { narr: 'They crawled underneath a leaf…' },
     { puzzle: 22, scene: 'leaf', title: 'Under the leaf', hint: 'Make room under the leaf — quietly!' },
     { bg: 'leaf', front: 'leaf', low: true, show: { morfi: { x: -12, props: ['satchel'] }, puddy: { x: -26, props: ['spoon'] }, lilca: { x: -40, props: ['book'] } } },
-    { walk: { morfi: 118, puddy: 106, lilca: 94 }, t: 4200 },
+    { walk: { morfi: 118, puddy: 106, lilca: 94 }, t: 3000 },
     { bg: 'village', show: { morfi: { x: 20, props: ['satchel'] }, puddy: { x: 35, props: ['spoon'] }, lilca: { x: 48, props: ['book'] } } },
     { narr: 'They hid behind a mushroom…' },
     { puzzle: 40, scene: 'village', title: 'Behind the mushroom', hint: 'Get everyone behind the mushroom without being seen!' },
     { bg: 'village', front: 'mushroom', show: { morfi: { x: -12, props: ['satchel'] }, puddy: { x: -26, props: ['spoon'] }, lilca: { x: -40, props: ['book'] } } },
     { walk: { morfi: 58, puddy: 50, lilca: 42 }, t: 1800 },
     { act: { morfi: 'peek', puddy: 'peek', lilca: 'peek' }, wait: 1100 },
-    { walk: { morfi: 118, puddy: 106, lilca: 94 }, t: 4200 },
+    { walk: { morfi: 118, puddy: 106, lilca: 94 }, t: 3000 },
     { bg: 'meadow', show: { morfi: { x: 18, props: ['satchel'] }, puddy: { x: 34, props: ['spoon'] }, lilca: { x: 50, props: ['book'] }, flower: { x: 80 } } },
     { narr: 'They approached the suspicious flower.' },
     { say: 'morfi', text: 'Stop.', act: 'stop' },
@@ -360,7 +360,7 @@ const Story = (() => {
     { say: 'morfi', text: 'Don’t worry. I’ll escort you home.', act: 'salute' },
     { puzzle: 45, scene: 'meadow', title: 'Escort the beetle home', hint: 'Clear the meadow so the beetle can get home!' },
     { bg: 'meadow', front: 'grass', show: { beetle: { x: -8 }, morfi: { x: -20, props: ['satchel'] }, puddy: { x: -34, props: ['spoon'] }, lilca: { x: -48, props: ['book'] } } },
-    { walk: { beetle: 124, morfi: 112, puddy: 100, lilca: 88 }, t: 4800 },
+    { walk: { beetle: 124, morfi: 118, puddy: 112, lilca: 106 }, t: 3400 },
     { bg: 'leafhouse', show: { morfi: { x: 16, props: ['satchel'] }, puddy: { x: 32, props: ['spoon'] }, lilca: { x: 47, props: ['book'] }, beetle: { x: 64 } } },
     { narr: 'The beetle’s house was on the other side of the meadow, underneath a curled leaf.' },
     { show: { beetle2: { x: 82, who: 'beetle' } }, enter: 'beetle2' },
@@ -413,7 +413,7 @@ const Story = (() => {
     { say: 'kloenRide', text: 'Trust the cat? What cat?' },
     { puzzle: 23, scene: 'field', title: 'Pedal past the fields', hint: 'Clear the way so Bear and Kloenchen can ride on!' },
     { bg: 'field', show: { ...RIDE } },
-    { walk: { bearRide: 118, kloenRide: 96 }, t: 4000 },
+    { walk: { bearRide: 118, kloenRide: 110 }, t: 3000 },
     { bg: 'path', show: { bearRide: { x: 20 }, kloenRide: { x: 54 }, cat2: { x: 85 } } },
     { narr: 'Further along the path, someone was waiting by the grass. Black and white. Very still. Very serious.' },
     { say: 'kloenRide', text: 'That cat.' },
@@ -425,7 +425,7 @@ const Story = (() => {
     { say: 'kloenRide', text: 'I think we’re supposed to follow it.' },
     { puzzle: 27, scene: 'path', title: 'Follow the cat', hint: 'Make a way through the bushes — don’t lose the cat!' },
     { bg: 'path', front: 'grass', show: { cat2: { x: -6 }, ...RIDE } },
-    { walk: { cat2: 124, bearRide: 108, kloenRide: 86 }, t: 4200 },
+    { walk: { cat2: 124, bearRide: 116, kloenRide: 110 }, t: 3200 },
     { bg: 'forest', show: { bearRide: { x: 28 }, kloenRide: { x: 72 } } },
     { narr: 'The path wound into the forest near Stahnsdorf. Tall pines, soft needles, and the smell of adventure.' },
     { say: 'bearRide', text: 'Kloenchen, I have a question.' },
@@ -435,7 +435,7 @@ const Story = (() => {
     { say: 'bearRide', text: 'Exploring. Excellent. Very brave of us.' },
     { puzzle: 43, scene: 'forest', title: 'Through the pine forest', hint: 'Untangle the forest path!' },
     { bg: 'forest', show: { ...RIDE } },
-    { walk: { bearRide: 118, kloenRide: 96 }, t: 4000 },
+    { walk: { bearRide: 118, kloenRide: 110 }, t: 3000 },
     { bg: 'lake', show: { bear: { x: 26, props: ['bottle'] }, kloen: { x: 58 } } },
     { narr: 'And then — there it was. The big water. The Wannsee, full of little white sailboats.' },
     { say: 'kloen', text: 'The note said the big water. We’re here!', act: 'wave' },
@@ -540,15 +540,25 @@ const Story = (() => {
       if (s.flash) { stage().classList.remove('flash'); void stage().offsetWidth; stage().classList.add('flash'); Sound.tick(); }
       if (s.shake) { stage().classList.remove('shake'); void stage().offsetWidth; stage().classList.add('shake'); Native.buzz(); }
       if (s.walk) {
-        // Let the scene be drawn in its starting spot first (it may have only just been shown, e.g.
-        // right after a puzzle); otherwise everyone would jump straight to the end of the walk.
-        Object.keys(s.walk).concat(Object.keys(s.move || {})).forEach(k => { if (chars[k]) { chars[k].style.transition = 'none'; void chars[k].offsetWidth; } });
-        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-        for (const [k, x] of Object.entries(s.walk)) { const e = chars[k]; if (!e) continue; e.classList.add('walking'); e.style.transition = `left ${s.t || 1200}ms linear`; e.style.left = x + '%'; }
+        // Explicit animations from where each one stands to where it's going: they always play, even
+        // when the scene has only just been shown (e.g. right after a puzzle).
+        const t = s.t || 1200, anims = [];
+        for (const [k, x] of Object.entries(s.walk)) {
+          const e = chars[k]; if (!e) continue;
+          const from = e.style.left || '0%';
+          e.classList.add('walking');
+          e.style.left = x + '%';
+          anims.push(e.animate([{ left: from }, { left: x + '%' }], { duration: t, easing: 'linear' }).finished);
+        }
         // Something falling or floating at the same time (y in vh above the ground).
-        for (const [k, o] of Object.entries(s.move || {})) { const e = chars[k]; if (!e) continue; e.style.transition = `bottom ${s.t || 1200}ms cubic-bezier(.5,0,.8,.4), transform ${s.t || 1200}ms`; e.style.bottom = o.y + 'vh'; e.style.transform = 'translateX(-50%) rotate(200deg)'; }
-        await new Promise(r => setTimeout(r, s.t || 1200));
-        Object.values(chars).forEach(e => { e.classList.remove('walking'); e.style.transition = ''; });
+        for (const [k, o] of Object.entries(s.move || {})) {
+          const e = chars[k]; if (!e) continue;
+          const from = e.style.bottom || '0vh';
+          e.style.bottom = o.y + 'vh'; e.style.transform = 'translateX(-50%) rotate(200deg)';
+          anims.push(e.animate([{ bottom: from, transform: 'translateX(-50%) rotate(0deg)' }, { bottom: o.y + 'vh', transform: 'translateX(-50%) rotate(200deg)' }], { duration: t, easing: 'cubic-bezier(.5,0,.8,.4)' }).finished);
+        }
+        await Promise.race([Promise.all(anims).catch(() => {}), new Promise(r => setTimeout(r, t + 300))]);
+        Object.values(chars).forEach(e => e.classList.remove('walking'));
       }
       if (s.wait) await new Promise(r => setTimeout(r, s.wait));
       if (s.award) { await award(s.award); }
