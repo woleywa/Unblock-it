@@ -459,3 +459,12 @@ a.linkish { display: block; text-align: center; }
 @keyframes wheelspin { to { transform: rotate(360deg); } }
 /* Hint film: the see-through copy that shows the next move */
 .block.hint-ghost { opacity: 0.75; z-index: 55; filter: saturate(0.9) brightness(1.2) drop-shadow(0 0 8px rgba(255,255,255,0.55)); }
+
+/* Daily puzzle */
+.daily-btn.todo { background: linear-gradient(180deg, rgba(255,213,74,0.28), rgba(255,160,40,0.18)); border-color: rgba(255,213,74,0.55); }
+.daily-btn .flame { font-size: 0.85em; margin-left: 2px; }
+.streak-big { display: flex; flex-direction: column; align-items: center; gap: 2px; margin: 2px 0 4px; }
+.streak-big b { font-size: 2rem; line-height: 1; }
+.streak-big span { color: var(--dim); font-size: 0.9rem; }
+.daily-btn.todo::after { content: ''; position: absolute; top: 7px; right: 9px; width: 9px; height: 9px; border-radius: 50%; background: #ff5a4e; box-shadow: 0 0 0 2px rgba(20,15,51,0.6); animation: nextup 1.2s ease-in-out infinite; }
+.daily-btn { position: relative; }

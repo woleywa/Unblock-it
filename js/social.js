@@ -370,7 +370,7 @@ const Social = (() => {
   function tick() {
     const t = now();
     document.querySelectorAll('.screen:not([hidden]) .count').forEach(e => { e.textContent = fmtLeft(+e.dataset.t - t); });
-    if (chPlay && !$('game').hidden && cur) {
+    if (chPlay && !chPlay.daily && !$('game').hidden && cur) {
       const left = myEnd(cur.ch, cur.entry) - t;
       $('clock').textContent = `⏱ ${fmtLeft(left)}`;
       $('clock').classList.toggle('hurry', left < 60000);

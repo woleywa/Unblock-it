@@ -138,6 +138,7 @@ async function getSave() { await ready; await loading; return { stars: {}, moves
 async function putSave(progress) {
   await ready;
   const data = { stars: progress.stars, moves: progress.moves, updated: serverTimestamp() };
+  if (window.Extras) data.meta = window.Extras.meta();
   await setDoc(doc(db, 'saves', uid), data, { merge: true });
   save = { ...(save || {}), ...data };
 }

@@ -47,7 +47,8 @@ service cloud.firestore {
     match /saves/{uid} {
       allow read: if signedIn() && me() == uid;
       allow create, update: if signedIn() && me() == uid
-        && request.resource.data.keys().hasOnly(['stars', 'moves', 'friends', 'updated'])
+        && request.resource.data.keys().hasOnly(['stars', 'moves', 'friends', 'updated', 'meta'])
+        && (!('meta' in request.resource.data) || (request.resource.data.meta is map && request.resource.data.meta.size() <= 20))
         && (!('stars' in request.resource.data) || (request.resource.data.stars is map && request.resource.data.stars.size() <= 1000))
         && (!('moves' in request.resource.data) || (request.resource.data.moves is map && request.resource.data.moves.size() <= 1000))
         && (!('friends' in request.resource.data) || (request.resource.data.friends is list && request.resource.data.friends.size() <= 200));

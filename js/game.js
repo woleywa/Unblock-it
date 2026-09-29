@@ -82,6 +82,7 @@ function home() {
   $('stars-total').textContent = total ? `★ ${total}/${LEVELS.length * 3}` : '';
   $('play').textContent = total ? 'Continue' : 'Play';
   meChip();
+  if (typeof Extras !== 'undefined') Extras.homeButton();
   show('home');
   if (typeof Social !== 'undefined') Social.helpBox();
 }
@@ -137,6 +138,8 @@ function begin(lv, title, hint) {
   $('hint').textContent = hint || '';
   $('win').hidden = true;
   $('clock').hidden = !chPlay;
+  // (the daily puzzle sets these back to its own)
+  $('next').textContent = 'Next level'; $('to-ch').textContent = 'Back to challenge';
   lvClock();
   $('ask-friend').hidden = !!chPlay || !!answer;
   ansBar();
@@ -765,7 +768,8 @@ async function syncProgress() {
     for (const k of Object.keys(cm)) if (!(progress.moves[k] <= cm[k])) progress.moves[k] = cm[k];
     saveProgress();
     const behind = Object.keys(progress.stars).some(k => !(cs[k] >= progress.stars[k])) || Object.keys(progress.moves).some(k => !(cm[k] <= progress.moves[k]));
-    if (behind) await on.putSave(progress);
+    const metaBehind = typeof Extras !== 'undefined' && Extras.merge(s.meta);
+    if (behind || metaBehind) await on.putSave(progress);
     if (on.name) on.submit(null, 0, totals()).catch(() => {});
     if (!$('home').hidden) home();
   } catch (e) { console.warn(e); }
