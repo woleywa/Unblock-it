@@ -18,6 +18,11 @@ const Story = (() => {
     bottle: `<g class="prop"><rect x="86" y="104" width="12" height="26" rx="4" fill="#dff2ff" stroke="#9ac8e8" stroke-width="1.5" opacity="0.9"/><rect x="88" y="98" width="8" height="7" rx="2" fill="#e8433f"/></g>`,
     magnifier: `<g class="prop"><circle cx="98" cy="98" r="11" fill="#bfe8ff" opacity="0.6" stroke="#8a5a2e" stroke-width="4"/><path d="M92,108 L84,122" stroke="#8a5a2e" stroke-width="5" stroke-linecap="round"/><path d="M93,93 q4,-3 8,0" stroke="#fff" stroke-width="2" fill="none"/></g>`,
     flashlight: `<g class="prop"><rect x="84" y="112" width="20" height="9" rx="3" fill="#3a3a44"/><path d="M104,110 L150,92 L150,140 L104,122 Z" fill="#fff6c0" opacity="0.35"/></g>`,
+    toast: `<g class="prop"><rect x="82" y="100" width="20" height="18" rx="5" fill="#e8b060" stroke="#b37a3a" stroke-width="2"/><rect x="86" y="104" width="12" height="10" rx="3" fill="#e8433f"/></g>`,
+    // Mörfi's winter look: an orange-red jacket and a rusty knitted scarf.
+    winter: `<g class="prop"><path d="M36,96 Q60,90 84,96 L90,126 L30,126 Z" fill="#e8542e"/><path d="M60,96 V126" stroke="#b8401f" stroke-width="2"/><path d="M40,98 L44,126 M80,98 L76,126" stroke="#b8401f" stroke-width="1.5" opacity="0.6"/>
+      <ellipse cx="30" cy="109" rx="9" ry="13" fill="#e8542e"/><ellipse cx="90" cy="109" rx="9" ry="13" fill="#e8542e"/>
+      <path d="M40,92 Q60,104 80,92 Q82,100 60,108 Q38,100 40,92 Z" fill="#a8422a"/><path d="M52,104 q-4,10 -2,18 M60,106 q4,10 2,16" stroke="#a8422a" stroke-width="5" stroke-linecap="round"/><circle cx="52" cy="124" r="3" fill="#a8422a"/><circle cx="62" cy="124" r="3" fill="#a8422a"/></g>`,
     spoon: `<g class="prop"><rect x="20" y="96" width="4" height="22" rx="2" fill="#cfd5e6" transform="rotate(20 22 107)"/><ellipse cx="18" cy="94" rx="5" ry="7" fill="#cfd5e6" transform="rotate(20 22 107)"/></g>`,
   };
   // A cartoon cat standing up: body, tail, head with ears, big eyes, pink nose, whiskers.
@@ -203,6 +208,63 @@ const Story = (() => {
       <circle cx="40" cy="88" r="6" fill="#fff"/><circle cx="76" cy="80" r="5" fill="#fff"/><path d="M60,62 V30" stroke="#cfd5e6" stroke-width="3"/><circle cx="60" cy="28" r="6" fill="#ff5a4e" class="blink-light"/>
       <path d="M44,20 q16,-14 32,0 M36,12 q24,-22 48,0" stroke="#7fe8ff" stroke-width="3" fill="none" class="waves"/>`,
 
+    // Nori: Mörfi's best friend from the north — red beanie, dark hair, white puffy jacket, grey knit collar.
+    nori: props => `
+      <path d="M26,58 Q24,98 34,106 L86,106 Q96,98 94,58 Z" fill="#2a2426"/>
+      <circle cx="26" cy="72" r="6" fill="#f3d2b4"/><circle cx="94" cy="72" r="6" fill="#f3d2b4"/>
+      <ellipse cx="60" cy="70" rx="31" ry="29" fill="#f3d2b4"/>
+      <path d="M29,62 Q32,50 44,48 L44,62 Z M91,62 Q88,50 76,48 L76,62 Z" fill="#2a2426"/>
+      <path d="M24,56 Q26,18 60,16 Q94,18 96,56 Q60,46 24,56 Z" fill="#e0333f"/><path d="M24,56 Q60,44 96,56 L96,64 Q60,52 24,64 Z" fill="#c02633"/>
+      ${[30, 38, 46, 54, 62, 70, 78, 86].map(x => `<path d="M${x},${x < 60 ? 30 - (60 - x) * 0.1 : 30 - (x - 60) * 0.1} V56" stroke="#c02633" stroke-width="2"/>`).join('')}
+      <rect x="50" y="46" width="20" height="10" rx="2" fill="#c8955a"/><path d="M54,51 h12" stroke="#7a5028" stroke-width="1.4"/>
+      ${eyes(47, 73, 72, 7)}
+      <ellipse cx="37" cy="84" rx="6" ry="3.5" fill="#ff8f8f" opacity="0.5"/><ellipse cx="83" cy="84" rx="6" ry="3.5" fill="#ff8f8f" opacity="0.5"/>
+      <path class="smile" d="M51,84 Q60,94 69,84 Z" fill="#fff" stroke="#c0505a" stroke-width="1.6"/><ellipse class="oh" cx="60" cy="88" rx="3" ry="4" fill="${INK}"/>
+      <circle cx="44" cy="78" r="1.2" fill="#6a4a3a"/>
+      <path d="M36,98 Q60,90 84,98 L92,150 L28,150 Z" fill="#f4f4f6" stroke="#d6d8e0" stroke-width="1.5"/>
+      <path d="M46,96 Q60,104 74,96 L72,106 Q60,112 48,106 Z" fill="#b8b8c0"/><path d="M60,108 V150" stroke="#d6d8e0" stroke-width="2"/>
+      <path d="M32,118 H88 M30,134 H90" stroke="#e2e4ea" stroke-width="2"/>
+      <g class="arm-l" style="transform-origin:38px 102px"><ellipse cx="30" cy="118" rx="9" ry="15" fill="#f4f4f6" stroke="#d6d8e0" stroke-width="1.5"/><circle cx="29" cy="133" r="5" fill="#f3d2b4"/></g>
+      <g class="arm-r" style="transform-origin:82px 102px"><ellipse cx="90" cy="118" rx="9" ry="15" fill="#f4f4f6" stroke="#d6d8e0" stroke-width="1.5"/><circle cx="91" cy="133" r="5" fill="#f3d2b4"/></g>
+      <g class="legs"><rect x="44" y="150" width="12" height="10" fill="#3a3a48"/><rect x="64" y="150" width="12" height="10" fill="#3a3a48"/><ellipse cx="50" cy="163" rx="9" ry="5" fill="#5a4030"/><ellipse cx="70" cy="163" rx="9" ry="5" fill="#5a4030"/></g>
+      ${(props || []).map(p => PROPS[p] || '').join('')}`,
+    // A purple beetle (the spoon borrower) and her three babies in a nest.
+    pbeetle: () => ART.beetle().replace(/#2fbf8f/g, '#a45cff').replace(/#1a7f5f/g, '#6124b6').replace(/#9ff5d5/g, '#e3c8ff'),
+    babies: () => `<path d="M14,150 Q60,176 106,150 Q100,166 60,170 Q20,166 14,150 Z" fill="#8a6a3a"/><path d="M14,150 Q60,138 106,150" stroke="#a8844a" stroke-width="4" fill="none"/>
+      ${[34, 60, 86].map((x, i) => `<g class="bob" style="--i:${i}"><ellipse cx="${x}" cy="144" rx="11" ry="9" fill="#a45cff"/><circle cx="${x}" cy="134" r="7" fill="#2b2140"/><circle cx="${x - 2.5}" cy="133" r="1.6" fill="#fff"/><circle cx="${x + 2.5}" cy="133" r="1.6" fill="#fff"/></g>`).join('')}
+      <path d="M40,122 L96,112" stroke="#cfd5e6" stroke-width="5" stroke-linecap="round"/><ellipse cx="100" cy="111" rx="8" ry="6" fill="#cfd5e6"/>${[[98, 108], [103, 112], [96, 113]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.8" fill="#8fe0ff"/>`).join('')}`,
+    bush: () => `<circle cx="36" cy="138" r="30" fill="#2f8a45"/><circle cx="84" cy="136" r="32" fill="#379a4f"/><circle cx="60" cy="116" r="32" fill="#44ad5c"/><circle cx="52" cy="108" r="8" fill="#6fd08a" opacity="0.6"/><rect x="10" y="160" width="100" height="8" rx="4" fill="#23602f"/>`,
+    bowl: () => `<rect x="10" y="130" width="100" height="10" rx="4" fill="#a8743f"/><rect x="20" y="140" width="8" height="30" fill="#8a5a2e"/><rect x="92" y="140" width="8" height="30" fill="#8a5a2e"/>
+      <path d="M36,112 Q60,138 84,112 Z" fill="#fff" stroke="#9ac8e8" stroke-width="2"/><ellipse cx="60" cy="112" rx="24" ry="5" fill="#fff8e0"/>${[48, 56, 64, 72].map(x => `<circle cx="${x}" cy="111" r="2.5" fill="#e0a45a"/>`).join('')}`,
+    prints: () => `${[[20, 164], [44, 156], [68, 164], [92, 156]].map(([x, y], i) => `<g class="glint" style="--i:${i}"><ellipse cx="${x}" cy="${y}" rx="7" ry="4.5" fill="#6a4520" opacity="0.75"/><rect x="${x - 1.5}" y="${y - 12}" width="3" height="9" rx="1.5" fill="#6a4520" opacity="0.6"/></g>`).join('')}`,
+    letter: () => `<rect x="24" y="126" width="72" height="44" rx="4" fill="#fff4dc" stroke="#d9a53a" stroke-width="2"/><path d="M24,126 L60,152 L96,126" fill="none" stroke="#d9a53a" stroke-width="2"/><circle cx="60" cy="150" r="10" fill="#ffd54a" stroke="#b37a00" stroke-width="2"/><text x="60" y="154" text-anchor="middle" font-size="7" font-weight="700" fill="#16214a" font-family="Fredoka,system-ui">ISA</text>`,
+
+    // Snitch Commander Hoot: a wise old owl in a trench coat, with the golden ISA badge.
+    hoot: () => `
+      <path d="M26,100 Q24,160 40,166 L80,166 Q96,160 94,100 Z" fill="#8a6a4a"/><path d="M60,100 V166" stroke="#6a4a2a" stroke-width="2"/><path d="M42,100 L60,124 L78,100" fill="#c8a878"/>
+      <circle cx="70" cy="126" r="7" fill="#ffd54a" stroke="#b37a00" stroke-width="2"/><text x="70" y="129" text-anchor="middle" font-size="5" font-weight="700" fill="#16214a" font-family="Fredoka,system-ui">ISA</text>
+      <ellipse cx="60" cy="66" rx="38" ry="36" fill="#9a7a5a"/><path d="M26,40 L34,58 L44,44 Z M94,40 L86,58 L76,44 Z" fill="#7a5a3a"/>
+      <ellipse cx="60" cy="74" rx="30" ry="26" fill="#e8d6b8"/>
+      <circle cx="46" cy="66" r="13" fill="#fff"/><circle cx="74" cy="66" r="13" fill="#fff"/>
+      ${eyes(46, 74, 66, 7)}
+      <path d="M32,54 Q46,46 56,56 M88,54 Q74,46 64,56" stroke="#5a3a1a" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M56,80 L60,90 L64,80 Z" fill="#e0a030"/>
+      <g class="arm-l" style="transform-origin:32px 110px"><ellipse cx="28" cy="126" rx="9" ry="20" fill="#8a6a4a"/></g><g class="arm-r" style="transform-origin:88px 110px"><ellipse cx="92" cy="126" rx="9" ry="20" fill="#8a6a4a"/></g>
+      <g class="legs"><path d="M46,166 v6 M52,166 v6 M68,166 v6 M74,166 v6" stroke="#e0a030" stroke-width="3" stroke-linecap="round"/></g>
+      <path class="smile" d="M0,0"/><ellipse class="oh" cx="60" cy="92" rx="3" ry="3" fill="${INK}"/>`,
+    // Snacko-3000: a round little ISA helper robot with a grabber arm.
+    snacko: () => `
+      <path d="M60,40 V22" stroke="#9aa4b8" stroke-width="3"/><circle cx="60" cy="20" r="6" fill="#ff5a4e" class="blink-light"/>
+      <rect x="22" y="40" width="76" height="60" rx="26" fill="#d9deea" stroke="#9aa4b8" stroke-width="3"/>
+      <rect x="32" y="52" width="56" height="30" rx="14" fill="#16214a"/><circle cx="48" cy="67" r="7" fill="#7fe8ff" class="eyes"/><circle cx="72" cy="67" r="7" fill="#7fe8ff" class="eyes"/>
+      <path class="smile" d="M52,76 q8,5 16,0" stroke="#7fe8ff" stroke-width="2.5" fill="none"/><ellipse class="oh" cx="60" cy="77" rx="3" ry="3" fill="#7fe8ff"/>
+      <rect x="34" y="100" width="52" height="42" rx="12" fill="#c8cedc" stroke="#9aa4b8" stroke-width="3"/><text x="60" y="126" text-anchor="middle" font-size="12" font-weight="700" fill="#16214a" font-family="Fredoka,system-ui">3000</text>
+      <g class="arm-r" style="transform-origin:86px 110px"><path d="M86,112 L112,100 L118,92 M112,100 L120,106" stroke="#9aa4b8" stroke-width="5" stroke-linecap="round" fill="none"/></g>
+      <g class="arm-l" style="transform-origin:34px 110px"><path d="M34,112 L12,122" stroke="#9aa4b8" stroke-width="5" stroke-linecap="round"/></g>
+      <g class="legs"><rect x="36" y="142" width="48" height="14" rx="7" fill="#5a6278"/><circle cx="46" cy="160" r="7" fill="#2a2a30"/><circle cx="74" cy="160" r="7" fill="#2a2a30"/></g>`,
+    crumbs: () => `${[[14, 164], [34, 158], [56, 166], [78, 158], [100, 164]].map(([x, y], i) => `<g class="glint" style="--i:${i}"><circle cx="${x}" cy="${y}" r="4" fill="#e0a45a"/><circle cx="${x + 5}" cy="${y + 2}" r="2.5" fill="#c8883a"/></g>`).join('')}`,
+    pile: () => `<path d="M10,166 Q60,90 110,166 Z" fill="#e0a45a"/>${[[40, 140], [60, 120], [80, 142], [50, 156], [72, 158], [60, 144]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="11" fill="#e8b060" stroke="#b37a3a" stroke-width="2"/><circle cx="${x - 3}" cy="${y - 2}" r="1.6" fill="#7a4a1a"/><circle cx="${x + 3}" cy="${y + 3}" r="1.6" fill="#7a4a1a"/>`).join('')}<text x="60" y="104" text-anchor="middle" font-size="12" font-weight="700" fill="#16214a" font-family="Fredoka,system-ui">EVIDENCE</text>`,
+
     // The beetle: small, shiny and a bit embarrassed.
     beetle: () => `
       <g class="legs"><path d="M40,150 l-10,10 M50,154 l-6,12 M70,154 l6,12 M80,150 l10,10" stroke="${INK}" stroke-width="3" stroke-linecap="round"/></g>
@@ -220,8 +282,8 @@ const Story = (() => {
       ${eyes(54, 66, 68, 3)}
       ${mouth(60, 76, 3.5)}`,
   };
-  const NAMES = { morfi: 'Mörfi', puddy: 'Puddy', lilca: 'Lilca', beetle: 'Beetle', flower: 'Flower', mom: 'Beetle family', bear: 'Bear', kloen: 'Kloenchen', cat2: 'The cat', bearRide: 'Bear', kloenRide: 'Kloenchen', blorp: 'Director Blorp (ISA)', snail: 'Slowbert the snail', magpie: 'Pica the magpie' };
-  const SIZE = { morfi: 1, puddy: 0.9, lilca: 0.9, beetle: 0.72, flower: 1.15, bear: 1.08, kloen: 1, bearRide: 1.12, kloenRide: 1.08, cat2: 0.62, bird: 0.6, blorp: 1.1, snail: 0.7, magpie: 0.75, feather: 0.3, radio: 0.8, note: 0.3, box: 0.55 };
+  const NAMES = { morfi: 'Mörfi', puddy: 'Puddy', lilca: 'Lilca', beetle: 'Beetle', flower: 'Flower', mom: 'Beetle family', bear: 'Bear', kloen: 'Kloenchen', cat2: 'The cat', bearRide: 'Bear', kloenRide: 'Kloenchen', blorp: 'Director Blorp (ISA)', snail: 'Slowbert the snail', magpie: 'Pica the magpie', nori: 'Nori', pbeetle: 'Purple beetle', hoot: 'Snitch Commander Hoot', snacko: 'Snacko-3000' };
+  const SIZE = { morfi: 1, puddy: 0.9, lilca: 0.9, beetle: 0.72, flower: 1.15, bear: 1.08, kloen: 1, bearRide: 1.12, kloenRide: 1.08, cat2: 0.62, bird: 0.6, blorp: 1.1, hoot: 1.1, snacko: 0.8, crumbs: 0.6, pile: 0.8, nori: 1, pbeetle: 0.72, babies: 0.7, bush: 0.95, bowl: 0.6, prints: 0.6, letter: 0.3, snail: 0.7, magpie: 0.75, feather: 0.3, radio: 0.8, note: 0.3, box: 0.55 };
 
   // ── Scenery (400×700, anchored at the bottom) ──
   const mushroomHouse = (x, y, s, cap = '#e8433f') => `<g transform="translate(${x} ${y}) scale(${s})">
@@ -232,6 +294,47 @@ const Story = (() => {
   const grass = (y, color, n = 40, h = 26) => { let s = ''; for (let i = 0; i < n; i++) { const x = (i / n) * 420 - 10 + (i % 3) * 3, hh = h * (0.6 + ((i * 37) % 10) / 20); s += `<path d="M${x},${y} q2,${-hh * 0.6} ${(i % 2 ? 4 : -3)},${-hh}" stroke="${color}" stroke-width="3" fill="none" stroke-linecap="round" class="blade" style="--i:${i % 7}"/>`; } return s; };
   const clouds = () => [[40, 120, 1.2], [230, 80, 1.6], [320, 200, 1], [120, 240, 0.9], [300, 320, 1.3]].map(([x, y, k], i) => `<g class="cloud" style="--i:${i}" opacity="0.8"><ellipse cx="${x}" cy="${y}" rx="${60 * k}" ry="${9 * k}" fill="#fff"/><ellipse cx="${x + 30 * k}" cy="${y - 6 * k}" rx="${40 * k}" ry="${7 * k}" fill="#fff" opacity="0.8"/></g>`).join('');
   const pines = (y, n, c1, c2, h = 150) => Array.from({ length: n }, (_, i) => { const x = (i / n) * 440 - 20 + (i % 2) * 12, hh = h * (0.75 + ((i * 29) % 10) / 30); return `<path d="M${x},${y - hh} L${x + 26},${y - hh * 0.45} L${x + 14},${y - hh * 0.45} L${x + 34},${y} L${x - 34},${y} L${x - 14},${y - hh * 0.45} L${x - 26},${y - hh * 0.45} Z" fill="${i % 2 ? c1 : c2}"/><rect x="${x - 4}" y="${y}" width="8" height="14" fill="#6a4520"/>`; }).join('');
+  const BG4 = {
+    // ISA headquarters, hidden deep inside the biggest mushroom: screens, a star map, the biscuit vault.
+    hq: () => `
+      <defs><linearGradient id="hqg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#16214a"/><stop offset="1" stop-color="#2a3a7a"/></linearGradient></defs>
+      <rect width="400" height="700" fill="url(#hqg)"/><path d="M0,0 H400 V90 Q200,20 0,90 Z" fill="#e8433f"/>${[[70, 40], [200, 22], [330, 48]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="14" fill="#fff" opacity="0.85"/>`).join('')}
+      <rect x="30" y="140" width="340" height="170" rx="16" fill="#0d1430" stroke="#ffd54a" stroke-width="4"/>
+      ${Array.from({ length: 24 }, (_, i) => `<circle cx="${50 + (i * 53) % 300}" cy="${160 + (i * 37) % 130}" r="${1 + (i % 3)}" fill="#fff" opacity="0.7" class="twinkle" style="--i:${i % 5}"/>`).join('')}
+      <path d="M70,280 Q150,180 240,220 T340,170" stroke="#7fe8ff" stroke-width="2" stroke-dasharray="6 6" fill="none"/><circle cx="340" cy="170" r="8" fill="#ffd54a" class="blink-light"/>
+      <text x="200" y="136" text-anchor="middle" font-family="Fredoka,system-ui" font-weight="700" font-size="16" fill="#ffd54a" letter-spacing="3">INTERGALACTIC SNITCH ASSOCIATION</text>
+      ${[40, 150, 260].map((x, i) => `<rect x="${x}" y="340" width="100" height="70" rx="10" fill="#0d1430" stroke="#5a6aa8" stroke-width="3"/><path d="M${x + 12},${380 + (i % 2) * 6} l14,-12 14,8 14,-16 14,10 14,-6" stroke="${['#7fe8ff', '#9ff5c0', '#ff9ec4'][i]}" stroke-width="3" fill="none"/>`).join('')}
+      <rect x="300" y="430" width="80" height="120" rx="12" fill="#a8b0c8" stroke="#6a7290" stroke-width="4"/><circle cx="340" cy="490" r="24" fill="#8a92b0" stroke="#5a6278" stroke-width="4"/><path d="M340,470 V510 M320,490 H360" stroke="#5a6278" stroke-width="4"/><text x="340" y="448" text-anchor="middle" font-size="11" font-weight="700" fill="#16214a" font-family="Fredoka,system-ui">🍪 VAULT</text>
+      <rect y="560" width="400" height="140" fill="#1d2a5a"/>${[0, 1, 2, 3, 4, 5, 6, 7].map(i => `<rect x="${i * 52}" y="560" width="48" height="140" fill="#23326a" opacity="${i % 2 ? 1 : 0.6}"/>`).join('')}<path d="M0,560 H400" stroke="#ffd54a" stroke-width="3"/>`,
+  };
+  const BG3 = {
+    // The far north by day: grey sky, the sea, green fields with little red and white houses, a hillside with rocks.
+    coast: () => `
+      <defs><linearGradient id="skc" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8e9aac"/><stop offset="1" stop-color="#dfe3ea"/></linearGradient></defs>
+      <rect width="400" height="700" fill="url(#skc)"/>${[[60, 80, 2], [260, 120, 2.4], [160, 200, 1.8]].map(([x, y, k], i) => `<g class="cloud" style="--i:${i}"><ellipse cx="${x}" cy="${y}" rx="${50 * k}" ry="${18 * k}" fill="#f2f4f8" opacity="0.85"/><ellipse cx="${x + 30 * k}" cy="${y + 8 * k}" rx="${40 * k}" ry="${14 * k}" fill="#c9cfda"/></g>`).join('')}
+      <rect y="300" width="400" height="40" fill="#6f8290"/><path d="M0,300 H400" stroke="#9aaab6" stroke-width="2"/>${[310, 322].map((y, i) => `<path d="M${i * 30},${y} q20,-3 40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0 t40,0" stroke="#dfe6ec" stroke-width="1.5" fill="none" opacity="0.5" class="wave" style="--i:${i}"/>`).join('')}
+      <path d="M0,340 Q200,326 400,338 V470 H0 Z" fill="#6aa548"/><path d="M0,380 Q200,370 400,384" stroke="#5a9540" stroke-width="10" fill="none" opacity="0.5"/>
+      <path d="M40,470 Q120,400 220,390 Q300,380 400,372" stroke="#8a8e94" stroke-width="5" fill="none"/>
+      ${[[246, 362, '#c0392b'], [270, 360, '#f2f2f2'], [296, 364, '#3a3a40'], [320, 358, '#c0392b']].map(([x, y, c]) => `<rect x="${x}" y="${y}" width="18" height="12" fill="${c}"/><path d="M${x - 2},${y} l11,-8 11,8 z" fill="#4a4a50"/>`).join('')}
+      ${[340, 354, 368].map(x => `<ellipse cx="${x}" cy="386" rx="7" ry="5" fill="#f4f4f4"/>`).join('')}
+      <path d="M0,420 Q60,380 120,410 Q200,450 280,420 Q340,400 400,430 V700 H0 Z" fill="#b8a86a"/>
+      <path d="M0,470 Q100,440 200,470 Q300,500 400,470 V700 H0 Z" fill="#9aa058"/>
+      ${[[60, 500, 26], [150, 470, 18], [300, 510, 30], [230, 560, 22], [90, 600, 34], [340, 620, 26]].map(([x, y, r]) => `<ellipse cx="${x}" cy="${y}" rx="${r}" ry="${r * 0.6}" fill="#6f7478"/><ellipse cx="${x - r * 0.3}" cy="${y - r * 0.2}" rx="${r * 0.5}" ry="${r * 0.25}" fill="#8f9498"/><ellipse cx="${x + r * 0.2}" cy="${y - r * 0.4}" rx="${r * 0.3}" ry="${r * 0.12}" fill="#8aa04a" opacity="0.7"/>`).join('')}
+      ${grass(700, '#b8b060', 40, 70)}${grass(700, '#7aa04a', 30, 45)}`,
+    // The same north at night: stars, clouds, the northern lights, a hill, village lights and a big fir tree.
+    aurora: () => `
+      <defs><linearGradient id="ska" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0d1a3a"/><stop offset="0.6" stop-color="#1c3a56"/><stop offset="1" stop-color="#2a4a5a"/></linearGradient>
+        <linearGradient id="au" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff7ad0" stop-opacity="0"/><stop offset="0.35" stop-color="#7affc8" stop-opacity="0.55"/><stop offset="1" stop-color="#3affb0" stop-opacity="0"/></linearGradient></defs>
+      <rect width="400" height="700" fill="url(#ska)"/>
+      ${Array.from({ length: 40 }, (_, i) => `<circle cx="${(i * 97) % 400}" cy="${(i * 53) % 380}" r="${0.8 + (i % 3) * 0.5}" fill="#fff" opacity="${0.35 + (i % 4) * 0.15}" class="twinkle" style="--i:${i % 5}"/>`).join('')}
+      <g class="aurora"><path d="M-40,300 Q60,160 160,230 Q260,300 340,180 Q380,130 440,160 L440,40 Q380,20 330,80 Q250,180 160,120 Q60,60 -40,180 Z" fill="url(#au)"/>
+        <path d="M-40,340 Q80,230 190,290 Q300,350 440,240 L440,160 Q300,260 190,210 Q80,160 -40,260 Z" fill="url(#au)" opacity="0.7"/></g>
+      ${[[40, 360, 2.2], [300, 120, 2.6], [220, 420, 1.8], [360, 300, 1.6]].map(([x, y, k], i) => `<g class="cloud" style="--i:${i}" opacity="0.55"><ellipse cx="${x}" cy="${y}" rx="${50 * k}" ry="${18 * k}" fill="#8a96aa"/><ellipse cx="${x + 26 * k}" cy="${y + 6 * k}" rx="${36 * k}" ry="${13 * k}" fill="#6a7690"/></g>`).join('')}
+      <path d="M0,520 Q120,470 260,500 Q340,515 400,500 V700 H0 Z" fill="#0f1a1c"/>
+      ${[[40, 530], [70, 534], [110, 528], [150, 532], [320, 522]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i === 0 ? 10 : 3}" fill="#ffe27a" opacity="${i === 0 ? 0.5 : 0.9}" class="window"/>`).join('')}
+      <g fill="#081012"><path d="M250,560 L200,540 L236,516 L196,500 L234,470 L200,456 L240,420 L216,408 L252,370 L240,350 L264,318 L288,350 L276,370 L312,408 L288,420 L328,456 L294,470 L332,500 L292,516 L328,540 L278,560 Z"/></g>
+      <rect y="560" width="400" height="140" fill="#0a1214"/>${grass(565, '#16282a', 44)}`,
+  };
   const BG2 = {
     // Inside Mörfi's mushroom house: round window, shelf, lamp, rug, a biscuit tin.
     inside: () => `
@@ -640,13 +743,196 @@ const Story = (() => {
     { say: 'lilca', text: 'She’s writing her case report.' },
     { say: 'puddy', text: 'It’ll be forty pages.' },
     { say: 'morfi', text: 'FORTY-TWO.', offstage: true },
+    { narr: 'Knock knock. Lilca opened the door. Nobody was there. Just a tiny envelope on the doorstep, with a golden ISA seal.' },
+    { show: { letter: { x: 50 } }, enter: 'letter' },
+    { card: `<div class="case letter"><b class="stamp">TOP SECRET</b><p>Agent Mörfi,</p><p>We have another mission. This one is much more serious.</p><p>Someone has been stealing biscuits from the ISA headquarters.</p><p class="sig">— Snitch Commander</p></div>`, narr: 'Puddy stared at Lilca. Lilca stared at the letter.' },
+    { say: 'morfi', text: 'Finally. A serious case. 🍪', offstage: true },
+    { narr: 'TO BE CONTINUED…' },
     { end: 3 },
   ];
-  const CHAPTERS = [
-    { id: 1, series: 'morfi', bonus: 50, num: 'Chapter 1', title: 'Mörfi and the Very Important Mission', short: 'Mörfi · Chapter 1', steps: CH1, icon: '🍄' },
-    { id: 3, series: 'morfi', num: 'Chapter 2', title: 'The Case of the Missing Spoon', short: 'Mörfi · Chapter 2', steps: CH3, icon: '🥄' },
-    { id: 2, series: 'bear', num: 'Story 1', title: 'The Bike Tour with Kloenchen', short: 'Bear & Kloenchen', steps: CH2, icon: '🚲' },
+  // ── Mörfi: The Great ISA Biscuit Heist ──
+  const CH5 = [
+    { bg: 'village', show: { morfi: { x: 22, props: ['satchel'] }, puddy: { x: 48 }, lilca: { x: 74, props: ['book'] } } },
+    { narr: 'The letter had said: someone is stealing biscuits from the ISA headquarters. Mörfi had not slept all night. She had been “preparing”.' },
+    { say: 'lilca', text: 'You were snoring.' },
+    { say: 'morfi', text: 'Preparing loudly.' },
+    { say: 'puddy', text: 'Where even IS the ISA headquarters?' },
+    { say: 'morfi', text: 'That, Puddy, is the most classified secret in the whole galaxy.' },
+    { narr: 'Mörfi walked to the biggest mushroom on the hill. She knocked three times. Then twice. Then once. Then she said “biscuit”.' },
+    { shake: true, narr: 'The mushroom rumbled. A tiny door slid open. Behind it: a lift going down. Very, very far down.' },
+    { say: 'puddy', text: 'It was in the MUSHROOM this whole time?!', act: 'jump' },
+    { puzzle: 0, pool: 'hard', scene: 'village', title: 'The secret lift', hint: 'Line everything up to open the secret door!' },
+    { bg: 'hq', show: { morfi: { x: 20 }, puddy: { x: 42 }, lilca: { x: 64, props: ['book'] } } },
+    { narr: 'Deep underground lay the headquarters of the Intergalactic Snitch Association. Screens blinked. A star map glowed. Somewhere, a printer printed something top secret.' },
+    { show: { hoot: { x: 84 } }, enter: 'hoot' },
+    { say: 'hoot', text: 'Agent Mörfi. Welcome. I am Snitch Commander Hoot.' },
+    { say: 'morfi', text: 'A real… Snitch Commander…', act: 'gasp' },
+    { say: 'hoot', text: 'Our biscuit vault is being emptied. Every night, a little more. Last night: forty-two biscuits.' },
+    { say: 'puddy', text: 'FORTY-TWO?!', act: 'scream' },
+    { say: 'hoot', text: 'The ISA runs on biscuits, Agent. Without them, no one can think.' },
+    { say: 'morfi', text: 'Commander, I will find the thief. You have my word. And my magnifying glass.', act: 'salute', props: ['magnifier'] },
+    { narr: 'Mörfi began at once. She inspected the vault. She inspected the screens. She inspected Puddy.' },
+    { say: 'puddy', text: 'Why is it ALWAYS me?' },
+    { say: 'morfi', text: 'Where were you last night between 23:00 and 23:05?' },
+    { say: 'puddy', text: 'At home! Sleeping! With Lilca!' },
+    { say: 'lilca', text: 'He was. He snores too.' },
+    { say: 'morfi', text: 'Hm. Two snorers. Solid alibi.' },
+    { puzzle: 6, pool: 'hard', scene: 'hq', title: 'Search the headquarters', hint: 'Check every corner of the headquarters!' },
+    { bg: 'hq', show: { morfi: { x: 24, props: ['magnifier'] }, puddy: { x: 46 }, lilca: { x: 68, props: ['book'] }, crumbs: { x: 86 } }, enter: 'crumbs' },
+    { narr: 'Next to the vault, Lilca spotted something. A trail of crumbs. Leading down the corridor.' },
+    { say: 'lilca', text: 'Crumbs. Very neat crumbs. In a perfectly straight line.' },
+    { say: 'morfi', text: 'Too neat. Nobody eats a biscuit in a straight line. Except…' },
+    { say: 'puddy', text: 'Except who?' },
+    { say: 'morfi', text: 'Except someone who isn’t eating them at all.' },
+    { walk: { morfi: 116, puddy: 110, lilca: 104 }, t: 2600 },
+    { bg: 'hq', show: { morfi: { x: 22, props: ['magnifier'] }, puddy: { x: 40 }, lilca: { x: 58, props: ['book'] } } },
+    { narr: 'The crumbs led past the Room of Top Secret Files, past the Very Top Secret Files, and past the Snack Room (empty, of course).' },
+    { puzzle: 16, pool: 'hard', scene: 'hq', title: 'Follow the crumbs', hint: 'Follow the crumb trail down the long corridor!' },
+    { bg: 'night', show: { morfi: { x: 22 }, puddy: { x: 42 }, lilca: { x: 62, props: ['flashlight'] } } },
+    { narr: 'That night they hid behind the star map. Lights off. Total silence. Puddy had promised: no stakeout biscuits.' },
+    { say: 'puddy', text: '(stomach rumble)' },
+    { say: 'morfi', text: 'Puddy.' },
+    { say: 'puddy', text: 'It’s not me, it’s my stomach. It has its own opinions.' },
+    { bg: 'hq', show: { morfi: { x: 18 }, puddy: { x: 34 }, lilca: { x: 50, props: ['flashlight'] }, snacko: { x: 120 } } },
+    { narr: 'At exactly 23:00, something rolled out of the dark. Beep. Beep. Boop.' },
+    { walk: { snacko: 80 }, t: 1800 },
+    { say: 'snacko', text: 'COLLECTING EVIDENCE. COLLECTING EVIDENCE.' },
+    { narr: 'It opened the vault with one tiny beep and scooped up a whole armful of biscuits.' },
+    { say: 'morfi', text: 'FREEZE! Intergalactic Snitch Association!', act: 'point' },
+    { say: 'snacko', text: 'HELLO, AGENT. I AM SNACKO-3000. I AM ALSO INTERGALACTIC SNITCH ASSOCIATION.' },
+    { say: 'lilca', text: 'It’s… an ISA robot.' },
+    { say: 'snacko', text: 'MY PROGRAM: “COLLECT ALL EVIDENCE”. BISCUIT CRUMBS WERE FOUND AT EVERY CRIME SCENE. CONCLUSION: BISCUITS ARE EVIDENCE.' },
+    { say: 'morfi', text: 'That’s… actually very good snitching.' },
+    { say: 'snacko', text: 'THANK YOU. I HAVE COLLECTED ALL THE EVIDENCE. PLEASE COME AND SEE.' },
+    { puzzle: 17, pool: 'hard', scene: 'hq', title: 'Chase Snacko', hint: 'Keep up with the little robot!' },
+    { bg: 'hq', show: { morfi: { x: 18 }, puddy: { x: 36 }, lilca: { x: 54, props: ['book'] }, snacko: { x: 70 }, pile: { x: 88 } }, enter: 'pile' },
+    { narr: 'In a storeroom at the very bottom of headquarters stood a mountain. A mountain of biscuits. Neatly labelled EVIDENCE.' },
+    { say: 'puddy', text: 'This is the most beautiful thing I have ever seen.', act: 'gasp' },
+    { say: 'morfi', text: 'Snacko. Biscuits aren’t evidence. Biscuits are… for thinking.' },
+    { say: 'snacko', text: 'UPDATING PROGRAM… BISCUITS: FOR THINKING. CRUMBS: EVIDENCE. …SORRY, AGENT.' },
+    { say: 'lilca', text: 'He just wanted to do a good job.' },
+    { say: 'morfi', text: 'Every snitch makes mistakes, Snacko. Once, I interrogated a flower.' },
+    { say: 'snacko', text: 'DID THE FLOWER CONFESS?' },
+    { say: 'morfi', text: 'The flower screamed.' },
+    { puzzle: 75, pool: 'hard', scene: 'hq', title: 'Refill the vault', hint: 'Stack every biscuit back into the vault!' },
+    { bg: 'hq', show: { morfi: { x: 20 }, puddy: { x: 38, props: ['biscuit'] }, lilca: { x: 56, props: ['book'] }, snacko: { x: 72 }, hoot: { x: 88 } } },
+    { say: 'hoot', text: 'Agent Mörfi. The vault is full, Snacko is fixed, and nobody was really bad.' },
+    { say: 'hoot', text: 'You found the truth, followed the clues… and saved the biscuits.' },
+    { say: 'morfi', text: 'Truth. Clues. Biscuits.', act: 'salute' },
+    { say: 'hoot', text: 'For this case: one hundred and fifty Snitch points.' },
+    { award: 'points', n: 150, key: 'ch5' },
+    { say: 'morfi', text: 'Commander… how many do I need to become like you?' },
+    { say: 'hoot', text: 'More than today. Fewer than tomorrow. Keep snitching, Agent.' },
+    { say: 'snacko', text: 'AGENT MÖRFI. MAY I BE YOUR ASSISTANT?' },
+    { say: 'morfi', text: 'Snacko. I thought you’d never ask.' },
+    { say: 'puddy', text: 'Can I be the biscuit tester?' },
+    { say: 'hoot', text: 'Absolutely not.' },
+    { narr: 'And somewhere, very quietly, Snacko put one single biscuit in his pocket. As evidence. Of a very good day.' },
+    { end: 5 },
   ];
+
+  // ── Mörfi: The Northern Lights ──
+  const W = { props: ['winter'] };
+  const CH4 = [
+    { bg: 'village', show: { morfi: { x: 24, props: ['satchel'] }, puddy: { x: 52 }, lilca: { x: 78, props: ['book'] } } },
+    { narr: 'One autumn morning, Mörfi was packing. She packed a scarf. She packed a jacket. She packed her magnifying glass. Twice.' },
+    { say: 'lilca', text: 'Where are you going?' },
+    { say: 'morfi', text: 'North. Very far north. It’s top secret.' },
+    { say: 'lilca', text: 'It’s a holiday.' },
+    { say: 'morfi', text: 'A top secret holiday.' },
+    { say: 'puddy', text: 'Will you bring biscuits?' },
+    { say: 'morfi', text: 'Puddy. I am a professional. …Yes.' },
+    { walk: { morfi: 118 }, t: 2200 },
+    { bg: 'coast', show: { morfi: { x: 24, ...W } } },
+    { narr: 'Far, far in the north, where the sea is grey and the grass is gold, little red and white houses sit between rocky hills.' },
+    { narr: 'And waiting on the hill, in a bright red beanie, was Mörfi’s best friend from the north.' },
+    { show: { nori: { x: 70 } }, enter: 'nori' },
+    { say: 'nori', text: 'MÖRFI! You made it!', act: 'jump' },
+    { say: 'morfi', text: 'Nori! Agent Mörfi, reporting for holiday.', act: 'salute' },
+    { narr: 'Nori always wore her red beanie. Even in summer. Especially in summer.' },
+    { say: 'nori', text: 'Guess what? Tonight, if the clouds go away, we might see the northern lights!' },
+    { say: 'morfi', text: 'Northern… lights? Who is operating them?' },
+    { say: 'nori', text: 'Nobody. It’s nature.' },
+    { say: 'morfi', text: 'That’s exactly what they WANT you to think.' },
+    { say: 'nori', text: 'Come on! The best view is from the top of the hill.' },
+    { puzzle: 33, pool: 'hard', scene: 'coast', title: 'Up the rocky hill', hint: 'Clear the path between the rocks!' },
+    { bg: 'coast', show: { nori: { x: 34 }, morfi: { x: 62, ...W } } },
+    { narr: 'At the top, the wind was cold and the sea went on forever. Somewhere below, a sheep said “meh”.' },
+    { say: 'nori', text: 'Selfie! Say “biscuits!”' },
+    { say: 'morfi', text: 'BISCUITS!', act: 'jump' },
+    { flash: true, narr: 'Click. Two big smiles, a red beanie, a rusty scarf — and half a sheep in the background.' },
+    { say: 'morfi', text: 'I will send this to the ISA as evidence.' },
+    { say: 'nori', text: 'Evidence of what?' },
+    { say: 'morfi', text: 'Of fun. It’s very important to document fun.' },
+    { narr: 'But by evening, thick grey clouds rolled in from the sea.' },
+    { say: 'nori', text: 'Oh no. With these clouds we won’t see anything.' },
+    { say: 'morfi', text: 'Then we must find a gap in the clouds. Nori, this is now a mission.' },
+    { puzzle: 4, pool: 'hard', scene: 'coast', title: 'Find a gap in the clouds', hint: 'Find the spot where the sky is clear!' },
+    { bg: 'aurora', show: { morfi: { x: 30, ...W }, nori: { x: 60 } } },
+    { narr: 'Late at night, they stood beside a tall dark fir tree. Stars peeked out between the clouds.' },
+    { say: 'morfi', text: 'I see nothing. Suspicious.' },
+    { say: 'nori', text: 'Wait. Just wait. Look… there!', act: 'point' },
+    { aurora: true, narr: 'A soft green glow crept across the sky. It shimmered. It rippled. It danced — like a curtain made of light.' },
+    { say: 'morfi', text: 'GREEN LIGHTS. In the SKY. MOVING.', act: 'scream' },
+    { say: 'nori', text: 'The northern lights! Aren’t they beautiful?' },
+    { say: 'morfi', text: 'Beautiful… and possibly intergalactic. I must report this at once.' },
+    { show: { blorp: { x: 76, y: 26 } }, enter: 'blorp' },
+    { say: 'blorp', text: 'Agent Mörfi. It is two o’clock in the morning.' },
+    { say: 'morfi', text: 'Director! Unidentified green signals over the north!' },
+    { say: 'blorp', text: 'Those are the northern lights, Agent. Tiny bits from the sun, making the sky glow.' },
+    { say: 'morfi', text: 'So… the SUN is sending messages.' },
+    { say: 'blorp', text: '…Blorp out.' },
+    { show: { blorp: { x: 150 } } },
+    { say: 'nori', text: 'Who was that?' },
+    { say: 'morfi', text: 'Classified.' },
+    { narr: 'Then the clouds started to drift back over the lights.' },
+    { say: 'nori', text: 'Quick! They’re moving away. Follow them!' },
+    { puzzle: 57, pool: 'hard', scene: 'aurora', title: 'Chase the lights', hint: 'Hurry — keep the lights in view!' },
+    { bg: 'aurora', aurora: true, show: { morfi: { x: 34, ...W }, nori: { x: 62 } } },
+    { narr: 'They found the last clear piece of sky. And the lights came back — brighter than ever, green and a little bit pink.' },
+    { say: 'nori', text: 'Make a wish!' },
+    { say: 'morfi', text: 'I wish to become Snitch Commander.' },
+    { say: 'nori', text: 'You’re not supposed to say it out loud!' },
+    { say: 'morfi', text: '…Then I wish for biscuits.' },
+    { say: 'nori', text: 'Also out loud.' },
+    { say: 'morfi', text: 'Mörfi has many wishes.' },
+    { narr: 'They lay in the cold grass and watched until their noses were red. The lights swirled into a long, curved shape.' },
+    { say: 'morfi', text: 'It looks like a spoon.' },
+    { say: 'nori', text: 'Everything looks like a spoon to you.' },
+    { say: 'morfi', text: 'A good agent sees clues everywhere.' },
+    { puzzle: 37, pool: 'hard', scene: 'aurora', title: 'Home in the dark', hint: 'Find the way back to the little red house!' },
+    { bg: 'coast', show: { morfi: { x: 30, ...W }, nori: { x: 64 } } },
+    { narr: 'The next morning, Mörfi wrote a very official report.' },
+    { card: `<div class="case"><b class="stamp">TOP SECRET</b><h3>ISA CASE FILE #003</h3>
+      <p><span>Case</span>Green lights in the sky</p><p><span>Location</span>Very far north</p><p><span>Agents</span>Mörfi &amp; Nori</p><p><span>Suspect</span>The sun (probably)</p>
+      <p><span>Danger level</span>0</p><p><span>Beauty level</span>∞</p><p><span>Case status</span>✨ UNFORGETTABLE</p></div>`, narr: 'She signed it — and Nori signed it too, with a little drawing of a red beanie.' },
+    { award: 'points', n: 80, key: 'ch4' },
+    { say: 'nori', text: 'Will you come back next year?' },
+    { say: 'morfi', text: 'An agent always returns to the scene of the fun.', act: 'salute' },
+    { puzzle: 40, pool: 'hard', scene: 'coast', title: 'Pack the souvenirs', hint: 'Fit all the souvenirs into the bag!' },
+    { bg: 'village', show: { morfi: { x: 24, props: ['satchel'] }, puddy: { x: 52 }, lilca: { x: 78, props: ['book'] } } },
+    { say: 'puddy', text: 'You’re back! Did you bring biscuits?', act: 'jump' },
+    { say: 'morfi', text: 'Northern biscuits. Very rare. Very crunchy.' },
+    { say: 'lilca', text: 'And did you solve the mystery of the lights?' },
+    { say: 'morfi', text: 'Some mysteries aren’t for solving, Lilca. They’re just for looking at.' },
+    { say: 'puddy', text: 'That’s very wise.' },
+    { say: 'morfi', text: 'I know. 🌌', act: 'salute' },
+    { end: 4 },
+  ];
+  // The stories, in the order they appear on the Story screen. To reorder, move a line: chapter numbers
+  // follow this order, and progress is kept by id (so moving never loses anyone's place).
+  const CHAPTERS = [
+    { id: 1, series: 'morfi', bonus: 50, title: 'Mörfi and the Very Important Mission', steps: CH1, icon: '🍄' },
+    { id: 3, series: 'morfi', title: 'The Case of the Missing Spoon', steps: CH3, icon: '🥄' },
+    { id: 5, series: 'morfi', title: 'The Great ISA Biscuit Heist', steps: CH5, icon: '🍪' },
+    { id: 4, series: 'morfi', title: 'Mörfi and the Northern Lights', steps: CH4, icon: '🌌' },
+    { id: 2, series: 'bear', title: 'The Bike Tour with Kloenchen', steps: CH2, icon: '🚲' },
+  ];
+  CHAPTERS.forEach(c => {
+    const n = CHAPTERS.filter(x => x.series === c.series).indexOf(c) + 1;
+    c.num = c.series === 'morfi' ? `Chapter ${n}` : `Story ${n}`;
+    c.short = c.series === 'morfi' ? `Mörfi · Chapter ${n}` : 'Bear & Kloenchen';
+  });
 
   // ── Snitch points: Mörfi's stories earn them; the Snitch level grows (Commander is level 10) ──
   const SNITCH_AT = [0, 50, 120, 220, 350, 520, 750, 1000, 1300, 1700];
@@ -683,6 +969,8 @@ const Story = (() => {
   function setBg(name) {
     const svg = stage().querySelector('.st-bg');
     if (!BG[name] && BG2[name]) BG[name] = BG2[name];
+    if (!BG[name] && BG3[name]) BG[name] = BG3[name];
+    if (!BG[name] && BG4[name]) BG[name] = BG4[name];
     // The map is shown whole (nothing cut off at the sides); scenery fills the screen.
     svg.setAttribute('preserveAspectRatio', name === 'map' ? 'xMidYMid meet' : 'xMidYMax slice');
     stage().style.background = name === 'map' ? '#f2efe4' : '';
@@ -738,7 +1026,11 @@ const Story = (() => {
   async function run() {
     while (ch && at < ch.steps.length) {
       const s = ch.steps[at];
-      if (s.bg) { clearChars(); setBg(s.bg); front(s.front); stage().classList.toggle('low', !!s.low); $('st-say').hidden = true; }
+      // A card (case file, letter) stays up until the next step.
+      stage().querySelectorAll('.st-card').forEach(e => e.remove());
+      if (s.card) { const c = document.createElement('div'); c.className = 'st-card'; c.innerHTML = s.card; stage().appendChild(c); }
+      if (s.aurora != null) stage().classList.toggle('lights', !!s.aurora);
+      if (s.bg) { clearChars(); stage().classList.remove('lights'); setBg(s.bg); front(s.front); stage().classList.toggle('low', !!s.low); $('st-say').hidden = true; if (s.aurora) stage().classList.add('lights'); }
       if (s.show) for (const [k, o] of Object.entries(s.show)) { charEl(k, o); if (o.x > 100) chars[k].remove(), delete chars[k]; }
       if (s.props) for (const [k, p] of Object.entries(s.props)) if (chars[k]) charEl(k, { props: p });
       if (s.enter && chars[s.enter]) { chars[s.enter].classList.add('pop-in'); }
@@ -843,7 +1135,7 @@ const Story = (() => {
     if (s.scene) {
       const bg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       bg.setAttribute('class', 'scene-bg'); bg.setAttribute('viewBox', '0 0 400 700'); bg.setAttribute('preserveAspectRatio', 'xMidYMax slice');
-      bg.innerHTML = own((BG[s.scene] || BG2[s.scene])(), 'pz');
+      bg.innerHTML = own((BG[s.scene] || BG2[s.scene] || BG3[s.scene] || BG4[s.scene])(), 'pz');
       $('game').prepend(bg);
       $('game').classList.add('scened', 'scene-' + s.scene);
     }
@@ -852,7 +1144,7 @@ const Story = (() => {
   }
 
   function finish() {
-    bubble(null, ch.id === 1 ? 'The end of chapter 1 — Mörfi will be back with another Very Important Mission soon. 🍄' : ch.id === 3 ? 'The end of chapter 2 — Super Mega Snitch Mörfi is one case closer to Commander. 🥄🍄' : 'The end — Bear and Kloenchen will be back with another bike tour soon. 🚲🔔');
+    bubble(null, ch.series === 'bear' ? 'The end — Bear and Kloenchen will be back with another bike tour soon. 🚲🔔' : `The end of ${ch.num} — Super Mega Snitch Mörfi will return. 🍄`);
     waiting = false;
     $('st-tap').hidden = true;
     $('st-end').hidden = false;
@@ -867,7 +1159,8 @@ const Story = (() => {
     ch = CHAPTERS.find(c => c.id === id) || CHAPTERS[0];
     document.querySelector('.st-title').textContent = '📖 ' + ch.short;
     const s = saved()['ch' + ch.id];
-    at = !fromStart && typeof s === 'number' ? s : 0;
+    // Resume at the saved puzzle (only if that step still is a puzzle — the story may have changed).
+    at = !fromStart && typeof s === 'number' && ch.steps[s] && ch.steps[s].puzzle != null ? s : 0;
     openStage();
     // Resuming at a puzzle: rebuild that scene first (the nearest background before it).
     if (at > 0) {
