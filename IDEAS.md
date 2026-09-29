@@ -18,7 +18,7 @@ A running list of ideas for the game. ✅ = built, 🔨 = in progress, 💡 = id
   a short card shows a looping mini-animation of how it behaves, with an "OK, got it" button (and ▶ Show me).
 
 ## Ways to play
-- 💡 **Daily puzzle** — the same level for everyone each day, a 🔥 streak, and a shareable result
+- ✅ **Daily puzzle** — the same level for everyone each day, a 🔥 streak, and a shareable result
   ("Happy Blocks #12 ⭐⭐⭐ 18 moves").
 - 💡 **Level editor** — build a board, the solver checks it can be solved and sets par, share it with friends.
 - 💡 **Time attack (solo)** — as many stars as possible in 5 minutes.
@@ -26,8 +26,8 @@ A running list of ideas for the game. ✅ = built, 🔨 = in progress, 💡 = id
 - ✅ Packed boards, levels mixing several specials, and ⏱ time-challenge levels.
 
 ## Progress and rewards
-- 💡 **Medals / achievements** — e.g. "10 levels at par", "helped 5 friends", "no undo".
-- 💡 **Themes** unlocked with stars — candy, space, neon…
+- ✅ **Medals / achievements** — e.g. "10 levels at par", "helped 5 friends", "no undo".
+- ✅ **Themes** unlocked with stars — candy, space, neon…
 - 💡 **Team weekly goal** — "collect 150 stars together this week".
 
 ## Friends and social

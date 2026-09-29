@@ -16,8 +16,10 @@ const Extras = (() => {
   const EPOCH = new Date(2026, 8, 29);
   const today = () => { const n = new Date(); return Math.round((new Date(n.getFullYear(), n.getMonth(), n.getDate()) - EPOCH) / 86400000) + 1; };
   const week = d => Math.floor((d - 1) / 7);
-  // Everyone gets the same board on the same day, from the challenge pool (every board once before repeats).
-  const dailyLevel = d => CHALLENGE_LEVELS[((d - 1) * 53 % CHALLENGE_LEVELS.length + CHALLENGE_LEVELS.length) % CHALLENGE_LEVELS.length];
+  // Everyone gets the same board on the same day, from the pool of hard daily boards (js/daily-levels.js,
+  // packed boards and mixes); every board once before any repeats.
+  const POOL = typeof DAILY_LEVELS !== 'undefined' ? DAILY_LEVELS : CHALLENGE_LEVELS;
+  const dailyLevel = d => POOL[((d - 1) * 37 % POOL.length + POOL.length) % POOL.length];
 
   // The streak as it stands today: still alive if the last solve was yesterday (or the day before,
   // when this week's freeze is unused).

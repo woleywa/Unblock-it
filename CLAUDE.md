@@ -63,6 +63,11 @@ version.
   cell. Stages may combine any specials (the mixes, levels 81-100).
 - Time challenges: `level.time` seconds (generator: `timeAt: n` in a stage marks its n-th level). game.js
   startClock() starts on the first drag; at 0 an ask() card offers Try again / Levels. ⏱ badge in the list.
+- js/extras.js (Extras): daily puzzle (DAILY_LEVELS from `node tools/generate.js daily`, board of the day
+  = POOL[(day-1)*37 % n], day #1 = 29 Sep 2026, runs through chPlay with `daily: true`), 🔥 streak with one
+  freeze a week, star chests (every 30 ★ → next of 8 styles/skies; window.SKIN read by Art.blockSVG, sky via
+  html.sky-*), medals (MEDALS list, Extras.event()/onWin() hooks in game.js), friend nudge, all in one `meta`
+  record (localStorage unblock_meta, synced in saves/{uid}.meta; merge() keeps the best of both).
 - "New!" pop-ups: js/intro.js (`Intro.show(key, again)`), one looping mini-board scene per feature
   (basics, walls, ice, frozen, layered, fire, beaver) drawn with the real Art functions and a 👆 finger.
   start() shows it once per feature (localStorage `unblock_seen_intros`) and adds "▶ Show me" to the hint.
