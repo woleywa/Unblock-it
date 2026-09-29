@@ -122,6 +122,7 @@ const Extras = (() => {
     if (m.story && m.story.ch1 === 'done' && (meta.story || {}).ch1 !== 'done') { meta.story = { ...(meta.story || {}), ch1: 'done' }; changed = true; }
     if ((m.freezes || 0) > meta.freezes) { meta.freezes = m.freezes; changed = true; }
     if ((m.biscuits || 0) > meta.biscuits) { meta.biscuits = m.biscuits; changed = true; }
+    if (m.snitch && (m.snitch.sp || 0) > ((meta.snitch || {}).sp || 0)) { meta.snitch = m.snitch; changed = true; } else if (meta.snitch && (!m.snitch || meta.snitch.sp > m.snitch.sp)) mine = true;
     if ((m.chests || 0) > meta.chests) { meta.chests = m.chests; changed = true; } else if ((m.chests || 0) < meta.chests) mine = true;
     if (m.style && !meta.style.skin && !meta.style.sky && (m.style.skin || m.style.sky)) { meta.style = m.style; changed = true; applyStyle(); }
     if (changed) { try { localStorage.setItem(KEY, JSON.stringify(meta)); } catch (e) {} homeButton(); }

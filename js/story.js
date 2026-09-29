@@ -16,6 +16,8 @@ const Story = (() => {
     book: `<g class="prop"><rect x="38" y="100" width="44" height="26" rx="3" fill="#6a4fb0"/><rect x="41" y="103" width="18" height="20" fill="#fff8ea"/><rect x="61" y="103" width="18" height="20" fill="#fff8ea"/><path d="M44,108 h12 M44,112 h12 M64,108 h12 M64,112 h12" stroke="#bbb" stroke-width="1"/></g>`,
     satchel: `<g class="prop"><path d="M40,92 L82,128" stroke="#8a5a2e" stroke-width="3"/><rect x="72" y="118" width="20" height="16" rx="4" fill="#b3743a"/><circle cx="82" cy="126" r="2.5" fill="#ffd54a"/><text x="82" y="131" font-size="5" text-anchor="middle" fill="#fff" font-weight="700" font-family="Fredoka,system-ui">ISA</text></g>`,
     bottle: `<g class="prop"><rect x="86" y="104" width="12" height="26" rx="4" fill="#dff2ff" stroke="#9ac8e8" stroke-width="1.5" opacity="0.9"/><rect x="88" y="98" width="8" height="7" rx="2" fill="#e8433f"/></g>`,
+    magnifier: `<g class="prop"><circle cx="98" cy="98" r="11" fill="#bfe8ff" opacity="0.6" stroke="#8a5a2e" stroke-width="4"/><path d="M92,108 L84,122" stroke="#8a5a2e" stroke-width="5" stroke-linecap="round"/><path d="M93,93 q4,-3 8,0" stroke="#fff" stroke-width="2" fill="none"/></g>`,
+    flashlight: `<g class="prop"><rect x="84" y="112" width="20" height="9" rx="3" fill="#3a3a44"/><path d="M104,110 L150,92 L150,140 L104,122 Z" fill="#fff6c0" opacity="0.35"/></g>`,
     spoon: `<g class="prop"><rect x="20" y="96" width="4" height="22" rx="2" fill="#cfd5e6" transform="rotate(20 22 107)"/><ellipse cx="18" cy="94" rx="5" ry="7" fill="#cfd5e6" transform="rotate(20 22 107)"/></g>`,
   };
   // A cartoon cat standing up: body, tail, head with ears, big eyes, pink nose, whiskers.
@@ -168,6 +170,39 @@ const Story = (() => {
     box: () => `<rect x="20" y="118" width="80" height="46" rx="6" fill="#a8743f" stroke="#6a4520" stroke-width="3"/><rect x="16" y="108" width="88" height="16" rx="5" fill="#8a5a2e" stroke="#6a4520" stroke-width="3"/>
       <path d="M60,128 l4,8 9,1 -7,6 2,9 -8,-5 -8,5 2,-9 -7,-6 9,-1 z" fill="#ffd54a" stroke="#b37a00" stroke-width="1.5"/>`,
 
+    // Director Blorp of the ISA: a friendly jelly alien, seen as a flickering hologram.
+    blorp: () => `<g class="holo">
+      <path d="M10,170 L30,120 H90 L110,170 Z" fill="#7fe8ff" opacity="0.18"/>
+      <ellipse cx="60" cy="98" rx="38" ry="40" fill="#7fe8ff" opacity="0.55" stroke="#bff6ff" stroke-width="2"/>
+      <path d="M60,58 Q56,40 66,32" stroke="#bff6ff" stroke-width="3" fill="none"/><circle cx="67" cy="31" r="5" fill="#ffd54a"/>
+      <rect x="36" y="56" width="48" height="12" rx="5" fill="#16214a"/><text x="60" y="66" text-anchor="middle" font-size="9" font-weight="700" fill="#ffd54a" font-family="Fredoka,system-ui">ISA</text>
+      ${eyes(48, 72, 92, 7)}
+      ${mouth(60, 108, 6)}
+      ${[0, 1, 2, 3, 4, 5, 6].map(i => `<rect x="18" y="${62 + i * 12}" width="84" height="2" fill="#fff" opacity="0.18"/>`).join('')}</g>`,
+    // Slowbert the snail: a shiny shell and all the time in the world.
+    snail: () => `
+      <path d="M8,160 Q10,146 26,146 L96,146 Q112,146 112,160 Z" fill="#c8e08a"/>
+      <circle cx="68" cy="116" r="34" fill="#d9a060" stroke="#a86a2a" stroke-width="3"/>
+      <path d="M68,116 m-4,0 a4,4 0 1 1 8,0 a10,10 0 1 1 -18,0 a16,16 0 1 1 30,0 a22,22 0 1 1 -42,0" fill="none" stroke="#a86a2a" stroke-width="3"/>
+      <ellipse cx="58" cy="100" rx="9" ry="5" fill="#fff" opacity="0.5"/>
+      <path d="M20,150 Q14,120 22,108" stroke="#c8e08a" stroke-width="12" stroke-linecap="round" fill="none"/>
+      <g class="ant"><path d="M18,110 L10,86 M26,108 L32,86" stroke="#9ab060" stroke-width="3"/><circle cx="10" cy="86" r="4" fill="#2a2a30"/><circle cx="32" cy="86" r="4" fill="#2a2a30"/></g>
+      <path class="smile" d="M16,120 q4,4 8,0" stroke="${INK}" stroke-width="1.6" fill="none"/><ellipse class="oh" cx="20" cy="121" rx="2" ry="3" fill="${INK}"/>`,
+    // Pica the magpie: black and white with a blue sheen, loves anything shiny.
+    magpie: () => `
+      <path d="M22,118 L-2,104 L4,122 Z" fill="#2a3a8a"/><path d="M26,120 L0,120 L10,132 Z" fill="#1d2440"/>
+      <g class="flap" style="transform-origin:60px 112px"><path d="M58,108 Q40,86 24,96 Q40,112 60,118 Z" fill="#1d2440"/><path d="M40,100 q8,6 16,8" stroke="#fff" stroke-width="4"/></g>
+      <ellipse cx="62" cy="118" rx="28" ry="22" fill="#1d2440"/><ellipse cx="68" cy="126" rx="16" ry="13" fill="#fff"/>
+      <circle cx="86" cy="96" r="16" fill="#1d2440"/>${eyes(84, 94, 94, 3.5)}
+      <path d="M100,96 l14,3 l-14,4 z" fill="#2a2a30"/>
+      <path d="M58,140 v18 M70,140 v18 M54,158 h8 M66,158 h8" stroke="#2a2a30" stroke-width="3"/>`,
+    // A black-and-white feather (a clue!).
+    feather: () => `<path d="M30,150 Q60,90 100,70 Q84,120 30,150 Z" fill="#1d2440"/><path d="M52,128 Q70,104 90,86" stroke="#fff" stroke-width="5" opacity="0.9"/><path d="M30,150 L100,70" stroke="#6a7ab0" stroke-width="2"/>`,
+    // The radio mushroom: ISA's line to the stars.
+    radio: () => `<rect x="50" y="110" width="20" height="50" rx="6" fill="#fff4dc"/><path d="M14,112 Q20,64 60,62 Q100,64 106,112 Q80,102 60,104 Q40,102 14,112 Z" fill="#6a4fb0"/>
+      <circle cx="40" cy="88" r="6" fill="#fff"/><circle cx="76" cy="80" r="5" fill="#fff"/><path d="M60,62 V30" stroke="#cfd5e6" stroke-width="3"/><circle cx="60" cy="28" r="6" fill="#ff5a4e" class="blink-light"/>
+      <path d="M44,20 q16,-14 32,0 M36,12 q24,-22 48,0" stroke="#7fe8ff" stroke-width="3" fill="none" class="waves"/>`,
+
     // The beetle: small, shiny and a bit embarrassed.
     beetle: () => `
       <g class="legs"><path d="M40,150 l-10,10 M50,154 l-6,12 M70,154 l6,12 M80,150 l10,10" stroke="${INK}" stroke-width="3" stroke-linecap="round"/></g>
@@ -185,8 +220,8 @@ const Story = (() => {
       ${eyes(54, 66, 68, 3)}
       ${mouth(60, 76, 3.5)}`,
   };
-  const NAMES = { morfi: 'Mörfi', puddy: 'Puddy', lilca: 'Lilca', beetle: 'Beetle', flower: 'Flower', mom: 'Beetle family', bear: 'Bear', kloen: 'Kloenchen', cat2: 'The cat', bearRide: 'Bear', kloenRide: 'Kloenchen' };
-  const SIZE = { morfi: 1, puddy: 0.9, lilca: 0.9, beetle: 0.72, flower: 1.15, bear: 1.08, kloen: 1, bearRide: 1.12, kloenRide: 1.08, cat2: 0.62, bird: 0.6, note: 0.3, box: 0.55 };
+  const NAMES = { morfi: 'Mörfi', puddy: 'Puddy', lilca: 'Lilca', beetle: 'Beetle', flower: 'Flower', mom: 'Beetle family', bear: 'Bear', kloen: 'Kloenchen', cat2: 'The cat', bearRide: 'Bear', kloenRide: 'Kloenchen', blorp: 'Director Blorp (ISA)', snail: 'Slowbert the snail', magpie: 'Pica the magpie' };
+  const SIZE = { morfi: 1, puddy: 0.9, lilca: 0.9, beetle: 0.72, flower: 1.15, bear: 1.08, kloen: 1, bearRide: 1.12, kloenRide: 1.08, cat2: 0.62, bird: 0.6, blorp: 1.1, snail: 0.7, magpie: 0.75, feather: 0.3, radio: 0.8, note: 0.3, box: 0.55 };
 
   // ── Scenery (400×700, anchored at the bottom) ──
   const mushroomHouse = (x, y, s, cap = '#e8433f') => `<g transform="translate(${x} ${y}) scale(${s})">
@@ -197,6 +232,35 @@ const Story = (() => {
   const grass = (y, color, n = 40, h = 26) => { let s = ''; for (let i = 0; i < n; i++) { const x = (i / n) * 420 - 10 + (i % 3) * 3, hh = h * (0.6 + ((i * 37) % 10) / 20); s += `<path d="M${x},${y} q2,${-hh * 0.6} ${(i % 2 ? 4 : -3)},${-hh}" stroke="${color}" stroke-width="3" fill="none" stroke-linecap="round" class="blade" style="--i:${i % 7}"/>`; } return s; };
   const clouds = () => [[40, 120, 1.2], [230, 80, 1.6], [320, 200, 1], [120, 240, 0.9], [300, 320, 1.3]].map(([x, y, k], i) => `<g class="cloud" style="--i:${i}" opacity="0.8"><ellipse cx="${x}" cy="${y}" rx="${60 * k}" ry="${9 * k}" fill="#fff"/><ellipse cx="${x + 30 * k}" cy="${y - 6 * k}" rx="${40 * k}" ry="${7 * k}" fill="#fff" opacity="0.8"/></g>`).join('');
   const pines = (y, n, c1, c2, h = 150) => Array.from({ length: n }, (_, i) => { const x = (i / n) * 440 - 20 + (i % 2) * 12, hh = h * (0.75 + ((i * 29) % 10) / 30); return `<path d="M${x},${y - hh} L${x + 26},${y - hh * 0.45} L${x + 14},${y - hh * 0.45} L${x + 34},${y} L${x - 34},${y} L${x - 14},${y - hh * 0.45} L${x - 26},${y - hh * 0.45} Z" fill="${i % 2 ? c1 : c2}"/><rect x="${x - 4}" y="${y}" width="8" height="14" fill="#6a4520"/>`; }).join('');
+  const BG2 = {
+    // Inside Mörfi's mushroom house: round window, shelf, lamp, rug, a biscuit tin.
+    inside: () => `
+      <rect width="400" height="700" fill="#f6d9b0"/><path d="M0,0 H400 V120 Q200,40 0,120 Z" fill="#e8433f"/>${[[60, 50], [200, 30], [330, 60]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="16" fill="#fff" opacity="0.9"/>`).join('')}
+      <circle cx="290" cy="270" r="62" fill="#8fd0ff" stroke="#a86a3a" stroke-width="10"/><path d="M290,208 V332 M228,270 H352" stroke="#a86a3a" stroke-width="6"/><circle cx="270" cy="250" r="14" fill="#fff" opacity="0.6"/>
+      <rect x="30" y="230" width="150" height="10" fill="#a86a3a"/><rect x="44" y="196" width="26" height="34" rx="4" fill="#6a4fb0"/><rect x="74" y="204" width="20" height="26" rx="4" fill="#3fa0d0"/><circle cx="130" cy="214" r="15" fill="#e0a45a" stroke="#a86a2a" stroke-width="3"/><text x="130" y="219" text-anchor="middle" font-size="12" fill="#7a4a1a">🍪</text>
+      <path d="M150,120 V170" stroke="#6a4520" stroke-width="3"/><path d="M130,190 Q150,160 170,190 Z" fill="#ffd54a"/><circle cx="150" cy="196" r="30" fill="#ffe27a" opacity="0.25" class="sun"/>
+      <rect y="560" width="400" height="140" fill="#c9965e"/>${[0, 1, 2, 3, 4, 5, 6, 7].map(i => `<rect x="${i * 52}" y="560" width="2" height="140" fill="#a8743f"/>`).join('')}
+      <ellipse cx="200" cy="640" rx="170" ry="38" fill="#d9577a" opacity="0.8"/><ellipse cx="200" cy="640" rx="120" ry="24" fill="#f08aa0" opacity="0.8"/>`,
+    // Slowbert's garden: a vegetable patch, a watering can, flowers.
+    garden: () => `
+      <defs><linearGradient id="skg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7fc4f0"/><stop offset="1" stop-color="#fff2d0"/></linearGradient></defs>
+      <rect width="400" height="700" fill="url(#skg)"/>${clouds()}
+      ${mushroomHouse(330, 520, 0.9, '#ff8a3c')}
+      <path d="M0,520 Q200,500 400,520 V700 H0 Z" fill="#6aa84a"/>
+      ${[0, 1, 2].map(r => `<path d="M20,${580 + r * 34} H380" stroke="#8a5a2e" stroke-width="16" stroke-linecap="round" opacity="0.7"/>` + [40, 110, 180, 250, 320].map((x, i) => `<g><path d="M${x + r * 10},${576 + r * 34} q-6,-16 0,-24 q6,8 0,24" fill="#3f9a4a"/>${(i + r) % 2 ? `<circle cx="${x + r * 10 + 8}" cy="${580 + r * 34}" r="7" fill="#ff7a3c"/>` : `<circle cx="${x + r * 10 + 8}" cy="${582 + r * 34}" r="6" fill="#e8433f"/>`}</g>`).join('')).join('')}
+      ${[[30, 500, '#ff7ab8'], [80, 510, '#ffd54a'], [370, 505, '#b48cff']].map(([x, y, c]) => `<path d="M${x},${y + 30} V${y}" stroke="#3f9a4a" stroke-width="3"/><circle cx="${x}" cy="${y}" r="9" fill="${c}"/><circle cx="${x}" cy="${y}" r="3" fill="#fff"/>`).join('')}`,
+    // The big old tree at night, with a nest full of shiny things.
+    tree: () => `
+      <rect width="400" height="700" fill="#141038"/>
+      ${Array.from({ length: 34 }, (_, i) => `<circle cx="${(i * 89) % 400}" cy="${(i * 47) % 300}" r="${1 + (i % 3) * 0.5}" fill="#fff" opacity="${0.4 + (i % 4) * 0.15}" class="twinkle" style="--i:${i % 5}"/>`).join('')}
+      <circle cx="80" cy="90" r="28" fill="#fff3c8"/>
+      <path d="M170,700 Q180,520 150,420 Q140,380 180,360 L230,360 Q260,380 250,420 Q220,520 240,700 Z" fill="#4a3020"/>
+      <path d="M160,420 Q80,380 40,300 M240,410 Q320,360 360,280 M200,360 Q200,280 190,200" stroke="#4a3020" stroke-width="24" fill="none" stroke-linecap="round"/>
+      ${[[60, 260, 90], [200, 180, 110], [340, 250, 95], [120, 180, 80], [290, 170, 80]].map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#1f4a2e" opacity="0.95"/>`).join('')}
+      <path d="M150,360 Q200,330 250,360 Q240,380 200,384 Q160,380 150,360 Z" fill="#8a6a3a"/><path d="M156,362 Q200,346 244,362" stroke="#a8844a" stroke-width="3" fill="none"/>
+      ${[[170, 352, '#cfd5e6'], [190, 346, '#ffd54a'], [212, 350, '#e8433f'], [230, 354, '#cfd5e6']].map(([x, y, c], i) => `<circle cx="${x}" cy="${y}" r="6" fill="${c}" class="glint" style="--i:${i}"/>`).join('')}
+      <rect y="600" width="400" height="100" fill="#1a3a24"/>${grass(605, '#2f6a3a', 44)}`,
+  };
   const BG = {
     // Schönefeld: a big sky with wispy clouds and contrails, willow twigs, a field, a fence, houses and a pylon.
     field: () => `
@@ -320,18 +384,18 @@ const Story = (() => {
     { bg: 'grass', show: { morfi: { x: -15, props: ['satchel'] }, puddy: { x: -28, props: ['spoon'] }, lilca: { x: -40, props: ['book'] } } },
     { walk: { morfi: 62, puddy: 42, lilca: 22 }, t: 1500 },
     { narr: 'They crept through the grass…' },
-    { puzzle: 4, scene: 'grass', title: 'Creep through the grass', hint: 'Clear a path so Mörfi can sneak through the grass!' },
+    { puzzle: 32, pool: 'hard', scene: 'grass', title: 'Creep through the grass', hint: 'Clear a path so Mörfi can sneak through the grass!' },
     // …and off they sneak, through the grass.
     { bg: 'grass', front: 'grass', show: { morfi: { x: -12, props: ['satchel'] }, puddy: { x: -26, props: ['spoon'] }, lilca: { x: -40, props: ['book'] } } },
     { walk: { morfi: 118, puddy: 106, lilca: 94 }, t: 3000 },
     { bg: 'leaf', show: { morfi: { x: 20, props: ['satchel'] }, puddy: { x: 45, props: ['spoon'] }, lilca: { x: 70, props: ['book'] } } },
     { narr: 'They crawled underneath a leaf…' },
-    { puzzle: 22, scene: 'leaf', title: 'Under the leaf', hint: 'Make room under the leaf — quietly!' },
+    { puzzle: 36, pool: 'hard', scene: 'leaf', title: 'Under the leaf', hint: 'Make room under the leaf — quietly!' },
     { bg: 'leaf', front: 'leaf', low: true, show: { morfi: { x: -12, props: ['satchel'] }, puddy: { x: -26, props: ['spoon'] }, lilca: { x: -40, props: ['book'] } } },
     { walk: { morfi: 118, puddy: 106, lilca: 94 }, t: 3000 },
     { bg: 'village', show: { morfi: { x: 20, props: ['satchel'] }, puddy: { x: 35, props: ['spoon'] }, lilca: { x: 48, props: ['book'] } } },
     { narr: 'They hid behind a mushroom…' },
-    { puzzle: 40, scene: 'village', title: 'Behind the mushroom', hint: 'Get everyone behind the mushroom without being seen!' },
+    { puzzle: 73, pool: 'hard', scene: 'village', title: 'Behind the mushroom', hint: 'Get everyone behind the mushroom without being seen!' },
     { bg: 'village', front: 'mushroom', show: { morfi: { x: -12, props: ['satchel'] }, puddy: { x: -26, props: ['spoon'] }, lilca: { x: -40, props: ['book'] } } },
     { walk: { morfi: 58, puddy: 50, lilca: 42 }, t: 1800 },
     { act: { morfi: 'peek', puddy: 'peek', lilca: 'peek' }, wait: 1100 },
@@ -358,7 +422,7 @@ const Story = (() => {
     { say: 'beetle', text: 'I’m a beetle.' },
     { say: 'morfi', text: 'Very convincing.' },
     { say: 'morfi', text: 'Don’t worry. I’ll escort you home.', act: 'salute' },
-    { puzzle: 45, scene: 'meadow', title: 'Escort the beetle home', hint: 'Clear the meadow so the beetle can get home!' },
+    { puzzle: 79, pool: 'hard', scene: 'meadow', title: 'Escort the beetle home', hint: 'Clear the meadow so the beetle can get home!' },
     { bg: 'meadow', front: 'grass', show: { beetle: { x: -8 }, morfi: { x: -20, props: ['satchel'] }, puddy: { x: -34, props: ['spoon'] }, lilca: { x: -48, props: ['book'] } } },
     { walk: { beetle: 124, morfi: 118, puddy: 112, lilca: 106 }, t: 3400 },
     { bg: 'leafhouse', show: { morfi: { x: 16, props: ['satchel'] }, puddy: { x: 32, props: ['spoon'] }, lilca: { x: 47, props: ['book'] }, beetle: { x: 64 } } },
@@ -411,7 +475,7 @@ const Story = (() => {
     { say: 'kloenRide', text: 'What does it say?' },
     { say: 'bearRide', text: '“Follow the path to the big water. Trust the cat. Bring biscuits.”' },
     { say: 'kloenRide', text: 'Trust the cat? What cat?' },
-    { puzzle: 23, scene: 'field', title: 'Pedal past the fields', hint: 'Clear the way so Bear and Kloenchen can ride on!' },
+    { puzzle: 34, pool: 'hard', scene: 'field', title: 'Pedal past the fields', hint: 'Clear the way so Bear and Kloenchen can ride on!' },
     { bg: 'field', show: { ...RIDE } },
     { walk: { bearRide: 118, kloenRide: 110 }, t: 3000 },
     { bg: 'path', show: { bearRide: { x: 20 }, kloenRide: { x: 54 }, cat2: { x: 85 } } },
@@ -423,7 +487,7 @@ const Story = (() => {
     { narr: 'The cat looked at the note. Then it turned around and trotted off along the path, towards the forest.' },
     { walk: { cat2: 118 }, t: 1600 },
     { say: 'kloenRide', text: 'I think we’re supposed to follow it.' },
-    { puzzle: 27, scene: 'path', title: 'Follow the cat', hint: 'Make a way through the bushes — don’t lose the cat!' },
+    { puzzle: 78, pool: 'hard', scene: 'path', title: 'Follow the cat', hint: 'Make a way through the bushes — don’t lose the cat!' },
     { bg: 'path', front: 'grass', show: { cat2: { x: -6 }, ...RIDE } },
     { walk: { cat2: 124, bearRide: 116, kloenRide: 110 }, t: 3200 },
     { bg: 'forest', show: { bearRide: { x: 28 }, kloenRide: { x: 72 } } },
@@ -433,7 +497,7 @@ const Story = (() => {
     { say: 'bearRide', text: 'Are we lost?' },
     { say: 'kloenRide', text: 'We’re not lost. We’re exploring.' },
     { say: 'bearRide', text: 'Exploring. Excellent. Very brave of us.' },
-    { puzzle: 43, scene: 'forest', title: 'Through the pine forest', hint: 'Untangle the forest path!' },
+    { puzzle: 38, pool: 'hard', scene: 'forest', title: 'Through the pine forest', hint: 'Untangle the forest path!' },
     { bg: 'forest', show: { ...RIDE } },
     { walk: { bearRide: 118, kloenRide: 110 }, t: 3000 },
     { bg: 'lake', show: { bear: { x: 26, props: ['bottle'] }, kloen: { x: 58 } } },
@@ -442,7 +506,7 @@ const Story = (() => {
     { say: 'bear', text: 'But where’s the secret?' },
     { show: { cat2: { x: 84 }, box: { x: 72 } }, enter: 'cat2' },
     { narr: 'The cat was already on the pier, sitting next to a little wooden box with a golden star.' },
-    { puzzle: 46, scene: 'lake', title: 'Reach the secret box', hint: 'Clear the pier to reach the box!' },
+    { puzzle: 72, pool: 'hard', scene: 'lake', title: 'Reach the secret box', hint: 'Clear the pier to reach the box!' },
     { bg: 'lake', show: { bear: { x: 26, props: ['bottle'] }, kloen: { x: 50 }, box: { x: 70 }, cat2: { x: 86 } } },
     { narr: 'Bear opened the box very slowly. Very, very slowly.' },
     { award: 'bells' },
@@ -458,10 +522,149 @@ const Story = (() => {
     { narr: 'On the way home, two golden bells rang all the way from the Wannsee. Ring ring! 🔔' },
     { end: 2 },
   ];
+  const M = { morfi: { x: 22, props: ['satchel'] }, puddy: { x: 48 }, lilca: { x: 74, props: ['book'] } };
+  const CH3 = [
+    { bg: 'village', show: { morfi: { x: 22, props: ['tea'] }, puddy: { x: 50 }, lilca: { x: 78, props: ['book'] } } },
+    { narr: 'It was a quiet morning in the mushroom village. Too quiet, if you asked Mörfi. Nobody asked Mörfi.' },
+    { say: 'puddy', text: 'MÖRFI!', act: 'jump' },
+    { say: 'morfi', text: 'Puddy. What happened. Speak clearly and in full sentences.', act: 'gasp' },
+    { say: 'puddy', text: 'My spoon! My emergency spoon! It’s GONE!', act: 'scream' },
+    { say: 'lilca', text: 'It’s a spoon, Puddy.' },
+    { say: 'puddy', text: 'It’s an EMERGENCY spoon, Lilca.' },
+    { say: 'morfi', text: 'He’s right. Without the spoon, there is no emergency equipment. Without emergency equipment…' },
+    { say: 'lilca', text: '…there’s just two biscuits?' },
+    { say: 'morfi', text: 'Exactly. Chaos.' },
+    { show: { radio: { x: 92 } }, enter: 'radio' },
+    { narr: 'Just then, the purple radio mushroom behind Mörfi’s house began to beep.' },
+    { say: 'morfi', text: 'The ISA line! Everyone act natural!', act: 'jump' },
+    { narr: 'Puddy froze mid-biscuit. Lilca turned a page very naturally.' },
+    { show: { blorp: { x: 50, y: 24 }, radio: { x: 150 } }, enter: 'blorp' },
+    { say: 'blorp', text: 'Agent Mörfi. This is Director Blorp of the Intergalactic Snitch Association.' },
+    { say: 'morfi', text: 'Director! Super Mega Snitch Mörfi, reporting for duty!', act: 'salute' },
+    { say: 'blorp', text: 'Shiny things are vanishing all over your village. A thimble. A button. A bottle cap.' },
+    { say: 'puddy', text: 'And a SPOON!' },
+    { say: 'blorp', text: '…And a spoon. Find the thief, Agent. Every case solved earns Snitch points. Enough of them, and one day… Snitch Commander.' },
+    { say: 'morfi', text: 'One day… Snitch… Commander…', act: 'gasp' },
+    { say: 'blorp', text: 'Blorp out.' },
+    { show: { blorp: { x: 150 } } },
+    { say: 'morfi', text: 'Team. This is the most important mission of my life.', props: ['magnifier'] },
+    { say: 'lilca', text: 'You said that about the flower.' },
+    { say: 'morfi', text: 'The flower was a training mission.' },
+    { bg: 'inside', show: { morfi: { x: 24, props: ['magnifier'] }, puddy: { x: 56 }, lilca: { x: 80, props: ['book'] } } },
+    { narr: 'First stop: the scene of the crime. Puddy’s kitchen drawer — which, it turned out, was in Mörfi’s house, because Puddy keeps his spoon there. For safety.' },
+    { say: 'morfi', text: 'Nobody touch anything. There could be clues everywhere.' },
+    { say: 'puddy', text: 'I touched the biscuit tin.' },
+    { say: 'morfi', text: 'That’s fine. The biscuit tin is always a suspect.' },
+    { puzzle: 63, pool: 'hard', scene: 'inside', title: 'Search the house', hint: 'Move everything aside — the clue must be here somewhere!' },
+    { bg: 'inside', show: { morfi: { x: 30, props: ['magnifier'] }, puddy: { x: 58 }, lilca: { x: 82, props: ['book'] }, feather: { x: 48 } }, enter: 'feather' },
+    { narr: 'Under the window lay something small. Something black. And white.' },
+    { say: 'morfi', text: 'A feather!', act: 'gasp' },
+    { say: 'lilca', text: 'And a little glitter. Whoever it was, they like shiny things.' },
+    { say: 'morfi', text: 'Black and white… likes shiny things… came through the window…' },
+    { say: 'puddy', text: 'A zebra!' },
+    { say: 'morfi', text: 'Puddy, a zebra doesn’t fit through a window.' },
+    { say: 'puddy', text: 'A small zebra.' },
+    { say: 'morfi', text: 'We need to question the only witness who never leaves the garden.' },
+    { bg: 'garden', show: { morfi: { x: 18, props: ['magnifier'] }, puddy: { x: 36 }, lilca: { x: 54, props: ['book'] }, snail: { x: 80 } } },
+    { narr: 'Slowbert the snail had lived in the vegetable patch for as long as anyone could remember. Mostly because he hadn’t finished leaving yet.' },
+    { say: 'morfi', text: 'Slowbert. Where were you last night?' },
+    { say: 'snail', text: 'Heeeere.' },
+    { say: 'morfi', text: 'And this morning?' },
+    { say: 'snail', text: 'Alsooo heeeere.' },
+    { say: 'morfi', text: 'Can anyone confirm that?' },
+    { say: 'snail', text: 'The caaarrot.' },
+    { say: 'lilca', text: 'Mörfi, it takes him a whole day to go anywhere. He didn’t steal a spoon.' },
+    { say: 'morfi', text: 'Hmm. A very strong alibi. Suspiciously strong.' },
+    { say: 'snail', text: 'But I saaaw something. Black and white. Flying. Veeery fast. Veeery rude.' },
+    { say: 'morfi', text: 'Which way did it go?' },
+    { say: 'snail', text: 'Towards… the biiig… old… treeee.' },
+    { narr: 'This took four minutes. Puddy ate two biscuits while waiting.' },
+    { puzzle: 76, pool: 'hard', scene: 'garden', title: 'Through the garden', hint: 'Clear the vegetable patch without squashing anything!' },
+    { bg: 'garden', show: { morfi: { x: -12, props: ['magnifier'] }, puddy: { x: -26 }, lilca: { x: -40, props: ['book'] } } },
+    { walk: { morfi: 118, puddy: 112, lilca: 106 }, t: 3000 },
+    { bg: 'meadow', show: { morfi: { x: 20, props: ['magnifier'] }, puddy: { x: 38 }, lilca: { x: 56, props: ['book'] }, beetle: { x: 82 } } },
+    { say: 'beetle', text: 'Mörfi! Mörfi! Our bottle cap is gone! We used it as a bathtub!', act: 'jump' },
+    { say: 'morfi', text: 'Beetle! Don’t worry. ISA is on the case.' },
+    { say: 'beetle', text: 'Thank you. It was a very good bathtub.' },
+    { say: 'lilca', text: 'The feathers go that way. Towards the big tree.' },
+    { puzzle: 50, pool: 'hard', scene: 'meadow', title: 'Follow the feather trail', hint: 'Follow the feathers across the meadow!' },
+    { bg: 'meadow', front: 'grass', show: { beetle: { x: -8 }, morfi: { x: -20, props: ['magnifier'] }, puddy: { x: -34 }, lilca: { x: -48, props: ['book'] } } },
+    { walk: { beetle: 124, morfi: 118, puddy: 112, lilca: 106 }, t: 3200 },
+    { bg: 'tree', show: { morfi: { x: 24 }, puddy: { x: 46, props: ['biscuit'] }, lilca: { x: 68, props: ['flashlight'] } } },
+    { narr: 'By nightfall, they were hiding at the bottom of the big old tree. A stakeout.' },
+    { say: 'puddy', text: 'I brought stakeout biscuits.' },
+    { say: 'morfi', text: 'Puddy, a stakeout requires total silence.' },
+    { say: 'puddy', text: '(crunch)' },
+    { say: 'morfi', text: 'Total. Silence.' },
+    { say: 'puddy', text: '(very quiet crunch)' },
+    { narr: 'An hour passed. Lilca read a book by flashlight. Puddy ran out of biscuits. Mörfi did not blink once. Mostly.' },
+    { show: { magpie: { x: -10, y: 40 } } },
+    { walk: { magpie: 52 }, t: 1600 },
+    { say: 'lilca', text: 'Something’s flying! Black and white!' },
+    { say: 'morfi', text: 'And it’s carrying… a SPOON!', act: 'point' },
+    { walk: { magpie: 50 }, t: 300, move: { magpie: { y: 58 } } },
+    { narr: 'The bird flew straight up into the tree — into a big nest that glittered in the moonlight.' },
+    { say: 'morfi', text: 'Team. We’re going up.' },
+    { say: 'puddy', text: 'Up the TREE?' },
+    { say: 'morfi', text: 'Commanders don’t say no to trees.' },
+    { puzzle: 74, pool: 'hard', scene: 'tree', title: 'Climb the big tree', hint: 'Find a way up through the branches!' },
+    { bg: 'tree', show: { morfi: { x: 24 }, puddy: { x: 44 }, lilca: { x: 64, props: ['flashlight'] }, magpie: { x: 84 } } },
+    { narr: 'The nest was full of treasures: a thimble, a button, a bottle cap… and Puddy’s emergency spoon.' },
+    { say: 'morfi', text: 'Freeze! Intergalactic Snitch Association!', act: 'point' },
+    { say: 'magpie', text: 'Oh! Oh no. I’m caught, aren’t I.' },
+    { say: 'morfi', text: 'Very caught. Why did you take everyone’s shiny things?' },
+    { say: 'magpie', text: 'It’s my babies’ first birthday tomorrow. I wanted the nest to sparkle for them.' },
+    { say: 'magpie', text: 'I didn’t think anyone would miss a spoon.' },
+    { say: 'puddy', text: 'I missed it. Very much.', act: 'gasp' },
+    { narr: 'Everyone was quiet for a moment. Mörfi looked at the magpie. The magpie looked at her feet.' },
+    { say: 'morfi', text: 'Pica, is it? A true snitch reports the truth. And the truth is… you did it for your family.' },
+    { say: 'lilca', text: 'Maybe everyone would lend you something shiny. If you just asked.' },
+    { say: 'puddy', text: 'You can have my biscuit tin lid. It’s VERY shiny.' },
+    { say: 'magpie', text: 'You… you’d do that?', act: 'jump' },
+    { puzzle: 44, pool: 'hard', scene: 'village', title: 'Return everything', hint: 'Bring every shiny thing back to its owner!' },
+    { bg: 'village', show: { morfi: { x: 20, props: ['satchel'] }, puddy: { x: 40, props: ['spoon'] }, lilca: { x: 60, props: ['book'] }, magpie: { x: 80 } } },
+    { narr: 'By the next evening, everything was back where it belonged. And Pica’s nest sparkled anyway — with a shiny lid, a ribbon from Lilca, and a golden sweet wrapper from the beetle.' },
+    { say: 'puddy', text: 'My spoon! My beautiful emergency spoon!', act: 'jump' },
+    { show: { blorp: { x: 50, y: 24 }, magpie: { x: 150 } }, enter: 'blorp' },
+    { say: 'blorp', text: 'Agent Mörfi. Case solved — with truth, with clues… and with kindness.' },
+    { say: 'blorp', text: 'That is worth… one hundred Snitch points.' },
+    { award: 'points', n: 100, key: 'ch3' },
+    { say: 'morfi', text: 'ONE HUNDRED SNITCH POINTS!', act: 'scream', shake: true },
+    { say: 'morfi', text: 'How many do I need to become Snitch Commander?' },
+    { say: 'blorp', text: '…A lot. Blorp out.' },
+    { show: { blorp: { x: 150 } } },
+    { say: 'puddy', text: 'Does this mean more emergency equipment?' },
+    { say: 'morfi', text: 'Two biscuits. And a spoon. Some things never change.', act: 'salute' },
+    { bg: 'night', show: { lilca: { x: 30, props: ['book'] }, puddy: { x: 62 } } },
+    { narr: 'That night, a light was still on in the mushroom house.' },
+    { say: 'lilca', text: 'She’s writing her case report.' },
+    { say: 'puddy', text: 'It’ll be forty pages.' },
+    { say: 'morfi', text: 'FORTY-TWO.', offstage: true },
+    { end: 3 },
+  ];
   const CHAPTERS = [
-    { id: 1, series: 'morfi', num: 'Chapter 1', title: 'Mörfi and the Very Important Mission', short: 'Mörfi · Chapter 1', steps: CH1, icon: '🍄' },
+    { id: 1, series: 'morfi', bonus: 50, num: 'Chapter 1', title: 'Mörfi and the Very Important Mission', short: 'Mörfi · Chapter 1', steps: CH1, icon: '🍄' },
+    { id: 3, series: 'morfi', num: 'Chapter 2', title: 'The Case of the Missing Spoon', short: 'Mörfi · Chapter 2', steps: CH3, icon: '🥄' },
     { id: 2, series: 'bear', num: 'Story 1', title: 'The Bike Tour with Kloenchen', short: 'Bear & Kloenchen', steps: CH2, icon: '🚲' },
   ];
+
+  // ── Snitch points: Mörfi's stories earn them; the Snitch level grows (Commander is level 10) ──
+  const SNITCH_AT = [0, 50, 120, 220, 350, 520, 750, 1000, 1300, 1700];
+  const snitch = () => { const m = Extras.meta(); return (m.snitch = m.snitch || { sp: 0, got: {} }); };
+  const snitchLevel = sp => SNITCH_AT.filter(n => sp >= n).length;
+  const snitchTitle = lv => lv >= 10 ? 'Snitch Commander' : 'Super Mega Snitch';
+  // Points for something, counted once per key (a better result later adds the difference).
+  function addSP(n, key) {
+    const sn = snitch(), had = sn.got[key] || 0, add = Math.max(0, n - had);
+    const before = sn.sp;
+    if (add) { sn.got[key] = n; sn.sp += add; persistStory(); }
+    return { add, before, after: sn.sp, up: snitchLevel(sn.sp) > snitchLevel(before) };
+  }
+  function snitchBar(sp) {
+    const lv = snitchLevel(sp), lo = SNITCH_AT[lv - 1], hi = SNITCH_AT[lv] || lo;
+    const pct = hi > lo ? Math.round((sp - lo) / (hi - lo) * 100) : 100;
+    return `<div class="sn-bar"><div class="sn-top"><b>🕵️ ${snitchTitle(lv)} · Level ${lv}</b><span>${sp} SP${hi > lo ? ` / ${hi}` : ''}</span></div><div class="sn-track"><i style="width:${pct}%"></i></div>${lv < 10 ? `<small>Snitch Commander at level 10</small>` : ''}</div>`;
+  }
 
   // ── The stage ──
   let ch = null, at = 0, waiting = false, typing = null, chars = {};
@@ -474,9 +677,12 @@ const Story = (() => {
     leaf: () => `<path d="M-20,420 Q200,330 420,420 Q360,460 200,452 Q40,462 -20,420 Z" fill="#6fd06a" opacity="0.95"/><path d="M-20,420 Q200,380 420,420" stroke="#3f9a4a" stroke-width="5" fill="none"/>` + grass(700, '#4fbf5a', 30, 60),
     mushroom: () => mushroomHouse(200, 660, 2.4, '#e8433f') + grass(700, '#4fbf5a', 30, 50),
   };
+  // A copy of a scene gets its own gradient ids (two copies with the same ids break each other).
+  const own = (svg, pre) => svg.replace(/id="([\w-]+)"/g, `id="${pre}$1"`).replace(/url\(#([\w-]+)\)/g, `url(#${pre}$1)`);
   function front(name) { stage().querySelector('.st-front').innerHTML = name ? FRONT[name]() : ''; }
   function setBg(name) {
     const svg = stage().querySelector('.st-bg');
+    if (!BG[name] && BG2[name]) BG[name] = BG2[name];
     // The map is shown whole (nothing cut off at the sides); scenery fills the screen.
     svg.setAttribute('preserveAspectRatio', name === 'map' ? 'xMidYMid meet' : 'xMidYMax slice');
     stage().style.background = name === 'map' ? '#f2efe4' : '';
@@ -561,9 +767,10 @@ const Story = (() => {
         Object.values(chars).forEach(e => e.classList.remove('walking'));
       }
       if (s.wait) await new Promise(r => setTimeout(r, s.wait));
-      if (s.award) { await award(s.award); }
+      if (s.award) { await award(s.award, s.n, s.key); }
       if (s.eat) { await eat(); }
       if (s.puzzle != null) { saved()['ch' + ch.id] = at; persistStory(); return puzzle(s); }
+      if (s.end && ch.series === 'morfi' && ch.bonus) addSP(ch.bonus, 'end' + ch.id);
       if (s.end) { saved()['ch' + ch.id] = 'done'; persistStory(); Extras.event('story' + s.end); return finish(); }
       if (s.say) {
         if (s.act) act(s.who || s.say, s.act);
@@ -590,11 +797,17 @@ const Story = (() => {
     return new Promise(done => {
       const e = document.createElement('div');
       e.className = 'st-award';
-      e.innerHTML = kind === 'bells' ? `<svg viewBox="0 0 120 100">${[30, 84].map(x => `<g transform="translate(${x} 50)"><circle r="24" fill="url(#gb)" stroke="#b37a00" stroke-width="3"/><ellipse cx="-7" cy="-8" rx="8" ry="5" fill="#fff" opacity="0.6"/><rect x="-5" y="-32" width="10" height="10" rx="3" fill="#b37a00"/><circle cx="0" cy="6" r="4" fill="#b37a00"/></g>`).join('')}<defs><radialGradient id="gb" cx="0.4" cy="0.35" r="0.7"><stop offset="0" stop-color="#fff6c0"/><stop offset="0.5" stop-color="#ffd54a"/><stop offset="1" stop-color="#d49a10"/></radialGradient></defs></svg><b>Two golden bike bells!</b>` : `<svg viewBox="0 0 100 100"><defs><radialGradient id="gb" cx="0.4" cy="0.35" r="0.7"><stop offset="0" stop-color="#fff6c0"/><stop offset="0.5" stop-color="#ffd54a"/><stop offset="1" stop-color="#d49a10"/></radialGradient></defs>
+      if (kind === 'points') {
+        const r = addSP(arguments[1] || 0, arguments[2] || 'x');
+        e.innerHTML = `<div class="sn-plus">+${arguments[1]} SP</div><b>Snitch points!</b><div class="sn-wrap">${snitchBar(r.before)}</div>${r.up ? `<div class="sn-up">⬆️ Snitch level ${snitchLevel(r.after)}!</div>` : ''}`;
+        setTimeout(() => { const w = e.querySelector('.sn-wrap'); if (w) w.innerHTML = snitchBar(r.after); }, 700);
+      }
+      else e.innerHTML = kind === 'isa' ? `<div class="st-isa">${isaLogo('aw')}</div><b>ISA</b>` : kind === 'bells' ? `<svg viewBox="0 0 120 100">${[30, 84].map(x => `<g transform="translate(${x} 50)"><circle r="24" fill="url(#gb)" stroke="#b37a00" stroke-width="3"/><ellipse cx="-7" cy="-8" rx="8" ry="5" fill="#fff" opacity="0.6"/><rect x="-5" y="-32" width="10" height="10" rx="3" fill="#b37a00"/><circle cx="0" cy="6" r="4" fill="#b37a00"/></g>`).join('')}<defs><radialGradient id="gb" cx="0.4" cy="0.35" r="0.7"><stop offset="0" stop-color="#fff6c0"/><stop offset="0.5" stop-color="#ffd54a"/><stop offset="1" stop-color="#d49a10"/></radialGradient></defs></svg><b>Two golden bike bells!</b>` : `<svg viewBox="0 0 100 100"><defs><radialGradient id="gb" cx="0.4" cy="0.35" r="0.7"><stop offset="0" stop-color="#fff6c0"/><stop offset="0.5" stop-color="#ffd54a"/><stop offset="1" stop-color="#d49a10"/></radialGradient></defs>
         <circle cx="50" cy="50" r="40" fill="url(#gb)" stroke="#b37a00" stroke-width="4"/>${[[36, 40], [60, 34], [56, 60], [38, 62], [66, 50]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4" fill="#b37a00" opacity="0.6"/>`).join('')}</svg><b>Golden Biscuit</b>`;
       stage().appendChild(e);
       Sound.win(); Art.confetti();
       e._keep = true;
+      if (kind === 'points') setTimeout(() => { e.classList.add('eaten'); setTimeout(() => e.remove(), 900); }, 3400);
       if (kind === 'bells') { e.classList.add('big'); setTimeout(() => { e.classList.add('eaten'); setTimeout(() => e.remove(), 900); }, 3200); }
       setTimeout(done, 1600);
     });
@@ -611,14 +824,15 @@ const Story = (() => {
 
   // A puzzle in the middle of the story: the normal board, then back to the story.
   function puzzle(s) {
-    begin(CHALLENGE_LEVELS[s.puzzle], `📖 ${s.title}`, s.hint);
+    begin(s.pool === 'hard' && typeof DAILY_LEVELS !== 'undefined' ? DAILY_LEVELS[s.puzzle] : CHALLENGE_LEVELS[s.puzzle], `📖 ${s.title}`, s.hint);
     chPlay = {
       story: true,
       again: () => puzzle(s),
       back: () => { chPlay = null; $('win').hidden = true; storyHome(); },
       next: () => { chPlay = null; $('win').hidden = true; at++; openStage(); run(); },
-      won: () => {
+      won: (m, stars) => {
         $('win-text').textContent = 'Mission step complete! 🕵️';
+        if (ch.series === 'morfi') { const r = addSP(stars * 10, `p${ch.id}_${at}`); $('win-text').textContent = r.add ? `Mission step complete! 🕵️ +${r.add} Snitch points` : 'Mission step complete! 🕵️'; }
         $('win-best').innerHTML = '';
         $('next').hidden = false; $('to-ch').hidden = false;
         $('next').className = 'big'; $('replay').className = 'ghost'; $('replay').textContent = 'Play again';
@@ -629,7 +843,7 @@ const Story = (() => {
     if (s.scene) {
       const bg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       bg.setAttribute('class', 'scene-bg'); bg.setAttribute('viewBox', '0 0 400 700'); bg.setAttribute('preserveAspectRatio', 'xMidYMax slice');
-      bg.innerHTML = BG[s.scene]();
+      bg.innerHTML = own((BG[s.scene] || BG2[s.scene])(), 'pz');
       $('game').prepend(bg);
       $('game').classList.add('scened', 'scene-' + s.scene);
     }
@@ -638,7 +852,7 @@ const Story = (() => {
   }
 
   function finish() {
-    bubble(null, ch.id === 1 ? 'The end of chapter 1 — Mörfi will be back with another Very Important Mission soon. 🍄' : 'The end — Bear and Kloenchen will be back with another bike tour soon. 🚲🔔');
+    bubble(null, ch.id === 1 ? 'The end of chapter 1 — Mörfi will be back with another Very Important Mission soon. 🍄' : ch.id === 3 ? 'The end of chapter 2 — Super Mega Snitch Mörfi is one case closer to Commander. 🥄🍄' : 'The end — Bear and Kloenchen will be back with another bike tour soon. 🚲🔔');
     waiting = false;
     $('st-tap').hidden = true;
     $('st-end').hidden = false;
@@ -669,7 +883,7 @@ const Story = (() => {
   function storyHome() {
     show('storyhome');
     const bg = document.querySelector('.sh-bg');
-    if (!bg.dataset.done) { bg.innerHTML = BG.village(); bg.dataset.done = 1; }
+    if (!bg.dataset.done) { bg.innerHTML = own(BG.village(), 'sh'); bg.dataset.done = 1; }
     const box = document.querySelector('.sh-chars');
     if (!box.dataset.done) {
       box.dataset.done = 1;
@@ -690,7 +904,7 @@ const Story = (() => {
           <button class="big sh-play" data-id="${c.id}" data-done="${st === 'done' ? 1 : ''}">${st === 'done' ? '↻ Replay' : going ? '▶ Continue' : '▶ Play'}</button></div>`;
     };
     // One section per series: Mörfi's ISA missions (with the ISA badge), and Bear & Kloenchen's tours.
-    $('sh-cards').innerHTML = `<div class="sh-series"><div class="sh-isa">${isaLogo('home')}</div><div><b>Mörfi &amp; the ISA</b><small>Top secret missions of a Super Mega Snitch</small></div></div>`
+    $('sh-cards').innerHTML = `<div class="sh-series"><div class="sh-isa">${isaLogo('home')}</div><div class="sn-col"><b>Mörfi &amp; the ISA</b>${snitchBar(snitch().sp)}</div></div>`
       + CHAPTERS.filter(c => c.series === 'morfi').map(card).join('')
       + `<div class="sh-series"><div class="sh-emoji">🐻🚲</div><div><b>Bear &amp; Kloenchen</b><small>Bike tours and little adventures</small></div></div>`
       + CHAPTERS.filter(c => c.series === 'bear').map(card).join('');

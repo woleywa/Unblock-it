@@ -73,7 +73,10 @@ version.
   use CHALLENGE_LEVELS through chPlay `{ story: true }`; progress in Extras meta.story (resumes at the
   last puzzle). Finishing chapter 1 gives the 🍪 Golden biscuit medal.
   Series: `morfi` (the ISA belongs to Mörfi's stories only; isaLogo() SVG) and `bear` (Bear & Kloenchen: CH2,
-  the Etappe 2 bike tour Schönefeld → Wannsee, scenes field/path/forest/lake/map, riders on bikes, the lake cat).
+  the Etappe 2 bike tour; CH3 = Mörfi chapter 2 'The Case of the Missing Spoon' (Director Blorp hologram, Slowbert
+  the snail, Pica the magpie). Snitch points (meta.snitch {sp, got}): Mörfi story puzzles give stars×10 once,
+  chapter ends/awards more; Snitch level from SNITCH_AT (Commander = level 10, far away on purpose). Story puzzles
+  use `pool: 'hard'` (DAILY_LEVELS); Schönefeld → Wannsee, scenes field/path/forest/lake/map, riders on bikes, the lake cat).
 - "New!" pop-ups: js/intro.js (`Intro.show(key, again)`), one looping mini-board scene per feature
   (basics, walls, ice, frozen, layered, fire, beaver) drawn with the real Art functions and a 👆 finger.
   start() shows it once per feature (localStorage `unblock_seen_intros`) and adds "▶ Show me" to the hint.
