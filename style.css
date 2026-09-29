@@ -591,3 +591,25 @@ button.stars-total { background: none; border: 0; padding: 4px 6px; cursor: poin
 .st-award.eaten { transition: transform 0.8s ease-in, opacity 0.8s; transform: translate(-50%, 140%) scale(0.2); opacity: 0; }
 .st-char .tail { animation: tailswish 2.2s ease-in-out infinite alternate; }
 @keyframes tailswish { from { transform: rotate(-6deg); } to { transform: rotate(8deg); } }
+
+/* Story: front layer (grass to wade through), crawling low, peeking out */
+.st-front { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+.st-front .blade { transform-box: fill-box; transform-origin: 50% 100%; animation: sway 1.6s ease-in-out infinite alternate; animation-delay: calc(var(--i) * -0.3s); }
+#story-stage.low .st-body { transform: scale(1.05, 0.72); animation: none; }
+#story-stage.low .st-char.walking .st-body { animation: crawl 0.3s ease-in-out infinite alternate; }
+@keyframes crawl { from { transform: scale(1.05, 0.72) translateY(0); } to { transform: scale(1.08, 0.68) translateY(-3px); } }
+.st-body.a-peek { animation: peek 1.1s ease-in-out; }
+@keyframes peek { 0%,100% { transform: translateY(0); } 30%, 70% { transform: translateY(-34px); } }
+/* Story puzzles: their scenery behind the board, and a board to match */
+#game.scened { position: relative; }
+#game .scene-bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+#game.scened > :not(.scene-bg) { position: relative; z-index: 1; }
+#game.scened #board { background: linear-gradient(180deg, rgba(79,154,85,0.92), rgba(39,98,52,0.95)); box-shadow: 0 14px 0 #1d4a28, 0 26px 50px rgba(0,0,0,0.45), inset 0 3px 0 rgba(255,255,255,0.22); }
+#game.scened .cell { background: linear-gradient(180deg, #1f4a27, #27592f); }
+#game.scene-leaf #board { background: linear-gradient(180deg, rgba(111,208,106,0.92), rgba(63,154,74,0.95)); }
+#game.scene-village #board { background: linear-gradient(180deg, rgba(168,116,63,0.95), rgba(122,80,40,0.97)); box-shadow: 0 14px 0 #5a3a1c, 0 26px 50px rgba(0,0,0,0.45), inset 0 3px 0 rgba(255,255,255,0.22); }
+#game.scene-village .cell { background: linear-gradient(180deg, #4a2f18, #5a3a1e); }
+#game.scened #hint, #game.scened .bar { text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+/* Long level titles don't push the buttons off the screen */
+#game .bar .title { min-width: 0; }
+#game .bar .title h2 { overflow: hidden; text-overflow: ellipsis; }

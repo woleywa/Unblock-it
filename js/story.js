@@ -179,13 +179,22 @@ const Story = (() => {
     { bg: 'grass', show: { morfi: { x: -15, props: ['satchel'] }, puddy: { x: -28, props: ['spoon'] }, lilca: { x: -40, props: ['book'] } } },
     { walk: { morfi: 62, puddy: 42, lilca: 22 }, t: 1500 },
     { narr: 'They crept through the grass…' },
-    { puzzle: 4, title: 'Creep through the grass', hint: 'Clear a path so Mörfi can sneak through the grass!' },
+    { puzzle: 4, scene: 'grass', title: 'Creep through the grass', hint: 'Clear a path so Mörfi can sneak through the grass!' },
+    // …and off they sneak, through the grass.
+    { bg: 'grass', front: 'grass', show: { morfi: { x: -12, props: ['satchel'] }, puddy: { x: -26, props: ['spoon'] }, lilca: { x: -40, props: ['book'] } } },
+    { walk: { morfi: 118, puddy: 106, lilca: 94 }, t: 4200 },
     { bg: 'leaf', show: { morfi: { x: 20, props: ['satchel'] }, puddy: { x: 45, props: ['spoon'] }, lilca: { x: 70, props: ['book'] } } },
     { narr: 'They crawled underneath a leaf…' },
-    { puzzle: 22, title: 'Under the leaf', hint: 'Make room under the leaf — quietly!' },
+    { puzzle: 22, scene: 'leaf', title: 'Under the leaf', hint: 'Make room under the leaf — quietly!' },
+    { bg: 'leaf', front: 'leaf', low: true, show: { morfi: { x: -12, props: ['satchel'] }, puddy: { x: -26, props: ['spoon'] }, lilca: { x: -40, props: ['book'] } } },
+    { walk: { morfi: 118, puddy: 106, lilca: 94 }, t: 4200 },
     { bg: 'village', show: { morfi: { x: 20, props: ['satchel'] }, puddy: { x: 35, props: ['spoon'] }, lilca: { x: 48, props: ['book'] } } },
     { narr: 'They hid behind a mushroom…' },
-    { puzzle: 40, title: 'Behind the mushroom', hint: 'Get everyone behind the mushroom without being seen!' },
+    { puzzle: 40, scene: 'village', title: 'Behind the mushroom', hint: 'Get everyone behind the mushroom without being seen!' },
+    { bg: 'village', front: 'mushroom', show: { morfi: { x: -12, props: ['satchel'] }, puddy: { x: -26, props: ['spoon'] }, lilca: { x: -40, props: ['book'] } } },
+    { walk: { morfi: 58, puddy: 50, lilca: 42 }, t: 1800 },
+    { act: { morfi: 'peek', puddy: 'peek', lilca: 'peek' }, wait: 1100 },
+    { walk: { morfi: 118, puddy: 106, lilca: 94 }, t: 4200 },
     { bg: 'meadow', show: { morfi: { x: 18, props: ['satchel'] }, puddy: { x: 34, props: ['spoon'] }, lilca: { x: 50, props: ['book'] }, flower: { x: 80 } } },
     { narr: 'They approached the suspicious flower.' },
     { say: 'morfi', text: 'Stop.', act: 'stop' },
@@ -208,7 +217,9 @@ const Story = (() => {
     { say: 'beetle', text: 'I’m a beetle.' },
     { say: 'morfi', text: 'Very convincing.' },
     { say: 'morfi', text: 'Don’t worry. I’ll escort you home.', act: 'salute' },
-    { puzzle: 45, title: 'Escort the beetle home', hint: 'Clear the meadow so the beetle can get home!' },
+    { puzzle: 45, scene: 'meadow', title: 'Escort the beetle home', hint: 'Clear the meadow so the beetle can get home!' },
+    { bg: 'meadow', front: 'grass', show: { beetle: { x: -8 }, morfi: { x: -20, props: ['satchel'] }, puddy: { x: -34, props: ['spoon'] }, lilca: { x: -48, props: ['book'] } } },
+    { walk: { beetle: 124, morfi: 112, puddy: 100, lilca: 88 }, t: 4800 },
     { bg: 'leafhouse', show: { morfi: { x: 16, props: ['satchel'] }, puddy: { x: 32, props: ['spoon'] }, lilca: { x: 47, props: ['book'] }, beetle: { x: 64 } } },
     { narr: 'The beetle’s house was on the other side of the meadow, underneath a curled leaf.' },
     { show: { beetle2: { x: 82, who: 'beetle' } }, enter: 'beetle2' },
@@ -238,6 +249,13 @@ const Story = (() => {
   const stage = () => $('story-stage');
   const saved = () => (Extras.meta().story = Extras.meta().story || {});
 
+  // Things in front of the characters: tall grass they wade through, the leaf they crawl under, a mushroom to hide behind.
+  const FRONT = {
+    grass: () => grass(700, '#2f8a3f', 46, 105) + grass(700, '#4fbf5a', 38, 78),
+    leaf: () => `<path d="M-20,420 Q200,330 420,420 Q360,460 200,452 Q40,462 -20,420 Z" fill="#6fd06a" opacity="0.95"/><path d="M-20,420 Q200,380 420,420" stroke="#3f9a4a" stroke-width="5" fill="none"/>` + grass(700, '#4fbf5a', 30, 60),
+    mushroom: () => mushroomHouse(200, 660, 2.4, '#e8433f') + grass(700, '#4fbf5a', 30, 50),
+  };
+  function front(name) { stage().querySelector('.st-front').innerHTML = name ? FRONT[name]() : ''; }
   function setBg(name) {
     const svg = stage().querySelector('.st-bg');
     svg.innerHTML = BG[name]();
@@ -270,6 +288,7 @@ const Story = (() => {
   }
   function bubble(key, text, name) {
     const box = $('st-say');
+    box.hidden = false;
     box.className = 'st-say' + (key ? ' talk' : ' narr');
     $('st-who').textContent = key ? name : '';
     $('st-who').hidden = !key;
@@ -290,7 +309,7 @@ const Story = (() => {
   async function run() {
     while (ch && at < ch.steps.length) {
       const s = ch.steps[at];
-      if (s.bg) { clearChars(); setBg(s.bg); }
+      if (s.bg) { clearChars(); setBg(s.bg); front(s.front); stage().classList.toggle('low', !!s.low); $('st-say').hidden = true; }
       if (s.show) for (const [k, o] of Object.entries(s.show)) { charEl(k, o); if (o.x > 100) chars[k].remove(), delete chars[k]; }
       if (s.props) for (const [k, p] of Object.entries(s.props)) if (chars[k]) charEl(k, { props: p });
       if (s.enter && chars[s.enter]) { chars[s.enter].classList.add('pop-in'); }
@@ -301,6 +320,7 @@ const Story = (() => {
         await new Promise(r => setTimeout(r, s.t || 1200));
         Object.values(chars).forEach(e => { e.classList.remove('walking'); e.style.transition = ''; });
       }
+      if (s.wait) await new Promise(r => setTimeout(r, s.wait));
       if (s.award) { await award(); }
       if (s.eat) { await eat(); }
       if (s.puzzle != null) { saved()['ch' + ch.id] = at; persistStory(); return puzzle(s); }
@@ -365,6 +385,13 @@ const Story = (() => {
       },
     };
     $('clock').hidden = true;
+    if (s.scene) {
+      const bg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      bg.setAttribute('class', 'scene-bg'); bg.setAttribute('viewBox', '0 0 400 700'); bg.setAttribute('preserveAspectRatio', 'xMidYMax slice');
+      bg.innerHTML = BG[s.scene]();
+      $('game').prepend(bg);
+      $('game').classList.add('scened', 'scene-' + s.scene);
+    }
     $('next').textContent = 'Continue the story ▶';
     $('to-ch').textContent = 'Home';
   }

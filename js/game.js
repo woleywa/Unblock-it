@@ -132,6 +132,9 @@ let helpCtx = null, answer = null, watching = false;
 let usedUndo = false, startedAt = 0; // for medals: no undo, fast solves
 
 function begin(lv, title, hint) {
+  // A story puzzle puts its scenery behind the board; anything else doesn't.
+  document.querySelectorAll('#game .scene-bg').forEach(e => e.remove());
+  $('game').classList.remove('scened', 'scene-grass', 'scene-leaf', 'scene-village', 'scene-meadow');
   level = clone(lv);
   st = { pieces: clone(level.pieces), gates: clone(level.gates) };
   moves = 0; history = []; busy = false; sol = []; watching = false; usedUndo = false; startedAt = 0; combo = 0; lastExit = 0;
