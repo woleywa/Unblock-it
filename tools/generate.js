@@ -63,6 +63,11 @@ const STAGES = [
   { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 0.7, fire: true, lanes: true, frozen: true, walls: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [4, 14], timeAt: 3 },
   { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 0.66, beaver: true, chains: true, layered: true, shapes: ['dot', 'bar2h', 'bar2v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [4, 14], timeAt: 1 },
   { n: 5, W: [6, 7], H: [8, 9], colors: 4, fill: 1, packed: true, holes: [1, 3], prison: true, arrows: true, frozen: true, shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z'], extra: [6, 18], timeAt: 4 },
+  // Round two of mixes (levels 101-120).
+  { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 1, packed: true, holes: [2, 4], arrows: true, ice: true, shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z'], extra: [5, 16], timeAt: 2 },
+  { n: 5, W: [6, 7], H: [7, 9], colors: 3, fill: 0.72, fire: true, prison: true, walls: true, shapes: ['dot', 'bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [5, 16], timeAt: 3 },
+  { n: 5, W: [6, 7], H: [7, 8], colors: 3, fill: 0.68, lanes: true, chains: true, frozen: true, shapes: ['dot', 'bar2h', 'bar2v', 'sq', 'l1', 'l2', 'l3', 'l4'], extra: [5, 16], timeAt: 1 },
+  { n: 5, W: [7, 7], H: [8, 9], colors: 4, fill: 1, packed: true, holes: [2, 4], prison: true, arrows: true, ice: true, frozen: true, shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z'], extra: [8, 22], timeAt: 4 },
 ];
 
 function shapeBox(sh) { return { h: Math.max(...sh.map(q => q[0])) + 1, w: Math.max(...sh.map(q => q[1])) + 1 }; }
