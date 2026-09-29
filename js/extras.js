@@ -59,6 +59,7 @@ const Extras = (() => {
     // Only the last 60 days are kept.
     for (const k of Object.keys(meta.daily)) if (+k < d - 60) delete meta.daily[k];
     persist();
+    check();
     const n = streakNow();
     $('win-text').textContent = `${m} moves · par ${level.par}`;
     $('win-best').innerHTML = `<div class="streak-big"><b>🔥 ${n}</b><span>day streak${n === 1 ? '' : ' — keep it going tomorrow!'}</span></div>${note ? `<p class="note">${note}</p>` : ''}`;
@@ -79,6 +80,8 @@ const Extras = (() => {
   // The home screen button: today's number, the streak, and a tick once it's done.
   function homeButton() {
     chestButton();
+    const mc = Object.keys(meta.ach || {}).length, st = $('stars-total');
+    if (st && st.textContent) st.textContent = st.textContent.split('  ·  🏅')[0] + `  ·  🏅 ${mc}`;
     const d = today(), done = meta.daily[d], n = streakNow();
     const b = $('to-daily');
     if (!b) return;
@@ -98,6 +101,9 @@ const Extras = (() => {
     const s = m.streak;
     if (s && (s.last > meta.streak.last || (s.last === meta.streak.last && s.n > meta.streak.n))) { meta.streak = { ...s, best: Math.max(s.best || 0, meta.streak.best || 0) }; changed = true; }
     else if (!s || s.last < meta.streak.last) mine = true;
+    for (const [k, v] of Object.entries(m.ach || {})) if (!meta.ach[k]) { meta.ach[k] = v; changed = true; }
+    for (const k of Object.keys(meta.ach)) if (!(m.ach || {})[k]) mine = true;
+    for (const [k, v] of Object.entries(m.count || {})) if (v > (meta.count[k] || 0)) { meta.count[k] = v; changed = true; }
     if ((m.chests || 0) > meta.chests) { meta.chests = m.chests; changed = true; } else if ((m.chests || 0) < meta.chests) mine = true;
     if (m.style && !meta.style.skin && !meta.style.sky && (m.style.skin || m.style.sky)) { meta.style = m.style; changed = true; applyStyle(); }
     if (changed) { try { localStorage.setItem(KEY, JSON.stringify(meta)); } catch (e) {} homeButton(); }
@@ -182,12 +188,76 @@ const Extras = (() => {
     });
   }
 
+  // ── Medals ──
+  meta.ach = meta.ach || {};                    // medal id → day it was won
+  meta.count = meta.count || {};                // running counts (timed wins, beavers fed, prisons opened…)
+  const threeStars = () => Object.values(progress.stars).filter(v => v === 3).length;
+  const solved = () => Object.values(progress.stars).filter(v => v > 0).length;
+  const MEDALS = [
+    { id: 'first', icon: '🎉', name: 'First steps', text: 'Solve your first level', ok: () => solved() >= 1 },
+    { id: 'ten', icon: '🔟', name: 'Warming up', text: 'Solve 10 levels', ok: () => solved() >= 10 },
+    { id: 'fifty', icon: '🏃', name: 'Halfway hero', text: 'Solve 50 levels', ok: () => solved() >= 50 },
+    { id: 'hundred', icon: '💯', name: 'Centurion', text: 'Solve 100 levels', ok: () => solved() >= 100 },
+    { id: 'par10', icon: '⭐', name: 'Sharp', text: '10 levels with ⭐⭐⭐', ok: () => threeStars() >= 10 },
+    { id: 'par50', icon: '🌟', name: 'Perfectionist', text: '50 levels with ⭐⭐⭐', ok: () => threeStars() >= 50 },
+    { id: 'clean', icon: '🧼', name: 'No take-backs', text: 'Solve a level of par 15+ without undo', ok: () => (meta.count.clean || 0) >= 1 },
+    { id: 'better', icon: '🧠', name: 'Big brain', text: 'Beat par (fewer moves than par)', ok: () => (meta.count.better || 0) >= 1 },
+    { id: 'quick', icon: '⚡', name: 'Lightning', text: 'Solve a level of par 15+ in under a minute', ok: () => (meta.count.quick || 0) >= 1 },
+    { id: 'timed', icon: '⏱', name: 'Against the clock', text: 'Beat a time challenge', ok: () => (meta.count.timed || 0) >= 1 },
+    { id: 'timed4', icon: '⏰', name: 'Speed demon', text: 'Beat 4 time challenges', ok: () => (meta.count.timed || 0) >= 4 },
+    { id: 'beaver', icon: '🦫', name: 'Beaver buddy', text: 'Feed 10 trees to beavers', ok: () => (meta.count.beaver || 0) >= 10 },
+    { id: 'jail', icon: '🔓', name: 'Jailbreak', text: 'Open 5 prisons', ok: () => (meta.count.jail || 0) >= 5 },
+    { id: 'fire', icon: '🚒', name: 'Firefighter', text: 'Put out 10 fires', ok: () => (meta.count.fire || 0) >= 10 },
+    { id: 'daily', icon: '📅', name: 'Daily habit', text: 'Solve a daily puzzle', ok: () => Object.keys(meta.daily).length >= 1 },
+    { id: 'streak7', icon: '🔥', name: 'On fire', text: '7-day daily streak', ok: () => (meta.streak.best || 0) >= 7 },
+    { id: 'streak30', icon: '🌋', name: 'Unstoppable', text: '30-day daily streak', ok: () => (meta.streak.best || 0) >= 30 },
+    { id: 'helper', icon: '🤝', name: 'Good friend', text: 'Solve a level for a friend who asked for help', ok: () => (meta.count.helped || 0) >= 1 },
+    { id: 'style', icon: '🎨', name: 'Fashionista', text: 'Open 4 star chests', ok: () => meta.chests >= 4 },
+  ];
+  let popT = 0;
+  function check() {
+    const fresh = MEDALS.filter(m => !meta.ach[m.id] && m.ok());
+    if (!fresh.length) return;
+    fresh.forEach(m => { meta.ach[m.id] = today(); });
+    persist();
+    // One banner per new medal, one after another.
+    fresh.forEach((m, i) => setTimeout(() => {
+      const e = $('medal-pop');
+      e.innerHTML = `<span>${m.icon}</span><div><small>New medal!</small><b>${m.name}</b></div>`;
+      e.hidden = false; e.classList.remove('in'); void e.offsetWidth; e.classList.add('in');
+      Sound.thaw && Sound.thaw();
+      clearTimeout(popT); popT = setTimeout(() => { e.hidden = true; }, 2600);
+    }, 900 + i * 2800));
+    homeButton();
+  }
+  // Something happened in a level: count it (and look for new medals).
+  function event(k, n = 1) { meta.count[k] = (meta.count[k] || 0) + n; check(); }
+  // A level was solved: { moves, par, undo, secs, timed, helped }.
+  function onWin(w) {
+    if (w.par >= 15 && !w.undo) meta.count.clean = (meta.count.clean || 0) + 1;
+    if (w.moves < w.par) meta.count.better = (meta.count.better || 0) + 1;
+    if (w.par >= 15 && w.secs < 60) meta.count.quick = (meta.count.quick || 0) + 1;
+    if (w.timed) meta.count.timed = (meta.count.timed || 0) + 1;
+    if (w.helped) meta.count.helped = (meta.count.helped || 0) + 1;
+    check();
+  }
+  function medals() {
+    const got = MEDALS.filter(m => meta.ach[m.id]).length;
+    $('medals-title').textContent = `🏅 Medals ${got}/${MEDALS.length}`;
+    $('medals-list').innerHTML = MEDALS.map(m => `<div class="medal ${meta.ach[m.id] ? 'got' : ''}"><span>${meta.ach[m.id] ? m.icon : '🔒'}</span><div><b>${m.name}</b><small>${m.text}</small></div></div>`).join('');
+    $('medals').hidden = false;
+  }
+  $('medals-done').addEventListener('click', () => { $('medals').hidden = true; });
+  $('stars-total').addEventListener('click', medals);
+
   applyStyle();
   $('to-daily').addEventListener('click', () => { Sound.unlock(); play(); });
   // A shared result links to ?daily: open today's puzzle.
   if (new URLSearchParams(location.search).has('daily')) setTimeout(play, 300);
 
-  return { play, homeButton, merge, meta: () => meta, today, stylePicker };
+  return { play, homeButton, merge, meta: () => meta, today, stylePicker, event, onWin, medals, check };
 })();
 window.Extras = Extras;
 Extras.homeButton();
+// Medals already earned by earlier play show up a moment after start.
+setTimeout(() => Extras.check(), 1500);

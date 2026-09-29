@@ -129,11 +129,12 @@ let sol = [];
 // helpCtx: solving a friend's help request { id, from, fromName }; answer: watching/following a friend's
 // solution { name, steps }; watching: the solution is playing itself (no stars saved).
 let helpCtx = null, answer = null, watching = false;
+let usedUndo = false, startedAt = 0; // for medals: no undo, fast solves
 
 function begin(lv, title, hint) {
   level = clone(lv);
   st = { pieces: clone(level.pieces), gates: clone(level.gates) };
-  moves = 0; history = []; busy = false; sol = []; watching = false;
+  moves = 0; history = []; busy = false; sol = []; watching = false; usedUndo = false; startedAt = 0;
   $('level-name').textContent = title;
   $('hint').textContent = hint || '';
   $('win').hidden = true;
@@ -300,6 +301,7 @@ $('board').addEventListener('pointerdown', e => {
   if (p.ice || p.lock) { d.classList.remove('shake'); void d.offsetWidth; d.classList.add('shake'); Sound.bump(); return; }
   clearHint();
   startClock();
+  if (!startedAt) startedAt = Date.now();
   drag = { p, d, x0: e.clientX, y0: e.clientY, r0: p.r, c0: p.c, r: p.r, c: p.c, g: Engine.grid(level, st.pieces), trail: [] };
   d.classList.add('dragging');
   $('board').setPointerCapture(e.pointerId);
@@ -442,6 +444,7 @@ function leave(id, d, gt, r, c) {
       e.classList.add('thawed');
       const [x, y] = px(q.r + q.h / 2, q.c + q.w / 2);
       Art.burst($('board'), x, y, 'gold', [0, -1]);
+      if (typeof Extras !== 'undefined' && !watching) Extras.event('jail');
       Sound.thaw();
     }
     render();
@@ -460,7 +463,7 @@ function leave(id, d, gt, r, c) {
       const [x, y] = px(f.r + 0.5, f.c + 0.5);
       const still = st.pieces.find(q => q.id === f.id);
       Art.steam($('board'), x, y - cs * 0.1, !still);
-      if (!still) out = true;
+      if (!still) { out = true; if (typeof Extras !== 'undefined' && !watching) Extras.event('fire'); }
       else { const e = document.querySelector(`[data-fire="${f.id}"]`); if (e) e.classList.add('hiss'); }
     }
     if (fires.length) Sound.sizzle(out);
@@ -482,6 +485,7 @@ function beaverEat(id, d, way, fid) {
   const eaten = Engine.eatAround(level, st, id, fid || (way ? forestAt(b, b.r, b.c, ...way) : 0));
   if (!eaten.length) { place(d, b.r, b.c); settle(d); return; }
   busy = true;
+  if (typeof Extras !== 'undefined' && !watching) Extras.event('beaver');
   const f = document.querySelector(`[data-forest="${eaten[0]}"]`);
   const fr = f ? +f.dataset.r : b.r, fc = f ? +f.dataset.c : b.c;
   // Hop on…
@@ -664,6 +668,7 @@ function win() {
   saveProgress();
   if (window.Online) window.Online.putSave(progress).catch(e => console.warn(e));
   winBoard(idx, moves);
+  if (typeof Extras !== 'undefined') Extras.onWin({ moves, par: level.par, undo: usedUndo, secs: (Date.now() - (startedAt || Date.now())) / 1000, timed: !!level.time, helped: !!helpCtx });
   $('next').hidden = idx >= LEVELS.length - 1;
   if (helpCtx && typeof Social !== 'undefined') Social.sendSolution(helpCtx, sol.slice());
 }
@@ -889,6 +894,7 @@ $('set-tips').addEventListener('click', () => { Intro.reset(); $('set-tips').tex
 $('settings-done').addEventListener('click', () => { $('settings').hidden = true; $('set-tips').textContent = '💡 Show the “New!” tips again'; });
 $('undo').addEventListener('click', () => {
   if (busy || !history.length) return;
+  usedUndo = true;
   const h = history.pop();
   sol.length = h.n ?? sol.length;
   st = h.st; moves = h.moves;

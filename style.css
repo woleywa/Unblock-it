@@ -511,3 +511,17 @@ html.sky-forest { background: #0e2a1c; }
 .styles .opt svg { width: 38px; height: 38px; }
 .styles .opt.locked svg, .styles .opt.locked .sw { opacity: 0.5; }
 .styles .opt b { font-size: 0.68rem; color: #fff; text-shadow: 0 1px 2px #000; }
+
+/* Medals */
+button.stars-total { background: none; border: 0; padding: 4px 6px; cursor: pointer; font: inherit; font-weight: 700; color: var(--accent); }
+.medals-card { max-width: min(380px, calc(100vw - 32px)); max-height: calc(100dvh - 40px); overflow-y: auto; gap: 10px; }
+#medals-list { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.medal { display: flex; gap: 12px; align-items: center; text-align: left; padding: 8px 12px; border-radius: 16px; background: rgba(255,255,255,0.05); opacity: 0.55; }
+.medal.got { opacity: 1; background: linear-gradient(90deg, rgba(255,213,74,0.2), rgba(255,255,255,0.05)); }
+.medal span { font-size: 1.6rem; width: 36px; text-align: center; }
+.medal b { display: block; color: #fff; } .medal small { color: var(--dim); font-weight: 600; }
+#medal-pop { position: fixed; top: calc(14px + env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 45; display: flex; gap: 12px; align-items: center;
+  padding: 10px 20px 10px 14px; border-radius: 20px; background: linear-gradient(180deg, #ffe27a, #ffb300); color: #5a2d00; box-shadow: 0 6px 0 #a86a00, 0 14px 30px rgba(0,0,0,0.4); }
+#medal-pop span { font-size: 2rem; } #medal-pop small { display: block; font-weight: 700; opacity: 0.75; } #medal-pop b { font-size: 1.1rem; }
+#medal-pop.in { animation: medalin 0.5s cubic-bezier(.3,1.6,.5,1); }
+@keyframes medalin { from { transform: translate(-50%, -140%); } }
