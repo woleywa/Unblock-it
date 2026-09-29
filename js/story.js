@@ -17,6 +17,34 @@ const Story = (() => {
     satchel: `<g class="prop"><path d="M40,92 L82,128" stroke="#8a5a2e" stroke-width="3"/><rect x="72" y="118" width="20" height="16" rx="4" fill="#b3743a"/><circle cx="82" cy="126" r="2.5" fill="#ffd54a"/><text x="82" y="131" font-size="5" text-anchor="middle" fill="#fff" font-weight="700" font-family="Fredoka,system-ui">ISA</text></g>`,
     spoon: `<g class="prop"><rect x="20" y="96" width="4" height="22" rx="2" fill="#cfd5e6" transform="rotate(20 22 107)"/><ellipse cx="18" cy="94" rx="5" ry="7" fill="#cfd5e6" transform="rotate(20 22 107)"/></g>`,
   };
+  // A cartoon cat standing up: body, tail, head with ears, big eyes, pink nose, whiskers.
+  function cat(o) {
+    const ear = (x, flip) => `<path d="M${x - 14 * flip},${o.big ? 30 : 36} L${x - 2 * flip},${o.big ? 2 : 12} L${x + 12 * flip},${o.big ? 34 : 38} Z" fill="${o.patch || o.base}"/>
+      <path d="M${x - 8 * flip},${o.big ? 30 : 34} L${x - 2 * flip},${o.big ? 12 : 20} L${x + 6 * flip},${o.big ? 32 : 36} Z" fill="#f2a8a8"/>`;
+    const catEyes = (lx, rx, y) => `<g class="eyes" style="transform-origin:60px ${y}px">${[lx, rx].map(x => `<ellipse cx="${x}" cy="${y}" rx="7.5" ry="8" fill="${o.eye}"/>
+      <ellipse cx="${x}" cy="${y}" rx="3.4" ry="6.4" fill="${INK}"/><circle cx="${x + 2.4}" cy="${y - 3}" r="2" fill="#fff"/>`).join('')}</g>`;
+    const tail = `<path class="tail" d="M84,140 Q112,138 110,110 Q108,92 118,84" stroke="${o.tail}" stroke-width="10" fill="none" stroke-linecap="round" style="transform-origin:84px 140px"/>
+      ${o.tailStripes ? `<path d="M96,140 l4,-9 M106,128 l8,-2 M109,112 l8,1 M112,96 l7,4" stroke="${o.stripe}" stroke-width="3" stroke-linecap="round"/>` : ''}`;
+    return `${tail}
+      <ellipse cx="60" cy="126" rx="31" ry="36" fill="${o.base}"/>
+      ${o.patches}
+      <ellipse cx="60" cy="130" rx="15" ry="22" fill="${o.muzzle}" opacity="${o.patch ? 0 : 0.9}"/>
+      <g class="arm-l" style="transform-origin:34px 112px"><ellipse cx="30" cy="122" rx="8" ry="13" fill="${o.patch ? o.base : o.base}"/><ellipse cx="29" cy="133" rx="7" ry="5" fill="${o.muzzle}"/></g>
+      <g class="arm-r" style="transform-origin:86px 112px"><ellipse cx="90" cy="122" rx="8" ry="13" fill="${o.base}"/><ellipse cx="91" cy="133" rx="7" ry="5" fill="${o.muzzle}"/></g>
+      <g class="legs"><ellipse cx="46" cy="160" rx="12" ry="7" fill="${o.patch ? o.base : o.muzzle}"/><ellipse cx="74" cy="160" rx="12" ry="7" fill="${o.patch ? o.base : o.muzzle}"/>
+        <path d="M40,162 v-3 M46,163 v-4 M52,162 v-3 M68,162 v-3 M74,163 v-4 M80,162 v-3" stroke="${o.shade}" stroke-width="1.4"/></g>
+      ${ear(40, 1)}${ear(80, -1)}
+      <ellipse cx="60" cy="70" rx="34" ry="31" fill="${o.base}"/>
+      ${o.cap}
+      <ellipse cx="60" cy="84" rx="17" ry="12" fill="${o.muzzle}"/>
+      ${catEyes(46, 74, 70)}
+      <ellipse cx="38" cy="84" rx="5" ry="3" fill="#ff8fb0" opacity="0.4"/><ellipse cx="82" cy="84" rx="5" ry="3" fill="#ff8fb0" opacity="0.4"/>
+      <path d="M56,80 h8 l-4,4 z" fill="#e87a8a"/>
+      <path class="smile" d="M60,84 v2 q-3,4 -7,1 M60,86 q3,4 7,1" fill="none" stroke="${INK}" stroke-width="1.6" stroke-linecap="round"/>
+      <ellipse class="oh" cx="60" cy="89" rx="3" ry="4" fill="${INK}"/>
+      <path d="M46,84 L${o.big ? 8 : 16},78 M46,87 L${o.big ? 6 : 14},88 M46,90 L${o.big ? 10 : 18},97 M74,84 L${o.big ? 112 : 104},78 M74,87 L${o.big ? 114 : 106},88 M74,90 L${o.big ? 110 : 102},97" stroke="#fff" stroke-width="1.2" opacity="0.9"/>
+      ${(o.props || []).map(p => PROPS[p] || '').join('')}`;
+  }
   const ART = {
     // Mörfi: black bob with antenna hairs, huge eyes, orange blouse, green skirt, boots.
     morfi: props => `
@@ -43,33 +71,18 @@ const Story = (() => {
       <g class="legs"><rect x="46" y="150" width="8" height="8" fill="#e0b24a"/><rect x="66" y="150" width="8" height="8" fill="#e0b24a"/>
         <path d="M43,157 h13 v8 q0,4 -4,4 h-11 q-3,0 -3,-3 q0,-4 5,-5 z" fill="${INK}"/><path d="M64,157 h13 v12 h-11 q-4,0 -4,-4 z" fill="${INK}"/></g>
       ${(props || []).map(p => PROPS[p] || '').join('')}`,
-    // Puddy: a round, soft, biscuit-loving buddy in a knitted cap.
-    puddy: props => `
-      <ellipse cx="60" cy="118" rx="36" ry="42" fill="#7fb2ff"/><ellipse cx="60" cy="130" rx="22" ry="24" fill="#b8d6ff"/>
-      <path d="M26,92 Q30,58 60,56 Q90,58 94,92 Q78,82 60,82 Q42,82 26,92 Z" fill="#ff7a5c"/><circle cx="60" cy="54" r="7" fill="#ffd54a"/>
-      <path d="M28,92 Q60,80 92,92" stroke="#ffd54a" stroke-width="4" fill="none"/>
-      ${eyes(48, 72, 104, 6)}
-      <ellipse cx="38" cy="114" rx="5" ry="3" fill="#ff8fb0" opacity="0.5"/><ellipse cx="82" cy="114" rx="5" ry="3" fill="#ff8fb0" opacity="0.5"/>
-      ${mouth(60, 116, 5)}
-      <g class="arm-l" style="transform-origin:28px 118px"><ellipse cx="24" cy="124" rx="7" ry="11" fill="#7fb2ff"/></g>
-      <g class="arm-r" style="transform-origin:92px 118px"><ellipse cx="96" cy="124" rx="7" ry="11" fill="#7fb2ff"/></g>
-      <g class="legs"><ellipse cx="44" cy="162" rx="11" ry="6" fill="#5a8fe0"/><ellipse cx="76" cy="162" rx="11" ry="6" fill="#5a8fe0"/></g>
-      ${(props || []).map(p => PROPS[p] || '').join('')}`,
-    // Lilca: lilac hair in a bun, round glasses, always with a book.
-    lilca: props => `
-      <circle cx="60" cy="22" r="13" fill="#b48cff"/>
-      <path d="M24,66 Q22,30 60,28 Q98,30 96,66 L94,92 L26,92 Z" fill="#b48cff"/>
-      <ellipse cx="60" cy="68" rx="30" ry="28" fill="#ffe2c8"/>
-      <path d="M30,58 Q36,32 60,34 Q84,32 90,58 Q76,46 60,46 Q44,46 30,58 Z" fill="#b48cff"/>
-      ${eyes(47, 73, 68, 6)}
-      <circle cx="47" cy="68" r="10" fill="none" stroke="#3a2d5c" stroke-width="2"/><circle cx="73" cy="68" r="10" fill="none" stroke="#3a2d5c" stroke-width="2"/><path d="M57,68 h6" stroke="#3a2d5c" stroke-width="2"/>
-      <ellipse cx="38" cy="82" rx="5" ry="3" fill="#ff8fb0" opacity="0.45"/><ellipse cx="82" cy="82" rx="5" ry="3" fill="#ff8fb0" opacity="0.45"/>
-      ${mouth(60, 84, 4)}
-      <path d="M40,96 Q60,90 80,96 L92,152 L28,152 Z" fill="#6a4fb0"/><path d="M40,96 Q60,104 80,96" stroke="#fff" stroke-width="3" fill="none"/>
-      <g class="arm-l" style="transform-origin:40px 98px"><ellipse cx="34" cy="110" rx="7" ry="12" fill="#6a4fb0"/></g>
-      <g class="arm-r" style="transform-origin:80px 98px"><ellipse cx="86" cy="110" rx="7" ry="12" fill="#6a4fb0"/></g>
-      <g class="legs"><rect x="46" y="152" width="8" height="10" fill="#ffe2c8"/><rect x="66" y="152" width="8" height="10" fill="#ffe2c8"/><ellipse cx="50" cy="164" rx="8" ry="5" fill="#3a2d5c"/><ellipse cx="70" cy="164" rx="8" ry="5" fill="#3a2d5c"/></g>
-      ${(props || []).map(p => PROPS[p] || '').join('')}`,
+    // Puddy: a white cat with dark tabby patches on his back and a tabby "cap" on his head.
+    puddy: props => cat({ base: '#fbf8f2', shade: '#e6e0d6', patch: '#4b3b30', stripe: '#241a14', eye: '#a8c44a', muzzle: '#fbf8f2', props,
+      patches: `<path d="M34,104 Q40,92 60,92 Q82,92 88,106 L90,132 Q76,122 62,126 Q46,130 32,124 Z" fill="#4b3b30"/>
+        <path d="M42,100 q4,10 0,22 M54,96 q4,12 0,26 M68,96 q4,12 0,26 M80,100 q4,10 0,20" stroke="#241a14" stroke-width="3.5" fill="none" stroke-linecap="round"/>`,
+      cap: `<path d="M27,70 Q26,38 60,36 Q94,38 93,70 Q86,62 78,64 Q72,54 60,56 Q50,54 44,64 Q34,62 27,70 Z" fill="#4b3b30"/>
+        <path d="M44,40 q2,8 -2,14 M60,37 v14 M76,40 q-2,8 2,14 M34,52 q6,2 8,8 M86,52 q-6,2 -8,8" stroke="#241a14" stroke-width="2.6" fill="none" stroke-linecap="round"/>`,
+      tail: '#4b3b30' }),
+    // Lilca: a brown tabby with big ears, long whiskers and amber eyes, always with a book.
+    lilca: props => cat({ base: '#a8875f', shade: '#8a6c48', patch: null, stripe: '#3f2c1c', eye: '#d9a53a', muzzle: '#e6d2ae', props, big: true,
+      patches: `<path d="M40,102 q6,8 2,20 M52,98 q5,10 1,24 M68,98 q-5,10 -1,24 M80,102 q-6,8 -2,20" stroke="#3f2c1c" stroke-width="3" fill="none" stroke-linecap="round"/>`,
+      cap: `<path d="M46,40 q3,8 -1,14 M60,37 v15 M74,40 q-3,8 1,14 M30,60 q8,0 12,6 M90,60 q-8,0 -12,6 M31,72 q7,0 10,4 M89,72 q-7,0 -10,4" stroke="#3f2c1c" stroke-width="2.6" fill="none" stroke-linecap="round"/>`,
+      tail: '#a8875f', tailStripes: true }),
     // The beetle: small, shiny and a bit embarrassed.
     beetle: () => `
       <g class="legs"><path d="M40,150 l-10,10 M50,154 l-6,12 M70,154 l6,12 M80,150 l10,10" stroke="${INK}" stroke-width="3" stroke-linecap="round"/></g>
@@ -88,7 +101,7 @@ const Story = (() => {
       ${mouth(60, 76, 3.5)}`,
   };
   const NAMES = { morfi: 'Mörfi', puddy: 'Puddy', lilca: 'Lilca', beetle: 'Beetle', flower: 'Flower', mom: 'Beetle family' };
-  const SIZE = { morfi: 1, puddy: 0.85, lilca: 0.95, beetle: 0.72, flower: 1.15 };
+  const SIZE = { morfi: 1, puddy: 0.9, lilca: 0.9, beetle: 0.72, flower: 1.15 };
 
   // ── Scenery (400×700, anchored at the bottom) ──
   const mushroomHouse = (x, y, s, cap = '#e8433f') => `<g transform="translate(${x} ${y}) scale(${s})">
