@@ -15,17 +15,17 @@
 //   help/{id}                     { from, fromName, level, par, to: [uids], created } — "help me with this level"
 //   help/{id}/answers/{uid}       { name, moves, steps: [{ p, r, c, g, e }], created } — a friend's solution
 //   challenges/{code}/entries/{uid} { name, team, teamName, started, updated, stars, moves, solved, score, runs }
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import { initializeApp } from '../vendor/firebase/firebase-app.js';
 import {
   initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence, signInAnonymously, onAuthStateChanged, EmailAuthProvider, linkWithCredential,
   signInWithEmailAndPassword, sendPasswordResetEmail, signOut, reauthenticateWithCredential, deleteUser,
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+} from '../vendor/firebase/firebase-auth.js';
 // Firestore Lite: plain one-off requests, no live stream (nothing for a cache or a sleeping phone
 // to hold open), and a much smaller download.
 import {
   getFirestore, doc, getDoc, writeBatch, setDoc, collection, query, orderBy, limit, getDocs,
   where, getCount, serverTimestamp, increment, updateDoc, Timestamp, arrayUnion, arrayRemove, documentId, deleteDoc,
-} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-lite.js';
+} from '../vendor/firebase/firebase-firestore-lite.js';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyAgZBn0sOd4E34DuygOHt1KhslHIsUz1eA',
@@ -441,6 +441,19 @@ async function teamChallenges(team) {
   return snap.docs.map(d => chOut(d.id, d.data()));
 }
 
+async function sendChallengeInvite(code, friendUid) {
+  await ready;
+  // Send invitation: store under invitations collection in each challenge
+  const invRef = doc(db, 'challenges', code, 'invitations', friendUid);
+  await setDoc(invRef, {
+    from: uid,
+    fromName: me.name,
+    to: friendUid,
+    sent: serverTimestamp(),
+    seen: false,
+  });
+}
+
 async function top(n = 50) {
   await ready;
   const snap = await getDocs(query(collection(db, 'players'), orderBy('score', 'desc'), limit(n)));
@@ -469,7 +482,7 @@ window.Online = {
   myTeamRank: () => timed(myTeamRank()), refreshTeam: () => timed(loadMyTeam()),
   createChallenge: o => timed(createChallenge(o)), getChallenge: c => timed(getChallenge(c)), entries: c => timed(entries(c)),
   myEntry: c => timed(myEntry(c)), joinChallenge: c => timed(joinChallenge(c)), saveEntry: (c, r, s, m) => timed(saveEntry(c, r, s, m)),
-  teamChallenges: t => timed(teamChallenges(t)), normCode,
+  teamChallenges: t => timed(teamChallenges(t)), sendChallengeInvite: (c, f) => timed(sendChallengeInvite(c, f)), normCode,
   now: () => Date.now() + skew,
   createAccount: (e, p) => timed(createAccount(e, p)), signIn: (e, p) => timed(signIn(e, p)), signOut: () => timed(signOutNow()),
   resetPassword: e => timed(resetPassword(e)), deleteAccount: (p, n) => timed(deleteAccount(p, n), 30000),

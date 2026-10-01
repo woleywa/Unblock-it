@@ -234,6 +234,23 @@ service cloud.firestore {
           && request.resource.data.runs is map && request.resource.data.runs.size() == request.resource.data.solved;
         allow delete: if false;
       }
+
+      // Challenge invitations: sent by one player to another
+      match /invitations/{uid} {
+        allow read: if signedIn() && (me() == uid || resource.data.from == me());
+        allow create: if signedIn()
+          && request.resource.data.keys().hasOnly(['from', 'fromName', 'to', 'sent', 'seen'])
+          && request.resource.data.from == me()
+          && request.resource.data.fromName == playerBefore(me()).name
+          && request.resource.data.to == uid
+          && request.resource.data.to != me()
+          && request.resource.data.sent == request.time
+          && request.resource.data.seen == false;
+        allow update: if signedIn() && me() == uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen'])
+          && request.resource.data.seen == true;
+        allow delete: if signedIn() && (me() == uid || resource.data.from == me());
+      }
     }
   }
 }

@@ -262,7 +262,74 @@ const Social = (() => {
     scores();
     tick();
   }
-  const invitePlayers = ch => share('Happy Blocks challenge', `Join my Happy Blocks challenge! Code ${ch.code}.`, link('c', ch.code));
+  async function invitePlayers(ch) {
+    const o = on();
+    if (!o || !o.name) { toast('You need a nickname to invite'); return; }
+    const friends = await o.friendsBoard().catch(() => []);
+    const friendList = friends.filter(f => !f.mine);
+
+    if (!friendList.length) {
+      share('Happy Blocks challenge', `Join my Happy Blocks challenge! Code ${ch.code}.`, link('c', ch.code));
+      return;
+    }
+
+    const html = `<div style="max-height: 300px; overflow-y: auto;">
+      <h4>Invite friends to this challenge</h4>
+      <p class="note small">Select friends to send them a direct invitation, or share the link instead.</p>
+      <div id="invite-list">${friendList.map(f =>
+        `<label style="display: block; padding: 8px 0; border-bottom: 1px solid var(--bg2);">
+          <input type="checkbox" value="${f.uid}" data-name="${esc(f.name)}"> ${esc(f.name)}
+        </label>`).join('')}
+      </div>
+    </div>`;
+
+    const picked = await new Promise(resolve => {
+      const d = document.createElement('div');
+      d.className = 'overlay';
+      d.innerHTML = `<div class="card">${html}<div style="margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end;">
+        <button class="ghost" id="invite-cancel">Cancel</button>
+        <button class="ghost" id="invite-link">📤 Share link</button>
+        <button id="invite-send" style="display: none;">📧 Send invites</button>
+      </div></div>`;
+
+      d.querySelector('#invite-cancel').onclick = () => { d.remove(); resolve(null); };
+      d.querySelector('#invite-link').onclick = () => { d.remove(); resolve('link'); };
+
+      const checkboxes = [...d.querySelectorAll('input[type="checkbox"]')];
+      const sendBtn = d.querySelector('#invite-send');
+      checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+          const selected = checkboxes.filter(c => c.checked);
+          sendBtn.style.display = selected.length ? 'block' : 'none';
+        });
+      });
+
+      sendBtn.onclick = () => {
+        const selected = checkboxes.filter(c => c.checked).map(c => ({ uid: c.value, name: c.dataset.name }));
+        d.remove();
+        resolve(selected);
+      };
+
+      document.body.appendChild(d);
+    });
+
+    if (!picked) return;
+    if (picked === 'link') {
+      share('Happy Blocks challenge', `Join my Happy Blocks challenge! Code ${ch.code}.`, link('c', ch.code));
+      return;
+    }
+
+    for (const friend of picked) {
+      try {
+        await o.sendChallengeInvite(ch.code, friend.uid);
+        toast(`Invited ${friend.name} to the challenge`);
+      } catch (e) {
+        console.warn(e);
+        toast(`Couldn't invite ${friend.name}`);
+      }
+    }
+  }
+
   $('ch-share').addEventListener('click', () => cur && invitePlayers(cur.ch));
 
   async function startCh() {
