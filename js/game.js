@@ -820,8 +820,8 @@ $('ask-friend').addEventListener('click', () => Social.askHelp(idx));
 // A plain link to the level (when there's no nickname / no connection for a proper request).
 async function shareLevel(i, helpId) {
   const n = i + 1, url = `${Native.webBase()}?level=${n}${helpId ? '&help=' + helpId : ''}`;
-  const text = `Can you solve Level ${n} in Happy Blocks? Par is ${LEVELS[i].par} moves — I'm stuck!`;
-  if (navigator.share) { try { await navigator.share({ title: `Happy Blocks — Level ${n}`, text, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+  const text = T(`Can you solve Level ${n} in Happy Blocks? Par is ${LEVELS[i].par} moves — I'm stuck!`);
+  if (navigator.share) { try { await navigator.share({ title: T(`Happy Blocks — Level ${n}`), text, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
   try { await navigator.clipboard.writeText(`${text} ${url}`); $('hint').textContent = 'Link copied — paste it to your friends.'; }
   catch (e) { ask('Copy this link and send it to your friends:', { input: url, copy: true, cancel: false, ok: 'Done' }); }
 }
@@ -911,6 +911,7 @@ function settings() {
 $('settings-home').addEventListener('click', () => { Sound.unlock(); settings(); });
 $('settings-game').addEventListener('click', () => { Sound.unlock(); settings(); });
 $('set-sound').addEventListener('click', () => { Sound.toggle(); settings(); });
+document.querySelectorAll('#set-lang button').forEach(b => { b.classList.toggle('on', b.dataset.lang === LANG); b.addEventListener('click', () => b.dataset.lang !== LANG && setLang(b.dataset.lang)); });
 $('set-buzz').addEventListener('click', () => { Native.setBuzz(!Native.buzzOn()); Native.buzz(); settings(); });
 $('set-tips').addEventListener('click', () => { Intro.reset(); $('set-tips').textContent = '✓ You’ll see them again'; });
 $('settings-done').addEventListener('click', () => { $('settings').hidden = true; $('set-tips').textContent = '💡 Show the “New!” tips again'; });

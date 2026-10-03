@@ -1162,6 +1162,7 @@ const Story = (() => {
     Object.values(chars).forEach(c => c.classList.toggle('speaking', c === e));
     // Typewriter; a tap shows it all at once.
     clearInterval(typing);
+    text = T(text);
     const t = $('st-text'); t.textContent = '';
     let i = 0;
     typing = setInterval(() => { t.textContent = text.slice(0, ++i); if (i % 3 === 0 && key) Sound.tick(); if (i >= text.length) { clearInterval(typing); typing = null; } }, 22);
@@ -1175,7 +1176,7 @@ const Story = (() => {
       const s = ch.steps[at];
       // A card (case file, letter) stays up until the next step.
       stage().querySelectorAll('.st-card').forEach(e => e.remove());
-      if (s.card) { const c = document.createElement('div'); c.className = 'st-card'; c.innerHTML = s.card; stage().appendChild(c); }
+      if (s.card) { const c = document.createElement('div'); c.className = 'st-card'; c.innerHTML = T(s.card); stage().appendChild(c); }
       if (s.aurora != null) stage().classList.toggle('lights', !!s.aurora);
       if (s.bg) { clearChars(); stage().classList.remove('lights'); setBg(s.bg); front(s.front); stage().classList.toggle('low', !!s.low); $('st-say').hidden = true; if (s.aurora) stage().classList.add('lights'); }
       if (s.show) for (const [k, o] of Object.entries(s.show)) { charEl(k, o); if (o.x > 100) chars[k].remove(), delete chars[k]; }
@@ -1263,7 +1264,7 @@ const Story = (() => {
 
   // A puzzle in the middle of the story: the normal board, then back to the story.
   function puzzle(s) {
-    begin(s.pool === 'hard' && typeof DAILY_LEVELS !== 'undefined' ? DAILY_LEVELS[s.puzzle] : CHALLENGE_LEVELS[s.puzzle], `📖 ${s.title}`, s.hint);
+    begin(s.pool === 'hard' && typeof DAILY_LEVELS !== 'undefined' ? DAILY_LEVELS[s.puzzle] : CHALLENGE_LEVELS[s.puzzle], `📖 ${T(s.title)}`, T(s.hint));
     chPlay = {
       story: true,
       again: () => puzzle(s),

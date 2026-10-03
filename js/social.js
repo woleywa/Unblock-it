@@ -12,6 +12,7 @@ const Social = (() => {
     clearTimeout(toastT); toastT = setTimeout(() => { e.hidden = true; }, 2200);
   }
   async function share(title, text, url) {
+    title = T(title); text = T(text);
     if (navigator.share) {
       try { await navigator.share({ title, text, url }); return; } catch (e) { if (e.name === 'AbortError') return; }
     }

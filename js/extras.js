@@ -83,7 +83,7 @@ const Extras = (() => {
 
   async function share(d) {
     const r = meta.daily[d] || { s: 0, m: 0 };
-    const text = `Happy Blocks daily #${d} ${'⭐'.repeat(r.s)}${'☆'.repeat(3 - r.s)} ${r.m} moves 🔥${streakNow()}`;
+    const text = T(`Happy Blocks daily #${d} ${'⭐'.repeat(r.s)}${'☆'.repeat(3 - r.s)} ${r.m} moves 🔥${streakNow()}`);
     const url = Native.webBase() + '?daily';
     if (navigator.share) { try { await navigator.share({ text, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
     try { await navigator.clipboard.writeText(`${text} ${url}`); ask('Copied! Paste it to your friends.', { cancel: false }); }
