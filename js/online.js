@@ -15,17 +15,17 @@
 //   help/{id}                     { from, fromName, level, par, to: [uids], created } — "help me with this level"
 //   help/{id}/answers/{uid}       { name, moves, steps: [{ p, r, c, g, e }], created } — a friend's solution
 //   challenges/{code}/entries/{uid} { name, team, teamName, started, updated, stars, moves, solved, score, runs }
-import { initializeApp } from '../vendor/firebase/firebase-app.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
 import {
   initializeAuth, indexedDBLocalPersistence, browserLocalPersistence, inMemoryPersistence, signInAnonymously, onAuthStateChanged, EmailAuthProvider, linkWithCredential,
   signInWithEmailAndPassword, sendPasswordResetEmail, signOut, reauthenticateWithCredential, deleteUser,
-} from '../vendor/firebase/firebase-auth.js';
+} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 // Firestore Lite: plain one-off requests, no live stream (nothing for a cache or a sleeping phone
 // to hold open), and a much smaller download.
 import {
   getFirestore, doc, getDoc, writeBatch, setDoc, collection, query, orderBy, limit, getDocs,
   where, getCount, serverTimestamp, increment, updateDoc, Timestamp, arrayUnion, arrayRemove, documentId, deleteDoc,
-} from '../vendor/firebase/firebase-firestore-lite.js';
+} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-lite.js';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyAgZBn0sOd4E34DuygOHt1KhslHIsUz1eA',
