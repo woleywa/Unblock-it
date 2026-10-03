@@ -919,6 +919,152 @@ const Story = (() => {
     { say: 'morfi', text: 'I know. 🌌', act: 'salute' },
     { end: 4 },
   ];
+  // ── Wolfgang & Mike: a Berlin afternoon, and a secret treasure box for Anton ──
+  Object.assign(PROPS, {
+    spezi: `<g class="prop"><rect x="86" y="96" width="12" height="30" rx="4" fill="#4a2a14"/><rect x="88" y="88" width="8" height="10" rx="2" fill="#4a2a14"/><rect x="86" y="106" width="12" height="11" fill="#ff8a2a"/><path d="M86,109 h12 M86,113 h12" stroke="#e8433f" stroke-width="1.5"/></g>`,
+    beer: `<g class="prop"><rect x="86" y="98" width="12" height="28" rx="4" fill="#2f8a3a" opacity="0.92"/><rect x="88" y="88" width="8" height="12" rx="2" fill="#2f8a3a"/><rect x="88" y="88" width="8" height="5" fill="#e8c860"/><rect x="86" y="108" width="12" height="9" fill="#fff4dc"/></g>`,
+    map: `<g class="prop"><path d="M76,98 l12,-4 12,4 12,-4 v28 l-12,4 -12,-4 -12,4 z" fill="#fff4dc" stroke="#c8a060" stroke-width="1.5"/><path d="M88,94 v28 M100,98 v28" stroke="#e0cfa8" stroke-width="1"/><path d="M80,116 q8,-10 14,-4 t12,-6" stroke="#5a8a3a" stroke-width="1.5" fill="none" stroke-dasharray="2 2"/><path d="M102,104 l6,6 M108,104 l-6,6" stroke="#e8433f" stroke-width="2.5" stroke-linecap="round"/></g>`,
+    nuts: `<g class="prop">${[[86, 120], [96, 116], [92, 126]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5.5" fill="#7a3f1a"/><ellipse cx="${x}" cy="${y + 3}" rx="4" ry="2" fill="#d9b88a"/><circle cx="${x - 2}" cy="${y - 2}" r="1.4" fill="#fff" opacity="0.6"/>`).join('')}</g>`,
+    phone: `<g class="prop"><rect x="84" y="94" width="16" height="26" rx="3" fill="#1d1d22"/><rect x="86" y="97" width="12" height="19" rx="1.5" fill="#7fd6ff"/><circle cx="92" cy="104" r="3" fill="#f4d77a"/></g>`,
+    keyring: `<g class="prop"><circle cx="92" cy="98" r="4" fill="none" stroke="#c9ccd6" stroke-width="1.5"/><ellipse cx="92" cy="112" rx="7" ry="9" fill="#2a2a30"/><circle cx="87" cy="104" r="3" fill="#2a2a30"/><circle cx="97" cy="104" r="3" fill="#2a2a30"/></g>`,
+  });
+  // A grown-up from the template: shared head/body shapes, everyone gets their own hair, face and clothes.
+  const person = o => `
+      ${o.back || ''}
+      <circle cx="27" cy="68" r="6" fill="${SKIN}"/><circle cx="93" cy="68" r="6" fill="${SKIN}"/>
+      <ellipse cx="60" cy="66" rx="30" ry="29" fill="${SKIN}"/>
+      ${o.hair}
+      ${eyes(47, 73, 67, o.eye || 7)}
+      ${o.face || ''}
+      <ellipse cx="38" cy="80" rx="5.5" ry="3.2" fill="#ff8f8f" opacity="0.4"/><ellipse cx="82" cy="80" rx="5.5" ry="3.2" fill="#ff8f8f" opacity="0.4"/>
+      ${o.beard || ''}
+      ${mouth(60, 83, 5)}
+      <path d="M38,96 Q60,90 82,96 L86,134 L34,134 Z" fill="${o.top}"/>
+      ${o.chest || ''}
+      <g class="arm-l" style="transform-origin:40px 100px"><ellipse cx="32" cy="112" rx="8" ry="13" fill="${o.top}"/><circle cx="31" cy="126" r="5" fill="${SKIN}"/></g>
+      <g class="arm-r" style="transform-origin:80px 100px"><ellipse cx="88" cy="112" rx="8" ry="13" fill="${o.top}"/><circle cx="89" cy="126" r="5" fill="${SKIN}"/></g>
+      <g class="legs"><rect x="42" y="132" width="15" height="26" rx="4" fill="${o.pants}"/><rect x="63" y="132" width="15" height="26" rx="4" fill="${o.pants}"/>
+        <path d="M39,158 h20 v5 q0,4 -4,4 h-14 q-4,0 -4,-4 z" fill="${o.shoes}"/><path d="M61,158 h20 v5 q0,4 -4,4 h-14 q-4,0 -4,-4 z" fill="${o.shoes}"/></g>
+      ${(o.props || []).map(p => PROPS[p] || '').join('')}`;
+  Object.assign(ART, {
+    // Wolfgang: tousled dark-blond hair, cream sweater with a light-blue shirt collar.
+    wolf: props => person({ props, top: '#efe6d2', pants: '#3a3f4a', shoes: '#f4f4f4',
+      hair: `<path d="M29,62 Q24,32 50,27 Q60,20 72,26 Q95,30 91,60 Q88,46 78,44 Q79,52 71,49 Q64,41 56,47 Q50,41 43,49 Q35,48 29,62 Z" fill="#c29a5c"/>
+        <path d="M44,28 q-6,-8 3,-11 M60,23 q1,-9 9,-8 M76,29 q8,-7 11,2 M34,40 q-8,-2 -6,6" stroke="#c29a5c" stroke-width="4.5" fill="none" stroke-linecap="round"/>`,
+      face: `<path d="M40,58 q6,-3 11,0 M69,58 q6,-3 11,0" stroke="#9a7440" stroke-width="1.6" fill="none" stroke-linecap="round"/>`,
+      chest: `<path d="M48,93 L60,104 L72,93 L67,91 L60,98 L53,91 Z" fill="#a8c8ec"/>` }),
+    // Mike: bald on top, brown curls at the sides, a beard, round glasses and a navy hoodie.
+    mike: props => person({ props, top: '#22305a', pants: '#2c2c34', shoes: '#1d1d22', eye: 6,
+      hair: `<path d="M30,74 Q24,48 34,36 Q33,54 39,66 Z" fill="#6a4a30"/><path d="M90,74 Q96,48 86,36 Q87,54 81,66 Z" fill="#6a4a30"/>
+        ${[[31, 46], [29, 58], [89, 46], [91, 58]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4.5" fill="#6a4a30"/>`).join('')}
+        <ellipse cx="50" cy="45" rx="9" ry="4.5" fill="#fff" opacity="0.35"/>`,
+      face: `<circle cx="47" cy="67" r="11" fill="none" stroke="#9a8670" stroke-width="2"/><circle cx="73" cy="67" r="11" fill="none" stroke="#9a8670" stroke-width="2"/><path d="M58,66 q2,-3 4,0 M36,66 l-6,-2 M84,66 l6,-2" stroke="#9a8670" stroke-width="2" fill="none"/>
+        <path d="M41,56 q6,-3 11,0 M68,56 q6,-3 11,0" stroke="#6a4a30" stroke-width="2" fill="none" stroke-linecap="round"/>`,
+      beard: `<path d="M31,72 Q32,99 60,101 Q88,99 89,72 Q84,88 73,88 Q66,79 60,80 Q54,79 47,88 Q36,88 31,72 Z" fill="#6a4a30"/>`,
+      chest: `<path d="M40,96 Q60,106 80,96 L78,91 Q60,99 42,91 Z" fill="#2c3d70"/><path d="M54,101 v14 M66,101 v14" stroke="#f4f4f4" stroke-width="1.6" stroke-linecap="round"/>` }),
+    // Anton: Mike's son — blond hair, a bright orange tee.
+    anton: props => person({ props, top: '#ff8a3a', pants: '#4a6a9a', shoes: '#e8433f', eye: 8,
+      hair: `<path d="M28,64 Q24,30 60,30 Q96,30 92,64 Q88,50 80,48 L76,54 L70,46 L64,53 L58,45 L52,53 L46,46 L40,54 Q32,50 28,64 Z" fill="#f4d77a"/>
+        <path d="M58,31 q4,-8 10,-5" stroke="#f4d77a" stroke-width="4" fill="none" stroke-linecap="round"/>` }),
+  });
+  Object.assign(NAMES, { wolf: 'Wolfgang', mike: 'Mike', anton: 'Anton' });
+  Object.assign(SIZE, { wolf: 1.08, mike: 1.08, anton: 0.78 });
+  Object.assign(BG4, {
+    // A Berlin balcony: white apartment blocks all around, a dark railing, a wooden table with drinks.
+    balcony: () => `
+      <defs><linearGradient id="bsk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9aa6bc"/><stop offset="1" stop-color="#e4e8ee"/></linearGradient></defs>
+      <rect width="400" height="700" fill="url(#bsk)"/>${clouds()}
+      <rect x="110" y="250" width="300" height="240" fill="#f6f6f3"/>
+      ${[0, 1, 2, 3, 4, 5].map(r => `<rect x="110" y="${282 + r * 38}" width="300" height="5" fill="#dcdcd6"/>` + [0, 1, 2, 3, 4, 5, 6, 7].map(c => `<rect x="${122 + c * 36}" y="${258 + r * 38}" width="16" height="22" fill="#6a7486" opacity="0.75"/>`).join('')).join('')}
+      <rect x="-10" y="110" width="120" height="400" fill="#fbfbf8"/>
+      ${[0, 1, 2, 3, 4].map(r => `<rect x="-10" y="${180 + r * 70}" width="120" height="7" fill="#e4e4de"/><rect x="20" y="${126 + r * 70}" width="26" height="46" fill="#5a6476" opacity="0.8"/><rect x="66" y="${126 + r * 70}" width="26" height="46" fill="#5a6476" opacity="0.8"/>`).join('')}
+      <rect width="400" height="34" fill="#e8e6e0"/><rect y="34" width="400" height="5" fill="#cfccc4"/>
+      ${[30, 90, 340].map((x, i) => `<ellipse cx="${x}" cy="${468 - i * 4}" rx="34" ry="22" fill="${i % 2 ? '#4f8a3f' : '#3f7a35'}"/>`).join('')}
+      <rect y="462" width="400" height="7" fill="#2a2a2e"/>${Array.from({ length: 34 }, (_, i) => `<rect x="${i * 12 + 2}" y="469" width="3" height="104" fill="#2a2a2e"/>`).join('')}
+      <rect y="572" width="400" height="128" fill="#a8743f"/>${[590, 616, 646, 682].map(y => `<path d="M0,${y} H400" stroke="#8a5a2e" stroke-width="2"/>`).join('')}
+      <rect x="262" y="528" width="150" height="10" rx="2" fill="#b8844a"/><rect x="272" y="538" width="6" height="40" fill="#8a5a2e"/><rect x="396" y="538" width="6" height="40" fill="#8a5a2e"/>
+      <rect x="292" y="488" width="12" height="40" rx="4" fill="#4a2a14"/><rect x="292" y="502" width="12" height="12" fill="#ff8a2a"/><rect x="295" y="478" width="6" height="12" fill="#4a2a14"/>
+      <rect x="352" y="492" width="13" height="36" rx="4" fill="#2f8a3a" opacity="0.92"/><rect x="355" y="482" width="7" height="12" fill="#e8c860"/>
+      <rect x="318" y="506" width="20" height="22" rx="3" fill="#dfeef8" opacity="0.6" stroke="#fff"/>`,
+    // A Berlin park in October: the TV tower far away, golden trees, a big chestnut tree, a bench.
+    park: () => `
+      <defs><linearGradient id="psk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8fb6e0"/><stop offset="1" stop-color="#eaf2f6"/></linearGradient></defs>
+      <rect width="400" height="700" fill="url(#psk)"/>${clouds()}
+      <rect x="300" y="160" width="7" height="250" fill="#b8bcc6"/><circle cx="303.5" cy="222" r="17" fill="#c8ccd6"/><rect x="295" y="236" width="17" height="5" fill="#9aa0ac"/><rect x="302" y="118" width="3" height="44" fill="#d8443a"/>
+      ${[[20, 400, '#e8a33a'], [90, 392, '#5f8a3a'], [160, 404, '#d9752a'], [240, 396, '#7aa848'], [360, 400, '#e8c34a']].map(([x, y, c]) => `<ellipse cx="${x}" cy="${y}" rx="56" ry="38" fill="${c}"/>`).join('')}
+      <rect y="410" width="400" height="290" fill="#8ab45a"/>
+      <path d="M400,470 Q260,500 220,560 Q190,630 230,700 L320,700 Q270,630 300,570 Q330,520 400,505 Z" fill="#e2d2a8"/>
+      <rect x="60" y="300" width="22" height="200" rx="6" fill="#6a4a30"/>
+      ${[[70, 270, 80, '#4f8a3a'], [30, 320, 56, '#e8a33a'], [112, 316, 58, '#d9752a'], [72, 230, 54, '#6aa04a']].map(([x, y, r, c]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/>`).join('')}
+      ${[[40, 540], [96, 552], [130, 530], [70, 590], [150, 578], [20, 600]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="7" fill="#7a3f1a"/><ellipse cx="${x}" cy="${y + 4}" rx="5" ry="2.4" fill="#d9b88a"/><ellipse cx="${x + 18}" cy="${y - 8}" rx="9" ry="4" fill="${i % 2 ? '#e8a33a' : '#d9752a'}" transform="rotate(${i * 50} ${x + 18} ${y - 8})"/>`).join('')}
+      <rect x="300" y="430" width="90" height="8" rx="2" fill="#8a5a2e"/><rect x="300" y="444" width="90" height="8" rx="2" fill="#8a5a2e"/><rect x="306" y="452" width="6" height="26" fill="#3a3a40"/><rect x="378" y="452" width="6" height="26" fill="#3a3a40"/>
+      ${grass(700, '#6aa04a', 40, 44)}`,
+  });
+  const CH6 = [
+    { bg: 'balcony' },
+    { narr: 'A grey October afternoon in Berlin. Up on a balcony, high above the courtyard, two old friends were catching up.' },
+    { show: { wolf: { x: 28, props: ['beer'] }, mike: { x: 70, props: ['spezi'] } }, enter: 'mike' },
+    { say: 'mike', text: 'Cheers! To Berlin!', act: 'wave' },
+    { say: 'wolf', text: 'Cheers! To you finally coming to visit.' },
+    { say: 'mike', text: 'Listen. I need your help with something. Something top secret.' },
+    { say: 'wolf', text: 'I love top secret.', act: 'gasp' },
+    { say: 'mike', text: 'It’s for Anton. I want to bring him a surprise from Berlin. A real treasure box.' },
+    { say: 'wolf', text: 'A treasure box for Anton? Then we need real treasure. Berlin treasure.' },
+    { say: 'mike', text: 'And where do we find Berlin treasure?' },
+    { say: 'wolf', text: 'In the park, of course. But first we need the map… it’s somewhere under all that stuff on the table.' },
+    { puzzle: 10, pool: 'hard', scene: 'balcony', title: 'Tidy the balcony table', hint: 'Clear the table — the treasure map is under there somewhere!' },
+    { bg: 'balcony', show: { wolf: { x: 28, props: ['map'] }, mike: { x: 70 } } },
+    { narr: 'Under the bottles and paper bags they found an old map of the neighbourhood. Wolfgang drew a big red X on the park.' },
+    { say: 'wolf', text: 'Treasure number one: chestnuts. The shiniest ones.' },
+    { say: 'mike', text: 'Number two: a feather. Anton loves feathers.' },
+    { say: 'wolf', text: 'Number three: something only Berlin has.' },
+    { say: 'mike', text: 'And rule number one: Anton doesn’t find out. Not a word.', act: 'salute' },
+    { walk: { wolf: 118, mike: 112 }, t: 2200 },
+    { bg: 'park', show: { wolf: { x: -10 }, mike: { x: -34 } } },
+    { walk: { wolf: 34, mike: 64 }, t: 2600 },
+    { narr: 'The park was full of autumn: golden leaves, joggers, dogs — and right in the middle, a big chestnut tree.' },
+    { say: 'mike', text: 'There! Chestnuts! Hundreds of them!', act: 'jump' },
+    { say: 'wolf', text: 'Careful. The good ones are always under the leaves.' },
+    { puzzle: 22, pool: 'hard', scene: 'park', title: 'Under the chestnut tree', hint: 'Clear the leaves to reach the shiniest chestnuts!' },
+    { bg: 'park', show: { wolf: { x: 30 }, mike: { x: 64, props: ['nuts'] } } },
+    { say: 'mike', text: 'Look at this one. It’s like a little mirror.' },
+    { say: 'wolf', text: 'Anton will love it. One treasure down, two to go.' },
+    { show: { bird: { x: -10, y: 46 } } },
+    { walk: { bird: 52 }, t: 1500 },
+    { show: { feather: { x: 54, y: 42 } } },
+    { walk: { bird: 120 }, t: 1300, move: { feather: { y: 0 } } },
+    { say: 'wolf', text: 'A feather! Air mail from a Berlin pigeon!', act: 'gasp' },
+    { say: 'mike', text: 'Quick, before the wind takes it!' },
+    { puzzle: 46, pool: 'hard', scene: 'park', title: 'Catch the feather', hint: 'Clear a path before the wind blows the feather away!' },
+    { bg: 'park', show: { wolf: { x: 30 }, mike: { x: 64, props: ['phone'] } } },
+    { narr: 'Just then, Mike’s phone buzzed. A video call. From Anton.' },
+    { say: 'anton', text: 'Hi Papa! What are you doing?', offstage: ' (on the phone)' },
+    { say: 'mike', text: 'Me? Nothing! Just… looking at trees. Very normal trees.' },
+    { say: 'wolf', text: '(Hide the chestnuts! Hide the feather!)', act: 'scream' },
+    { say: 'anton', text: 'Why is Wolfgang running around?', offstage: ' (on the phone)' },
+    { say: 'mike', text: 'He’s… jogging. Berliners love jogging. Bye, Anton! See you soon!', act: 'wave' },
+    { say: 'wolf', text: 'That was close.' },
+    { say: 'mike', text: 'Top secret. Still top secret.', act: 'salute' },
+    { say: 'wolf', text: 'Now treasure number three. Something only Berlin has…' },
+    { puzzle: 60, pool: 'hard', scene: 'park', title: 'Across the park', hint: 'Find the way across the park to the little kiosk!' },
+    { bg: 'park', show: { wolf: { x: 30, props: ['keyring'] }, mike: { x: 64 } } },
+    { narr: 'At the kiosk by the park gate, Wolfgang found it: a tiny black Berlin bear on a keyring.' },
+    { say: 'wolf', text: 'The Berlin bear. Every proper Berlin treasure needs one.' },
+    { say: 'mike', text: 'Chestnuts, a feather, the bear and the map. Now we just have to fit it all in the box.' },
+    { puzzle: 81, pool: 'hard', scene: 'balcony', title: 'Pack the treasure box', hint: 'Fit every treasure into the box — and close the lid!' },
+    { bg: 'inside', show: { mike: { x: 26 }, box: { x: 52 }, anton: { x: 76 } } },
+    { narr: 'A few days later, back home, someone found a mysterious wooden box with a big red X on the lid.' },
+    { say: 'anton', text: 'Papa! What’s THIS?', act: 'jump' },
+    { say: 'mike', text: 'No idea. Maybe… open it?' },
+    { card: `<div class="case letter"><h3>🗺️ Treasure from Berlin</h3>
+      <p><span>For</span>Anton</p><p><span>Found by</span>Papa &amp; Wolfgang</p>
+      <p><span>Treasure 1</span>🌰 The shiniest chestnuts in Berlin</p><p><span>Treasure 2</span>🪶 A pigeon feather (air mail)</p>
+      <p><span>Treasure 3</span>🐻 A little Berlin bear</p><p><span>Treasure 4</span>🗺️ The map with the red X</p></div>`, narr: 'Inside, on top of everything, was a little note.' },
+    { say: 'anton', text: 'Real treasure! From BERLIN!', act: 'jump' },
+    { say: 'anton', text: 'Wait… is THIS why Wolfgang was running around?' },
+    { say: 'mike', text: 'He was jogging. Berliners love jogging. ✌️', act: 'wave' },
+    { end: 6 },
+  ];
   // The stories, in the order they appear on the Story screen. To reorder, move a line: chapter numbers
   // follow this order, and progress is kept by id (so moving never loses anyone's place).
   const CHAPTERS = [
@@ -927,11 +1073,12 @@ const Story = (() => {
     { id: 5, series: 'morfi', title: 'The Great ISA Biscuit Heist', steps: CH5, icon: '🍪' },
     { id: 4, series: 'morfi', title: 'Mörfi and the Northern Lights', steps: CH4, icon: '🌌' },
     { id: 2, series: 'bear', title: 'The Bike Tour with Kloenchen', steps: CH2, icon: '🚲' },
+    { id: 6, series: 'friends', title: 'Treasure for Anton', steps: CH6, icon: '🌰' },
   ];
   CHAPTERS.forEach(c => {
     const n = CHAPTERS.filter(x => x.series === c.series).indexOf(c) + 1;
     c.num = c.series === 'morfi' ? `Chapter ${n}` : `Story ${n}`;
-    c.short = c.series === 'morfi' ? `Mörfi · Chapter ${n}` : 'Bear & Kloenchen';
+    c.short = c.series === 'morfi' ? `Mörfi · Chapter ${n}` : c.series === 'friends' ? 'Wolfgang & Mike' : 'Bear & Kloenchen';
   });
 
   // ── Snitch points: Mörfi's stories earn them; the Snitch level grows (Commander is level 10) ──
@@ -1068,7 +1215,7 @@ const Story = (() => {
         if (s.act) act(s.who || s.say, s.act);
         if (s.props && chars[s.say]) charEl(s.say, { props: s.props });
         bubble(s.offstage ? null : (s.who || s.say), s.text, NAMES[s.say]);
-        if (s.offstage) { $('st-who').hidden = false; $('st-who').textContent = NAMES[s.say] + ' (from inside)'; $('st-say').className = 'st-say talk offstage'; }
+        if (s.offstage) { $('st-who').hidden = false; $('st-who').textContent = NAMES[s.say] + (typeof s.offstage === 'string' ? s.offstage : ' (from inside)'); $('st-say').className = 'st-say talk offstage'; }
         at++;
         return;
       }
@@ -1144,7 +1291,7 @@ const Story = (() => {
   }
 
   function finish() {
-    bubble(null, ch.series === 'bear' ? 'The end — Bear and Kloenchen will be back with another bike tour soon. 🚲🔔' : `The end of ${ch.num} — Super Mega Snitch Mörfi will return. 🍄`);
+    bubble(null, ch.series === 'friends' ? 'The end — top secret mission complete. Anton’s treasure made it home. 🌰🪶🐻' : ch.series === 'bear' ? 'The end — Bear and Kloenchen will be back with another bike tour soon. 🚲🔔' : `The end of ${ch.num} — Super Mega Snitch Mörfi will return. 🍄`);
     waiting = false;
     $('st-tap').hidden = true;
     $('st-end').hidden = false;
@@ -1200,7 +1347,9 @@ const Story = (() => {
     $('sh-cards').innerHTML = `<div class="sh-series"><div class="sh-isa">${isaLogo('home')}</div><div class="sn-col"><b>Mörfi &amp; the ISA</b>${snitchBar(snitch().sp)}</div></div>`
       + CHAPTERS.filter(c => c.series === 'morfi').map(card).join('')
       + `<div class="sh-series"><div class="sh-emoji">🐻🚲</div><div><b>Bear &amp; Kloenchen</b><small>Bike tours and little adventures</small></div></div>`
-      + CHAPTERS.filter(c => c.series === 'bear').map(card).join('');
+      + CHAPTERS.filter(c => c.series === 'bear').map(card).join('')
+      + `<div class="sh-series"><div class="sh-emoji">🍻🌳</div><div><b>Wolfgang &amp; Mike</b><small>Berlin afternoons and secret missions</small></div></div>`
+      + CHAPTERS.filter(c => c.series === 'friends').map(card).join('');
     document.querySelectorAll('.sh-play').forEach(b => b.onclick = () => { Sound.unlock(); start(!!b.dataset.done, +b.dataset.id); });
     document.querySelectorAll('.sh-restart').forEach(b => b.onclick = () => start(true, +b.dataset.id));
   }
