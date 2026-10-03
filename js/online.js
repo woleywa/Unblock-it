@@ -11,6 +11,7 @@
 //   challenges/{code}             { by, byName, team, teamName, created, start, window, playMin, levels,
 //                                   players, joined, seed }             — window/playMin in minutes, 0 = no limit
 //   saves/{uid}                   { stars, moves, friends, updated } — private: progress + friend list
+//   invites/{code_to}             { from, fromName, to, code, created }  — a friend's challenge invite
 //   gifts/{from_to_day}           { from, fromName, to, kind, day, created, seen } — a little gift for a friend
 //   help/{id}                     { from, fromName, level, par, to: [uids], created } — "help me with this level"
 //   help/{id}/answers/{uid}       { name, moves, steps: [{ p, r, c, g, e }], created } — a friend's solution
@@ -441,18 +442,18 @@ async function teamChallenges(team) {
   return snap.docs.map(d => chOut(d.id, d.data()));
 }
 
-async function sendChallengeInvite(code, friendUid) {
+// Challenge invites: one per challenge and friend (the doc id), shown on the friend's home screen.
+async function sendChallengeInvite(code, to) {
   await ready;
-  // Send invitation: store under invitations collection in each challenge
-  const invRef = doc(db, 'challenges', code, 'invitations', friendUid);
-  await setDoc(invRef, {
-    from: uid,
-    fromName: me.name,
-    to: friendUid,
-    sent: serverTimestamp(),
-    seen: false,
-  });
+  if (!me) throw new Error('Pick a nickname first');
+  await setDoc(doc(db, 'invites', `${code}_${to}`), { from: uid, fromName: me.name, to, code, created: serverTimestamp() });
 }
+async function incomingInvites() {
+  await ready;
+  const snap = await getDocs(query(collection(db, 'invites'), where('to', '==', uid), limit(20)));
+  return snap.docs.map(d => ({ id: d.id, ...d.data(), created: ms(d.data().created) })).sort((a, b) => b.created - a.created);
+}
+async function dropInvite(id) { await ready; await deleteDoc(doc(db, 'invites', id)); }
 
 async function top(n = 50) {
   await ready;
@@ -482,7 +483,7 @@ window.Online = {
   myTeamRank: () => timed(myTeamRank()), refreshTeam: () => timed(loadMyTeam()),
   createChallenge: o => timed(createChallenge(o)), getChallenge: c => timed(getChallenge(c)), entries: c => timed(entries(c)),
   myEntry: c => timed(myEntry(c)), joinChallenge: c => timed(joinChallenge(c)), saveEntry: (c, r, s, m) => timed(saveEntry(c, r, s, m)),
-  teamChallenges: t => timed(teamChallenges(t)), sendChallengeInvite: (c, f) => timed(sendChallengeInvite(c, f)), normCode,
+  teamChallenges: t => timed(teamChallenges(t)), sendChallengeInvite: (c, f) => timed(sendChallengeInvite(c, f)), incomingInvites: () => timed(incomingInvites()), dropInvite: id => timed(dropInvite(id)), normCode,
   now: () => Date.now() + skew,
   createAccount: (e, p) => timed(createAccount(e, p)), signIn: (e, p) => timed(signIn(e, p)), signOut: () => timed(signOutNow()),
   resetPassword: e => timed(resetPassword(e)), deleteAccount: (p, n) => timed(deleteAccount(p, n), 30000),

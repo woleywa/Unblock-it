@@ -26,7 +26,7 @@ Object.assign(DE, {
   'optional': 'optional', 'No limit': 'Kein Limit', 'Create': 'Erstellen', 'You': 'Du', 'Change': 'Ändern', 'Close': 'Schließen',
   'Help': 'Hilfe', 'Ask for help': 'Um Hilfe bitten', 'Send to friends': 'An Freunde schicken', '📨 Share a link': '📨 Link teilen',
   '✨ New version ready ·': '✨ Neue Version bereit ·', 'Tap to update': 'Tippen zum Aktualisieren',
-  'Continue the story ▶': 'Geschichte fortsetzen ▶', 'Later': 'Später', 'Use it': 'Benutzen', '🎁 Open': '🎁 Öffnen',
+  'Continue the story ▶': 'Geschichte fortsetzen ▶', 'Later': 'Später', '▶ Open': '▶ Öffnen', 'Use it': 'Benutzen', '🎁 Open': '🎁 Öffnen',
   // Level list stages
   'Getting busy': 'Es wird voll', 'Walls': 'Mauern', 'On ice': 'Auf Eis', 'Frosty doors': 'Frostige Türen', 'Layers': 'Schichten', 'Fire': 'Feuer',
   'Mixed bag': 'Bunte Mischung', 'Big boards': 'Große Bretter', 'Expert': 'Experte', 'Beaver woods': 'Biberwald', 'On wheels': 'Auf Rädern',
@@ -205,6 +205,9 @@ DE_RX.push(
   [/^Join my Happy Blocks challenge! Code (\w+)\.$/, 'Mach bei meinem Happy-Blocks-Wettkampf mit! Code $1.'],
   [/^Invited (.+) to the challenge$/, '$1 zum Wettkampf eingeladen'],
   [/^Couldn't invite (.+)$/, 'Einladung an $1 fehlgeschlagen'],
+  [/^Invited (\d+) friends to the challenge$/, '$1 Freunde zum Wettkampf eingeladen'],
+  [/^⚡ (.+) invited you to a challenge!$/, '⚡ $1 hat dich zu einem Wettkampf eingeladen!'],
+  [/^(\d+ levels|Endless levels) · (\d+ min each|No time limit each) · (Solo|\d+ players)$/, (m, a, b, d) => `${T(a)} · ${T(b)} · ${T(d)}`],
   [/^(\d+) lvl · (\d+) mv$/, '$1 Lvl · $2 Z.'],
   [/^★ (\d+) · (\d+) levels?$/, '★ $1 · $2 Level'],
   [/^#(\d+) of (\d+)$/, '#$1 von $2'],

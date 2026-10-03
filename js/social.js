@@ -320,16 +320,36 @@ const Social = (() => {
       return;
     }
 
+    const failed = [];
     for (const friend of picked) {
-      try {
-        await o.sendChallengeInvite(ch.code, friend.uid);
-        toast(`Invited ${friend.name} to the challenge`);
-      } catch (e) {
-        console.warn(e);
-        toast(`Couldn't invite ${friend.name}`);
-      }
+      try { await o.sendChallengeInvite(ch.code, friend.uid); } catch (e) { console.warn(e); failed.push(friend.name); }
     }
+    toast(failed.length ? `Couldn't invite ${failed.join(', ')}` : picked.length === 1 ? `Invited ${picked[0].name} to the challenge` : `Invited ${picked.length} friends to the challenge`);
   }
+
+  // ── Challenge invites from friends: a pop-up on the home screen; the challenge also goes into the list ──
+  let invAt = 0, inviting = false;
+  async function checkInvites() {
+    const o = on();
+    if (inviting || !o || !o.name || Date.now() - invAt < 45000 || $('home').hidden) return;
+    invAt = Date.now(); inviting = true;
+    try {
+      for (const inv of await o.incomingInvites()) {
+        const ch = await o.getChallenge(inv.code).catch(() => null);
+        o.dropInvite(inv.id).catch(() => {});
+        if (!ch || endOf(ch) <= now()) continue;
+        remember(inv.code);
+        // Busy with something else: it waits in the Challenges list.
+        if ($('home').hidden || !$('ask').hidden || !$('gift').hidden) continue;
+        Sound.tick && Sound.tick();
+        const go = await ask(rules(ch).join(' · '), { title: `⚡ ${inv.fromName} invited you to a challenge!`, ok: '▶ Open', cancel: 'Later' });
+        if (go) { openCh(inv.code); break; }
+      }
+    } catch (e) { console.warn('invites', e); }
+    inviting = false;
+  }
+  window.addEventListener('online-ready', () => setTimeout(checkInvites, 3500));
+  window.addEventListener('online-user', () => { invAt = 0; setTimeout(checkInvites, 2500); });
 
   $('ch-share').addEventListener('click', () => cur && invitePlayers(cur.ch));
 
@@ -739,6 +759,7 @@ const Social = (() => {
   // Home screen: friends asking me, and solutions for my own requests.
   let boxBusy = false;
   async function helpBox() {
+    setTimeout(checkInvites, 600);
     const box = $('help-box'), o = on();
     if (!o || !o.name) { box.innerHTML = ''; $('help-pill').hidden = true; return; }
     if (boxBusy || !(await o.ready)) return;

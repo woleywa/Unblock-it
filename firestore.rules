@@ -115,6 +115,25 @@ service cloud.firestore {
       allow delete: if signedIn() && (resource.data.to == me() || resource.data.from == me());
     }
 
+    // Challenge invites from a friend: one per challenge and friend (the id says so). The friend sees
+    // them on their home screen and then deletes them; sending again just refreshes it.
+    function validInvite(id) {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['from', 'fromName', 'to', 'code', 'created'])
+        && d.from == me() && d.fromName == playerBefore(me()).name
+        && d.to is string && d.to != me()
+        && d.code is string && d.code.matches('^[A-Z0-9]{6}$')
+        && exists(/databases/$(database)/documents/challenges/$(d.code))
+        && id == d.code + '_' + d.to
+        && d.created == request.time;
+    }
+    match /invites/{id} {
+      allow get, list: if signedIn() && (resource.data.to == me() || resource.data.from == me());
+      allow create: if signedIn() && validInvite(id);
+      allow update: if signedIn() && resource.data.from == me() && validInvite(id);
+      allow delete: if signedIn() && (resource.data.to == me() || resource.data.from == me());
+    }
+
     match /help/{id} {
       allow get: if signedIn();
       allow list: if signedIn() && (resource.data.from == me() || me() in resource.data.to);
@@ -233,23 +252,6 @@ service cloud.firestore {
           && request.resource.data.score == request.resource.data.stars * 100000 - request.resource.data.moves
           && request.resource.data.runs is map && request.resource.data.runs.size() == request.resource.data.solved;
         allow delete: if false;
-      }
-
-      // Challenge invitations: sent by one player to another
-      match /invitations/{uid} {
-        allow read: if signedIn() && (me() == uid || resource.data.from == me());
-        allow create: if signedIn()
-          && request.resource.data.keys().hasOnly(['from', 'fromName', 'to', 'sent', 'seen'])
-          && request.resource.data.from == me()
-          && request.resource.data.fromName == playerBefore(me()).name
-          && request.resource.data.to == uid
-          && request.resource.data.to != me()
-          && request.resource.data.sent == request.time
-          && request.resource.data.seen == false;
-        allow update: if signedIn() && me() == uid
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['seen'])
-          && request.resource.data.seen == true;
-        allow delete: if signedIn() && (me() == uid || resource.data.from == me());
       }
     }
   }
