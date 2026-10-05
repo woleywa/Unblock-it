@@ -32,7 +32,8 @@ Object.assign(DE, {
   'Mixed bag': 'Bunte Mischung', 'Big boards': 'Große Bretter', 'Expert': 'Experte', 'Beaver woods': 'Biberwald', 'On wheels': 'Auf Rädern',
   'Colour lanes': 'Farbspuren', 'Prison': 'Gefängnis', 'Chains': 'Ketten', 'Packed': 'Vollgepackt', 'Ice, keys & arrows': 'Eis, Schlüssel & Pfeile',
   'Fire & lanes': 'Feuer & Spuren', 'Woods & chains': 'Wald & Ketten', 'Grand finale': 'Großes Finale', 'Packed on wheels': 'Vollgepackt auf Rädern',
-  'Fire & prison': 'Feuer & Gefängnis', 'Lanes & chains': 'Spuren & Ketten', 'Master': 'Meister', 'More': 'Mehr',
+  'Fire & prison': 'Feuer & Gefängnis', 'Lanes & chains': 'Spuren & Ketten', 'Master': 'Meister', 'Fire & ice': 'Feuer & Eis', 'Locked on wheels': 'Eingesperrt auf Rädern', 'Fire & chains': 'Feuer & Ketten',
+  'Packed prison': 'Volles Gefängnis', 'Burning lanes': 'Brennende Spuren', 'Grand master': 'Großmeister', 'More': 'Mehr',
   // Game
   'Drag each block out through the door of its colour.': 'Zieh jeden Block durch die Tür seiner Farbe hinaus.',
   'New: walls. Blocks can’t pass them.': 'Neu: Mauern. Blöcke kommen nicht hindurch.',

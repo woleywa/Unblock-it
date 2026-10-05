@@ -75,9 +75,9 @@ const STAGES = [
   { n: 5, W: [7, 8], H: [9, 10], colors: 4, fill: 0.78, fire: true, ice: true, walls: true, shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z'], extra: [10, 26], timeAt: 3 },
   { n: 5, W: [7, 8], H: [8, 10], colors: 4, fill: 0.72, prison: true, arrows: true, ice: true, shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z'], extra: [10, 24], timeAt: 2 },
   { n: 5, W: [7, 8], H: [9, 10], colors: 4, fill: 0.75, fire: true, chains: true, frozen: true, shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z'], extra: [9, 22], timeAt: 4 },
-  { n: 5, W: [7, 8], H: [9, 10], colors: 4, fill: 0.74, packed: true, holes: [1, 3], prison: true, ice: true, walls: true, shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z'], extra: [11, 25], note: 'packed masters', timeAt: 3 },
+  { n: 5, W: [7, 8], H: [9, 10], colors: 4, fill: 0.74, packed: true, holes: [1, 3], prison: true, ice: true, walls: true, shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z'], extra: [11, 25], timeAt: 3 },
   { n: 5, W: [7, 8], H: [9, 10], colors: 4, fill: 0.76, fire: true, lanes: true, frozen: true, walls: true, shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z'], extra: [10, 24], timeAt: 2 },
-  { n: 5, W: [8, 8], H: [9, 10], colors: 5, fill: 0.78, prison: true, chains: true, arrows: true, ice: true, shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z', 'big'], extra: [12, 28], note: 'expert mix', timeAt: 4 },
+  { n: 5, W: [8, 8], H: [9, 10], colors: 5, fill: 0.78, prison: true, chains: true, arrows: true, ice: true, shapes: ['bar2h', 'bar2v', 'bar3h', 'bar3v', 'sq', 'l1', 'l2', 'l3', 'l4', 't', 'z', 'big'], extra: [12, 28], timeAt: 4 },
 ];
 
 function shapeBox(sh) { return { h: Math.max(...sh.map(q => q[0])) + 1, w: Math.max(...sh.map(q => q[1])) + 1 }; }

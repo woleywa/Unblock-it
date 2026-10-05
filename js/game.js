@@ -93,6 +93,7 @@ const STAGES = [
   ['Warm-up', 'red'], ['Getting busy', 'orange'], ['Walls', 'purple'],
   ['On ice', 'sky'], ['Frosty doors', 'blue'], ['Layers', 'pink'], ['Fire', 'orange'],
   ['Mixed bag', 'green'], ['Big boards', 'purple'], ['Expert', 'red'], ['Beaver woods', 'orange'], ['On wheels', 'sky'], ['Colour lanes', 'green'], ['Prison', 'yellow'], ['Chains', 'blue'], ['Packed', 'pink'], ['Ice, keys & arrows', 'sky'], ['Fire & lanes', 'orange'], ['Woods & chains', 'green'], ['Grand finale', 'purple'], ['Packed on wheels', 'sky'], ['Fire & prison', 'orange'], ['Lanes & chains', 'green'], ['Master', 'red'],
+  ['Fire & ice', 'orange'], ['Locked on wheels', 'yellow'], ['Fire & chains', 'red'], ['Packed prison', 'pink'], ['Burning lanes', 'green'], ['Grand master', 'purple'],
 ];
 function levelList() {
   const g = $('level-grid');
