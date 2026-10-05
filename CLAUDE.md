@@ -85,6 +85,12 @@ version.
   both use mulberry32 (the original LCG repeats itself — it made identical levels) and every board is
   checked against the others for duplicates. A full rebuild still uses the LCG (same levels as before).
 
+- Languages: js/i18n.js (LANG, T(), setLang; Settings → English/Deutsch) translates text as it reaches the page,
+  from dictionaries keyed by the English text: js/i18n-de.js (menus; DE_RX for text with numbers/names) and
+  js/i18n-story-de.js (every story line). A new or changed story line needs its German added in the same change.
+  Character names (Mörfi, Puddy, Lilca, …) are never translated. tools/check-i18n.js (run by build:web) warns
+  about missing lines or changed names.
+
 ## Game (game.js)
 - Drag: the block slides cell by cell toward the finger (greedy, larger axis first), stopping at
   obstacles. Pushed past the board edge with a clear lane to a door of its colour → it leaves. Dropped
