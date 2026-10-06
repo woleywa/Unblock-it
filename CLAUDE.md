@@ -10,6 +10,25 @@ and the project's default site unblock-it-913f7.web.app (same files, second entr
 by game.js). Custom domain: not yet — when added, update native.js WEB, authorized domains, privacy.html. Bump `?v=N` on the script/style tags
 in `index.html` AND the `CACHE` name + file list in `sw.js` on every change, or phones keep the old
 version.
+**Edit only the source files** (repo root: index.html, style.css, js/…). `www/` is a build copy (gitignored)
+whose online.js imports ../vendor/firebase; copying it back into js/ breaks `build:web` (it checks for the
+gstatic imports), the hosting job fails and the site silently stops updating — this happened once.
+
+## Status and open items (last session: 2026-10-05)
+Done recently: levels 121–150 (6 new stages), story "Treasure for Anton" (Wolfgang & Mike series), German
+version (menus + all stories), challenge invites to friends with a home-screen pop-up, iPhone PWA layout fixes.
+Open — check with the user before assuming any of these are done:
+- **firestore.rules not yet published**: it adds `invites/{id}`; until it is live, sending an invite fails
+  (permission-denied). No service-account key was available in the last session (see "Deploying rules").
+- Invites are only tested with a stubbed `window.Online` (pop-up, Open/Later, list, no repeat), not between two
+  real devices. The friend-picker dialog in social.js `invitePlayers` uses inline styles — could reuse .card/.form CSS.
+- The iOS 26 black-strip fix (`100lvh` in standalone mode, style.css) is unverified on a real iPhone.
+- APK for Android: only the Actions artifact (zip, needs a GitHub login, expires after 90 days). The repo is
+  public, so publishing `app-debug.apk` to a fixed release (like `app-web`) would give a permanent direct link — offered, not done.
+- Not translated: privacy.html. German word choices the user may revisit: Mörfi is "Agentin", "Snitch" kept
+  as a game word ("Snitch-Punkte", "snitchen"; "petzen" would be easier for kids), "Director Blorp" kept.
+- The user's home-screen app was still on an old build (★ …/360 = 120 levels) on 2026-10-05 — if they report
+  missing features, have them close and reopen it first.
 
 ## Apps (see APPS.md)
 - Capacitor 8 wraps the same files: `npm run build:web` copies them to `www/` (gitignored), `npm run sync`
@@ -78,6 +97,14 @@ version.
   chapter ends/awards more; Snitch level from SNITCH_AT (Commander = level 10, far away on purpose). Story puzzles
   use `pool: 'hard'` (DAILY_LEVELS); CH5 = Biscuit Heist (Commander Hoot, Snacko-3000, ISA HQ), CH4 = Northern Lights (Nori, coast/aurora).
   Order on the Story screen = order of the CHAPTERS array (numbers follow it; progress is by id); Schönefeld → Wannsee, scenes field/path/forest/lake/map, riders on bikes, the lake cat).
+  Series `friends` (Wolfgang & Mike — the user and a friend; their looks are in ART.wolf/mike): CH6 "Treasure for
+  Anton" — a Berlin balcony with a beer and a Spezi, then a park (TV tower), collecting chestnuts, a pigeon
+  feather and a Berlin-bear keyring as a surprise for Mike's son Anton; Anton video-calls
+  (`offstage: ' (on the phone)'`); the end is at home (scene `inside`). Characters ART.wolf/mike/anton use the
+  `person()` template; scenes BG4.balcony/park; the Bear & Kloenchen story is also about real people.
+  Adding a chapter: a CH array + CHAPTERS entry (unused id); a new series also needs c.short in CHAPTERS.forEach,
+  a section in storyHome() and a line in finish(); German for every line (see Languages); test with a Playwright
+  script that taps through and fakes each puzzle win (`moves = level.par; st.pieces = []; win()`).
 - "New!" pop-ups: js/intro.js (`Intro.show(key, again)`), one looping mini-board scene per feature
   (basics, walls, ice, frozen, layered, fire, beaver) drawn with the real Art functions and a 👆 finger.
   start() shows it once per feature (localStorage `unblock_seen_intros`) and adds "▶ Show me" to the hint.
@@ -113,7 +140,14 @@ version.
 - Font: Fredoka (Google Fonts), falls back to system rounded.
 
 ## Levels
-- `node tools/generate.js 2026` (~45 s). Candidate boards are kept when the solver clears them with a
+- 150 campaign levels = 30 stages × 5 (tools/generate.js STAGES). game.js `STAGES` needs one [name, colour] per
+  stage (else the list says "More"), plus the German name in i18n-de.js. A stage `note` must be an Intro key
+  (walls, ice, frozen, layered, fire, packed, chains, prison, lanes, arrows, beaver) — anything else shows an empty hint.
+- More levels: add stages to tools/generate.js and run `node tools/generate.js --append` (keeps the existing
+  ones; 30 hard levels took ~10 min — run it in the background). It writes js/levels.js. Heavy combos
+  (fire+lanes+layered+packed…) crashed the solver once (`foot[k][pos[k]] is not iterable` in engine.js
+  fastSearch) — simpler combos worked.
+- `node tools/generate.js 2026` (~45 s) rebuilds everything from scratch. Candidate boards are kept when the solver clears them with a
   number of non-exit moves inside the stage's `extra` range; par = solver move count.
 - Test: a Playwright script that plays each level by mouse drags along the solver's paths — all 30
   levels won at par (see session notes).
@@ -169,9 +203,16 @@ version.
 - Links: `#join=CODE` (team), `#c=CODE` (challenge), `#f=UID` (friend), `?level=N` or `#level=N` (opens campaign level N
   for anyone, even if locked — the "Ask a friend to solve this" button under the board). On iPhone a link opens Safari, which is a different
   account from the home-screen app — so codes can be typed in too.
+- Challenge invites (`invites/{code_to}` { from, fromName, to, code, created }, like gifts): the challenge's ⤴ /
+  📨 Invite opens a friend picker (social.js `invitePlayers`; no friends → the share link). The friend's home
+  (helpBox → `checkInvites`, every 45 s at most, also on online-ready/online-user) pops up an ask() card
+  (▶ Open / Later); either way the code goes into their Challenges list (`remember`) and the invite is deleted.
+- iPhone home-screen app: iOS 26 makes 100% / dvh / svh short by the status bar in standalone mode, so style.css
+  sets `html, body { height: 100lvh }` under `@media (display-mode: standalone)`. The home footer (Privacy) is
+  in the flow under the name/stars row (it used to be absolute and overlapped it).
 - Note: game.js has a global `history` (undo stack) — use `window.history` for the browser's.
-- **Deploying rules**: the user gave a Firebase service-account key (kept outside the repo; never
-  commit it). `firebase deploy` fails on the `:test` call (403), so publish via the Rules REST API:
+- **Deploying rules**: the user gave a Firebase service-account key once (kept outside the repo; never
+  commit it; it is NOT in a new session's container — ask the user, or have them paste the rules in the console). `firebase deploy` fails on the `:test` call (403), so publish via the Rules REST API:
   POST `projects/unblock-it-913f7/rulesets` with the file, then PATCH `releases/cloud.firestore`
   (google-auth-library, cloud-platform scope). Test rules first in the emulator (Java is available):
   `firebase emulators:exec --only firestore` with @firebase/rules-unit-testing.

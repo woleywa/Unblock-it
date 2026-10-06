@@ -34,12 +34,16 @@ A running list of ideas for the game. ✅ = built, 🔨 = in progress, 💡 = id
 - 💡 **Push notifications** when a friend asks for help or sends a solution (needs the store apps).
 - 💡 **Team vs team** challenges.
 - ✅ Help requests with solution replay, friends leaderboard, share links for any level.
+- ✅ Invite friends to a challenge from the app (pop-up on their home screen).
+- 💡 Show who invited you on the challenge card; remind friends who haven't joined yet.
 
 ## Comfort and accessibility
+- ✅ **German** (Settings → English / Deutsch). 💡 More languages: add an i18n-xx.js dictionary; translate privacy.html.
 - 💡 **Colour-blind mode** — a small symbol on each block and its door, so colour isn't the only clue.
 - 💡 **Music** (off by default), and a haptics switch.
 
 ## Apps and hosting
+- 💡 **Permanent APK download link** — publish app-debug.apk to a fixed GitHub release on every build.
 - 💡 **Custom domain** (e.g. happyblocks.fun) on Firebase Hosting.
 - 💡 **App Store / Google Play** release (needs the developer accounts; see APPS.md), TestFlight for friends.
 - 💡 **Sign in with Apple / Google** as extra login options.
