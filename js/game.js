@@ -908,6 +908,7 @@ function startClock() {
 function settings() {
   $('set-sound').textContent = Sound.on ? '🔊 Sound: on' : '🔇 Sound: off';
   $('set-music').textContent = Music.on ? '🎵 Music: on' : '🎵 Music: off';
+  $('set-live').textContent = Social.liveOn ? '🏁 Scores while playing: on' : '🏁 Scores while playing: off';
   $('set-buzz').textContent = Native.buzzOn() ? '📳 Vibration: on' : '📴 Vibration: off';
   if (typeof Extras !== 'undefined') Extras.stylePicker();
   $('settings').hidden = false;
@@ -916,6 +917,7 @@ $('settings-home').addEventListener('click', () => { Sound.unlock(); settings();
 $('settings-game').addEventListener('click', () => { Sound.unlock(); settings(); });
 $('set-sound').addEventListener('click', () => { Sound.toggle(); settings(); });
 $('set-music').addEventListener('click', () => { Music.toggle(); settings(); });
+$('set-live').addEventListener('click', () => { Social.setLive(!Social.liveOn); settings(); });
 document.querySelectorAll('#set-lang button').forEach(b => { b.classList.toggle('on', b.dataset.lang === LANG); b.addEventListener('click', () => b.dataset.lang !== LANG && setLang(b.dataset.lang)); });
 $('set-buzz').addEventListener('click', () => { Native.setBuzz(!Native.buzzOn()); Native.buzz(); settings(); });
 $('set-tips').addEventListener('click', () => { Intro.reset(); $('set-tips').textContent = '✓ You’ll see them again'; });

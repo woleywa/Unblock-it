@@ -225,10 +225,10 @@ Open — check with the user before assuming any of these are done:
   note strings, one token per eighth ("C5", "-" hold, "." rest; 8 bars × 8). Look-ahead scheduler, pauses when the app
   is hidden, starts on the first tap. Settings → 🎵 Music (localStorage `unblock_music`, on by default).
   `Music.render(offlineCtx, name, secs)` renders it for tests (check peak/RMS, or write a WAV to listen).
-- Live challenge scores while playing: `#ch-live` between the clock and the board (social.js `live()`), sized to the
-  free space in #board-wrap (never shrinks the board): up to 5 rows (you always included, as "You"), one summary line
-  when there's little room, nothing when there's none. Own score from local runs; others via `entries()` every 15 s
-  (`livePoll`, stops when the board closes). begin() hides it for every other mode.
+- Live challenge scores while playing: `#ch-live` under the board (social.js `live()`): you and the leader (or the
+  runner-up when you lead), in the free space of #board-wrap (never shrinks the board); one summary line if there's
+  little room, nothing if none. Own score from local runs; others via `entries()` every 15 s (`livePoll`). Settings →
+  🏁 Scores while playing (localStorage `unblock_live`). begin() hides it for every other mode.
 - Pull down to refresh (game.js): menu screens reload the page; a single challenge (#ch) re-fetches in place via
   `Social.refresh()` (a reload would land on home). Never on the board or in a story.
 - Challenge invites (`invites/{code_to}` { from, fromName, to, code, created }, like gifts): the challenge's ⤴ /

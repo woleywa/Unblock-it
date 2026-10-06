@@ -457,10 +457,12 @@ const Social = (() => {
     live(); livePoll(code);
   }
 
-  // ── Live scores while playing: in the free space between the clock and the board ──
-  // As many rows as fit (you always included); one line if only a little room; nothing if none, so the
-  // board never shrinks. Your own score is local (it changes the moment you win); the others refresh every 15 s.
+  // ── Live scores while playing: you and the leader (or, when you lead, the runner-up) under the board ──
+  // In the free space below the board (it never shrinks the board); one line if there's only a little room.
+  // Your own score is local (it changes the moment you win); the others refresh every 15 s. Settings can hide it.
   const ROW = 25;
+  let liveOn = true;
+  try { liveOn = localStorage.getItem('unblock_live') !== 'off'; } catch (e) {}
   function liveRows() {
     if (!cur) return [];
     const mine = scoreRuns(cur.ch, (cur.entry && cur.entry.runs) || {});
@@ -470,23 +472,20 @@ const Social = (() => {
   }
   function live() {
     const box = $('ch-live');
-    if (!chPlay || !chPlay.code || !cur || $('game').hidden) { box.hidden = true; return; }
     box.hidden = true; box.innerHTML = '';
-    const wrap = $('board-wrap'), board = $('board');
-    const free = wrap.clientHeight - board.offsetHeight - 40;
+    if (!liveOn || !chPlay || !chPlay.code || !cur || $('game').hidden) return;
+    const free = $('board-wrap').clientHeight - $('board').offsetHeight - 40;
     const rows = liveRows(), me = rows.findIndex(r => r.mine);
     if (free < 26 || rows.length < 2 || me < 0) return;
-    const fit = Math.min(5, Math.floor((free - 10) / ROW));
-    if (fit < 2) {
-      const lead = rows[0];
-      box.innerHTML = `<div class="cl-line">#${me + 1} of ${rows.length} · ★ ${rows[me].stars}${me ? ` · ${esc(lead.name)} leads with ★ ${lead.stars}` : ' · you lead!'}</div>`;
+    const other = me === 0 ? 1 : 0;
+    if (free < 2 * ROW + 6) {
+      box.innerHTML = `<div class="cl-line">#${me + 1} of ${rows.length} · ★ ${rows[me].stars}${me ? ` · ${esc(rows[0].name)} leads with ★ ${rows[0].stars}` : ' · you lead!'}</div>`;
     } else {
-      let show = rows.slice(0, fit);
-      if (me >= fit) show = rows.slice(0, fit - 1).concat(rows[me]);
-      box.innerHTML = show.map(r => { const i = rows.indexOf(r); return `<div class="cl-row${r.mine ? ' mine' : ''}"><span class="pos">${medal(i)}</span><span class="who">${esc(r.mine ? 'You' : r.name)}</span><span class="st">★ ${r.stars}</span><span class="mv">${r.solved} lvl</span></div>`; }).join('');
+      box.innerHTML = [Math.min(me, other), Math.max(me, other)].map(i => { const r = rows[i]; return `<div class="cl-row${r.mine ? ' mine' : ''}"><span class="pos">${medal(i)}</span><span class="who">${esc(r.mine ? 'You' : r.name)}</span><span class="st">★ ${r.stars}</span><span class="mv">${r.solved} lvl</span></div>`; }).join('');
     }
     box.hidden = false;
   }
+  function setLive(v) { liveOn = v; try { localStorage.setItem('unblock_live', v ? 'on' : 'off'); } catch (e) {} live(); }
   let liveTimer = null;
   function livePoll(code) {
     clearInterval(liveTimer);
@@ -922,5 +921,5 @@ const Social = (() => {
   $('team-back').addEventListener('click', home);
 
   const refresh = () => { if (cur && cur.ch) openCh(cur.ch.code); };
-  return { refresh, rankTeams, rankFriends, offerFriend, account, openCh, list, team, askHelp, helpBox, sendSolution };
+  return { get liveOn() { return liveOn; }, setLive, refresh, rankTeams, rankFriends, offerFriend, account, openCh, list, team, askHelp, helpBox, sendSolution };
 })();
