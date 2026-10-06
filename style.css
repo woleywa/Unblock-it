@@ -307,6 +307,8 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 30px; }
 .acct-name .ghost { min-width: 0 !important; width: auto !important; padding: 7px 14px; font-size: 0.9rem; }
 #acct-form { display: flex; flex-direction: column; gap: 8px; }
 #acct-form input { font: inherit; font-size: 1.05rem; font-weight: 600; color: var(--text); background: rgba(10,6,40,0.5); border: 2px solid rgba(255,255,255,0.2); border-radius: 14px; padding: 11px 13px; outline: none; }
+#acct-form .big { width: 100%; margin: 6px 0 10px; padding: 18px 20px; font-size: 1.5rem; border-radius: 22px; }
+#acct .err { min-height: 0; }
 #acct-form input:focus { border-color: var(--accent); }
 .linkish { color: var(--dim); text-decoration: underline; font-size: 0.88rem; padding: 4px; }
 .fr-top { width: 100%; display: flex; flex-direction: column; gap: 8px; }

@@ -617,8 +617,16 @@ const Social = (() => {
             await o.signIn(email, pw);
             toast(o.name ? `Welcome back, ${o.name}!` : 'Signed in');
           } else {
-            await o.createAccount(email, pw);
-            toast('Saved! Sign in with this email on your other devices');
+            try {
+              await o.createAccount(email, pw);
+              toast('Saved! Sign in with this email on your other devices');
+            } catch (err) {
+              // The email already has an account: sign in to it with the same password, no extra step.
+              if (err.code !== 'auth/email-already-in-use' && err.code !== 'auth/credential-already-in-use') throw err;
+              store = { known: store.known, runs: {} }; persist();
+              await o.signIn(email, pw);
+              toast(o.name ? `Welcome back, ${o.name}!` : 'Signed in');
+            }
           }
           acctMode = 'save';
           $('acct').hidden = true;
@@ -648,7 +656,6 @@ const Social = (() => {
         } catch (err) { console.warn(err); $('acct-del-err').textContent = err.message || errText(err); $('acct-del-go').disabled = false; }
       });
     }
-    body.insertAdjacentHTML('beforeend', '<a class="linkish" href="privacy.html">Privacy policy</a>');
     $('acct').hidden = false;
     // Say so instead of silently waiting when the server can't be reached.
     o.ready.then(ok => { if (!ok && $('acct-err')) $('acct-err').textContent = 'Can’t reach the server right now — check your connection and try again.'; });
