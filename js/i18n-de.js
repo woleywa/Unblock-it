@@ -3,7 +3,7 @@
 Object.assign(DE, {
   // Home, tabs, headers
   'Play': 'Spielen', 'Levels': 'Level', '📅 Daily': '📅 Täglich', '⚡ Challenges': '⚡ Wettkämpfe', '👥 Team': '👥 Team',
-  '🏆 Leaderboard': '🏆 Bestenliste', 'Privacy': 'Datenschutz', '📤 Share': '📤 Teilen', 'Try this story in Happy Blocks!': 'Probier diese Geschichte in Happy Blocks!',
+  '🏆 Leaderboard': '🏆 Bestenliste', 'Privacy': 'Datenschutz', '↓ Pull to refresh': '↓ Zum Aktualisieren ziehen', '↻ Let go to refresh': '↻ Loslassen zum Aktualisieren', '📤 Share': '📤 Teilen', 'Try this story in Happy Blocks!': 'Probier diese Geschichte in Happy Blocks!',
   '📖 Stories': '📖 Geschichten', 'Puzzles': 'Rätsel', 'Story': 'Geschichte', 'Skip ⏭': 'Vor ⏭', 'tap ▸': 'tippen ▸',
   'Back to the stories': 'Zurück zu den Geschichten', 'Leaderboard': 'Bestenliste', 'Players': 'Spieler', 'Friends': 'Freunde', 'Teams': 'Teams',
   'Challenges': 'Wettkämpfe', '＋ New challenge': '＋ Neuer Wettkampf', 'Open': 'Öffnen', 'Challenge': 'Wettkampf', 'Team': 'Team',

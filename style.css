@@ -739,3 +739,8 @@ button.stars-total { background: none; border: 0; padding: 4px 6px; cursor: poin
 .sh-content { bottom: calc(84px + env(safe-area-inset-bottom)); overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 12px; }
 .sh-content::-webkit-scrollbar { display: none; }
 .sh-card { background: rgba(30,20,70,0.82); }
+
+/* Pull to refresh (menus only) */
+#pull { position: fixed; top: calc(env(safe-area-inset-top) + 8px); left: 50%; transform: translate(-50%, -40px); z-index: 30; pointer-events: none;
+  padding: 8px 18px; border-radius: 999px; background: rgba(20,15,51,0.85); border: 1px solid rgba(255,255,255,0.18); color: var(--dim); font-weight: 700; font-size: 0.9rem; white-space: nowrap; box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
+#pull.ready { color: #5a2d00; background: linear-gradient(180deg, #ffe27a, #ffb300); border-color: transparent; }

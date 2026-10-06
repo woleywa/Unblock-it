@@ -937,3 +937,32 @@ home();
 openLevelLink();
 // Offline cache for the web version; the apps carry their files already (and a cache could go stale).
 if ('serviceWorker' in navigator && !Native.app) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+// Pull down to refresh, on the menu screens only (never on the board or in a story, where a reload would lose your place).
+(() => {
+  const MENUS = ['home', 'levels', 'storyhome', 'ranks', 'chs', 'team'], NEED = 90;
+  const pill = document.createElement('div'); pill.id = 'pull'; pill.hidden = true; document.body.appendChild(pill);
+  let y0 = 0, dy = 0, on = false;
+  const menuShown = () => MENUS.some(id => !$(id).hidden) && !document.querySelector('.overlay:not([hidden])');
+  const atTop = el => { for (; el && el !== document.body; el = el.parentElement) if (el.scrollTop > 0) return false; return window.scrollY <= 0; };
+  addEventListener('touchstart', e => {
+    on = e.touches.length === 1 && menuShown() && !/^(INPUT|TEXTAREA)$/.test(e.target.tagName) && atTop(e.target);
+    y0 = e.touches[0].clientY; dy = 0;
+  }, { passive: true });
+  addEventListener('touchmove', e => {
+    if (!on) return;
+    dy = e.touches[0].clientY - y0;
+    if (dy < 12) { pill.hidden = true; return; }
+    pill.hidden = false;
+    const k = Math.min(dy, NEED * 1.4);
+    pill.style.transform = `translate(-50%, ${k * 0.5 - 40}px)`;
+    pill.textContent = dy >= NEED ? '↻ Let go to refresh' : '↓ Pull to refresh';
+    pill.classList.toggle('ready', dy >= NEED);
+  }, { passive: true });
+  const end = () => {
+    if (on && dy >= NEED && menuShown()) { pill.textContent = '↻'; location.reload(); return; }
+    on = false; pill.hidden = true;
+  };
+  addEventListener('touchend', end, { passive: true });
+  addEventListener('touchcancel', () => { on = false; pill.hidden = true; }, { passive: true });
+})();
