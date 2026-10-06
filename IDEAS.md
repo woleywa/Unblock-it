@@ -41,7 +41,7 @@ A running list of ideas for the game. ✅ = built, 🔨 = in progress, 💡 = id
 ## Comfort and accessibility
 - ✅ **German** (Settings → English / Deutsch). 💡 More languages: add an i18n-xx.js dictionary; translate privacy.html.
 - 💡 **Colour-blind mode** — a small symbol on each block and its door, so colour isn't the only clue.
-- 💡 **Music** (off by default), and a haptics switch.
+- ✅ **Music** (two chiptune loops, Settings on/off) and a haptics switch. 💡 More tunes (one per story series, a boss-level tune).
 
 ## Apps and hosting
 - 💡 **Permanent APK download link** — publish app-debug.apk to a fixed GitHub release on every build.

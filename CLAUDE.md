@@ -220,6 +220,11 @@ Open — check with the user before assuming any of these are done:
   `seqOf` draws from CHALLENGE_LEVELS + DAILY_LEVELS + LEVELS filtered by `diff` (so even Master has ~35), shuffled by the
   seed, then ordered by par. The pool order is fixed (append new campaign levels last) but adding levels to a tier
   mid-challenge changes that challenge's list — avoid shipping new levels while a challenge is live.
+- Music: js/music.js (Music) — original chiptune loops synthesized like audio.js (no files): `menu` (128 bpm) on menu
+  screens, `puzzle` (92 bpm, quieter) on the board and in stories; game.js `show()` calls `Music.screen(id)`. Songs are
+  note strings, one token per eighth ("C5", "-" hold, "." rest; 8 bars × 8). Look-ahead scheduler, pauses when the app
+  is hidden, starts on the first tap. Settings → 🎵 Music (localStorage `unblock_music`, on by default).
+  `Music.render(offlineCtx, name, secs)` renders it for tests (check peak/RMS, or write a WAV to listen).
 - Pull down to refresh (game.js): menu screens reload the page; a single challenge (#ch) re-fetches in place via
   `Social.refresh()` (a reload would land on home). Never on the board or in a story.
 - Challenge invites (`invites/{code_to}` { from, fromName, to, code, created }, like gifts): the challenge's ⤴ /

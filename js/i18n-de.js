@@ -15,7 +15,7 @@ Object.assign(DE, {
   'e.g. 🐻 BlockBoss': 'z. B. 🐻 BlockBoss', 'Save': 'Speichern', 'Not now': 'Jetzt nicht',
   // Settings
   '💡 Show the “New!” tips again': '💡 „Neu!“-Tipps wieder zeigen', '✓ You’ll see them again': '✓ Du siehst sie wieder',
-  'Done': 'Fertig', '🔊 Sound: on': '🔊 Ton: an', '🔇 Sound: off': '🔇 Ton: aus', '📳 Vibration: on': '📳 Vibration: an', '📴 Vibration: off': '📴 Vibration: aus',
+  'Done': 'Fertig', '🔊 Sound: on': '🔊 Ton: an', '🔇 Sound: off': '🔇 Ton: aus', '🎵 Music: on': '🎵 Musik: an', '🎵 Music: off': '🎵 Musik: aus', '📳 Vibration: on': '📳 Vibration: an', '📴 Vibration: off': '📴 Vibration: aus',
   'Language': 'Sprache',
   // Overlays
   'A star chest!': 'Eine Sternentruhe!', '🏅 Medals': '🏅 Medaillen', 'Cancel': 'Abbrechen', 'OK': 'OK', 'NEW!': 'NEU!', 'New!': 'Neu!',
