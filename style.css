@@ -627,7 +627,8 @@ button.stars-total { background: none; border: 0; padding: 4px 6px; cursor: poin
 #tabs button.on { background: linear-gradient(180deg, #ffe27a, #ffb300); color: #5a2d00; box-shadow: 0 3px 0 #a86a00; }
 #home { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
 /* In the flow under the name/stars row, so a full home screen can't push them on top of each other. */
-#home .home-foot { position: static; margin-top: 2px; }
+#home .home-foot { position: static; margin-top: 10px; padding: 4px 0; flex-shrink: 0; }
+#home .me-row { flex-shrink: 0; }
 
 /* ── Story home ── */
 #storyhome { position: fixed; inset: 0; overflow: hidden; padding: 0; }
