@@ -3,7 +3,7 @@
 Object.assign(DE, {
   // Home, tabs, headers
   'Play': 'Spielen', 'Levels': 'Level', '📅 Daily': '📅 Täglich', '⚡ Challenges': '⚡ Wettkämpfe', '👥 Team': '👥 Team',
-  '🏆 Leaderboard': '🏆 Bestenliste', 'Privacy': 'Datenschutz', 'Privacy policy': 'Datenschutzerklärung',
+  '🏆 Leaderboard': '🏆 Bestenliste', 'Privacy': 'Datenschutz',
   '📖 Stories': '📖 Geschichten', 'Puzzles': 'Rätsel', 'Story': 'Geschichte', 'Skip ⏭': 'Vor ⏭', 'tap ▸': 'tippen ▸',
   'Back to the stories': 'Zurück zu den Geschichten', 'Leaderboard': 'Bestenliste', 'Players': 'Spieler', 'Friends': 'Freunde', 'Teams': 'Teams',
   'Challenges': 'Wettkämpfe', '＋ New challenge': '＋ Neuer Wettkampf', 'Open': 'Öffnen', 'Challenge': 'Wettkampf', 'Team': 'Team',
