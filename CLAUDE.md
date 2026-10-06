@@ -14,12 +14,15 @@ version.
 whose online.js imports ../vendor/firebase; copying it back into js/ breaks `build:web` (it checks for the
 gstatic imports), the hosting job fails and the site silently stops updating — this happened once.
 
+**Workflow:** the user wants changes pushed **straight to main** (no PRs, no side branches). Every push to main
+deploys the website through the `hosting` job in apps.yml — the repo secret FIREBASE_SERVICE_ACCOUNT is set and
+verified (2026-10-06); check the run's "Deploy to Firebase Hosting" step, "No Firebase key yet" means the secret is gone.
+Firestore rules still need a service-account key (ask the user) — the `invites` rules were published 2026-10-06.
+
 ## Status and open items (last session: 2026-10-05)
 Done recently: levels 121–150 (6 new stages), story "Treasure for Anton" (Wolfgang & Mike series), German
 version (menus + all stories), challenge invites to friends with a home-screen pop-up, iPhone PWA layout fixes.
 Open — check with the user before assuming any of these are done:
-- **firestore.rules not yet published**: it adds `invites/{id}`; until it is live, sending an invite fails
-  (permission-denied). No service-account key was available in the last session (see "Deploying rules").
 - Invites are only tested with a stubbed `window.Online` (pop-up, Open/Later, list, no repeat), not between two
   real devices. The friend-picker dialog in social.js `invitePlayers` uses inline styles — could reuse .card/.form CSS.
 - The iOS 26 black-strip fix (`100lvh` in standalone mode, style.css) is unverified on a real iPhone.
