@@ -940,7 +940,7 @@ if ('serviceWorker' in navigator && !Native.app) navigator.serviceWorker.registe
 
 // Pull down to refresh, on the menu screens only (never on the board or in a story, where a reload would lose your place).
 (() => {
-  const MENUS = ['home', 'levels', 'storyhome', 'ranks', 'chs', 'team'], NEED = 90;
+  const MENUS = ['home', 'levels', 'storyhome', 'ranks', 'chs', 'ch', 'team'], NEED = 90;
   const pill = document.createElement('div'); pill.id = 'pull'; pill.hidden = true; document.body.appendChild(pill);
   let y0 = 0, dy = 0, on = false;
   const menuShown = () => MENUS.some(id => !$(id).hidden) && !document.querySelector('.overlay:not([hidden])');
@@ -960,7 +960,11 @@ if ('serviceWorker' in navigator && !Native.app) navigator.serviceWorker.registe
     pill.classList.toggle('ready', dy >= NEED);
   }, { passive: true });
   const end = () => {
-    if (on && dy >= NEED && menuShown()) { pill.textContent = '↻'; location.reload(); return; }
+    if (on && dy >= NEED && menuShown()) {
+      // A challenge reloads in place (a page reload would land on the home screen).
+      if (!$('ch').hidden && typeof Social !== 'undefined') { on = false; pill.hidden = true; Social.refresh(); return; }
+      pill.textContent = '↻'; location.reload(); return;
+    }
     on = false; pill.hidden = true;
   };
   addEventListener('touchend', end, { passive: true });

@@ -291,43 +291,36 @@ const Social = (() => {
       return;
     }
 
-    const html = `<div style="max-height: 300px; overflow-y: auto;">
-      <h4>Invite friends to this challenge</h4>
-      <p class="note small">Select friends to send them a direct invitation, or share the link instead.</p>
-      <div id="invite-list">${friendList.map(f =>
-        `<label style="display: block; padding: 8px 0; border-bottom: 1px solid var(--bg2);">
-          <input type="checkbox" value="${f.uid}" data-name="${esc(f.name)}"> ${esc(f.name)}
-        </label>`).join('')}
-      </div>
-    </div>`;
-
+    // Same layout as "Ask for help": tick friends, one big Send button, the link and Cancel below.
     const picked = await new Promise(resolve => {
       const d = document.createElement('div');
       d.className = 'overlay';
-      d.innerHTML = `<div class="card">${html}<div style="margin-top: 16px; display: flex; gap: 8px; justify-content: flex-end;">
-        <button class="ghost" id="invite-cancel">Cancel</button>
-        <button class="ghost" id="invite-link">📤 Share link</button>
-        <button id="invite-send" style="display: none;">📧 Send invites</button>
-      </div></div>`;
-
-      d.querySelector('#invite-cancel').onclick = () => { d.remove(); resolve(null); };
-      d.querySelector('#invite-link').onclick = () => { d.remove(); resolve('link'); };
-
-      const checkboxes = [...d.querySelectorAll('input[type="checkbox"]')];
+      d.style.zIndex = 26;
+      d.innerHTML = `<div class="card form">
+        <h2>Invite friends</h2>
+        <p class="note small">They get a pop-up in the game and the challenge shows up in their list.</p>
+        <div class="invite-friends">${friendList.map(f => `<label class="pick"><input type="checkbox" value="${esc(f.uid)}" data-name="${esc(f.name)}"><span>${esc(f.name)}</span></label>`).join('')}</div>
+        <p class="err" id="invite-err"></p>
+        <button class="big" type="button" id="invite-send">📨 Send invites</button>
+        <button class="ghost" type="button" id="invite-link">🔗 Share a link instead</button>
+        <button class="ghost" type="button" id="invite-cancel">Cancel</button>
+      </div>`;
+      const boxes = [...d.querySelectorAll('input[type="checkbox"]')];
       const sendBtn = d.querySelector('#invite-send');
-      checkboxes.forEach(cb => {
-        cb.addEventListener('change', () => {
-          const selected = checkboxes.filter(c => c.checked);
-          sendBtn.style.display = selected.length ? 'block' : 'none';
-        });
-      });
-
-      sendBtn.onclick = () => {
-        const selected = checkboxes.filter(c => c.checked).map(c => ({ uid: c.value, name: c.dataset.name }));
-        d.remove();
-        resolve(selected);
+      const sync = () => {
+        const n = boxes.filter(c => c.checked).length;
+        sendBtn.textContent = n ? `📨 Send invites (${n})` : '📨 Send invites';
+        d.querySelector('#invite-err').textContent = '';
       };
-
+      boxes.forEach(cb => cb.addEventListener('change', sync));
+      const done = v => { d.remove(); resolve(v); };
+      d.querySelector('#invite-cancel').onclick = () => done(null);
+      d.querySelector('#invite-link').onclick = () => done('link');
+      sendBtn.onclick = () => {
+        const selected = boxes.filter(c => c.checked).map(c => ({ uid: c.value, name: c.dataset.name }));
+        if (!selected.length) { d.querySelector('#invite-err').textContent = 'Pick at least one friend'; return; }
+        done(selected);
+      };
       document.body.appendChild(d);
     });
 
@@ -885,5 +878,6 @@ const Social = (() => {
   $('ch-back').addEventListener('click', list);
   $('team-back').addEventListener('click', home);
 
-  return { rankTeams, rankFriends, offerFriend, account, openCh, list, team, askHelp, helpBox, sendSolution };
+  const refresh = () => { if (cur && cur.ch) openCh(cur.ch.code); };
+  return { refresh, rankTeams, rankFriends, offerFriend, account, openCh, list, team, askHelp, helpBox, sendSolution };
 })();

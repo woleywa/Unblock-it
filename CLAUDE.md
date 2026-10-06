@@ -26,7 +26,7 @@ Done recently: levels 121–150 (6 new stages), story "Treasure for Anton" (Wolf
 version (menus + all stories), challenge invites to friends with a home-screen pop-up, iPhone PWA layout fixes.
 Open — check with the user before assuming any of these are done:
 - Invites are only tested with a stubbed `window.Online` (pop-up, Open/Later, list, no repeat), not between two
-  real devices. The friend-picker dialog in social.js `invitePlayers` uses inline styles — could reuse .card/.form CSS.
+  real devices. The friend picker (social.js `invitePlayers`) uses the Ask-for-help layout (.card.form, label.pick, big Send button).
 - The iOS 26 black-strip fix (`100lvh` in standalone mode, style.css) is unverified on a real iPhone.
 - APK for Android: only the Actions artifact (zip, needs a GitHub login, expires after 90 days). The repo is
   public, so publishing `app-debug.apk` to a fixed release (like `app-web`) would give a permanent direct link — offered, not done.
@@ -220,6 +220,8 @@ Open — check with the user before assuming any of these are done:
   `seqOf` draws from CHALLENGE_LEVELS + DAILY_LEVELS + LEVELS filtered by `diff` (so even Master has ~35), shuffled by the
   seed, then ordered by par. The pool order is fixed (append new campaign levels last) but adding levels to a tier
   mid-challenge changes that challenge's list — avoid shipping new levels while a challenge is live.
+- Pull down to refresh (game.js): menu screens reload the page; a single challenge (#ch) re-fetches in place via
+  `Social.refresh()` (a reload would land on home). Never on the board or in a story.
 - Challenge invites (`invites/{code_to}` { from, fromName, to, code, created }, like gifts): the challenge's ⤴ /
   📨 Invite opens a friend picker (social.js `invitePlayers`; no friends → the share link). The friend's home
   (helpBox → `checkInvites`, every 45 s at most, also on online-ready/online-user) pops up an ask() card
