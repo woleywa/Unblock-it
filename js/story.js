@@ -1341,7 +1341,7 @@ const Story = (() => {
       const st = saved()['ch' + c.id], going = typeof st === 'number' && st > 0;
       const status = st === 'done' ? '<span class="tag done">✅ Completed</span>' : going ? '<span class="tag go">In progress</span>' : `<span class="tag new">${c.id > 1 ? 'New story' : 'New!'}</span>`;
       return `<div class="sh-card"><div class="num">${c.icon}</div><div class="txt"><small>${c.num} ${status}</small><b>${c.title}</b>
-          ${going ? `<a class="sh-restart" data-id="${c.id}">↻ From the start</a>` : ''}</div>
+          <span class="sh-links">${going ? `<a class="sh-restart" data-id="${c.id}">↻ From the start</a>` : ''}<a class="sh-share" data-id="${c.id}">📤 Share</a></span></div>
           <button class="big sh-play" data-id="${c.id}" data-done="${st === 'done' ? 1 : ''}">${st === 'done' ? '↻ Replay' : going ? '▶ Continue' : '▶ Play'}</button></div>`;
     };
     // One section per series: Mörfi's ISA missions (with the ISA badge), and Bear & Kloenchen's tours.
@@ -1353,7 +1353,26 @@ const Story = (() => {
       + CHAPTERS.filter(c => c.series === 'friends').map(card).join('');
     document.querySelectorAll('.sh-play').forEach(b => b.onclick = () => { Sound.unlock(); start(!!b.dataset.done, +b.dataset.id); });
     document.querySelectorAll('.sh-restart').forEach(b => b.onclick = () => start(true, +b.dataset.id));
+    document.querySelectorAll('.sh-share').forEach(b => b.onclick = () => shareChapter(+b.dataset.id));
   }
+  // Share a link that opens this chapter (#story=ID) for anyone, no account needed.
+  async function shareChapter(id) {
+    const c = CHAPTERS.find(x => x.id === id); if (!c) return;
+    const title = T(c.title), text = T('Try this story in Happy Blocks!'), url = `${Native.webBase()}#story=${id}`;
+    if (navigator.share) { try { await navigator.share({ title, text, url }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+    try { await navigator.clipboard.writeText(`${title} — ${text} ${url}`); { const t = $('toast'); t.textContent = T('Link copied — paste it to your friends'); t.hidden = false; setTimeout(() => { t.hidden = true; }, 2200); } }
+    catch (e) { ask('Copy this link and send it to your friends:', { input: url, copy: true, cancel: false, ok: 'Done' }); }
+  }
+  // #story=ID opens that chapter (the Story home first, so Back lands there).
+  function route() {
+    const m = location.hash.match(/^#story=(\d{1,3})$/);
+    if (!m) return;
+    window.history.replaceState(null, '', location.pathname + location.search);
+    if (!CHAPTERS.some(c => c.id === +m[1])) return;
+    storyHome(); start(false, +m[1]);
+  }
+  window.addEventListener('hashchange', route);
+  route();
   function menu() { storyHome(); }
 
   $('st-stage-tap').addEventListener('click', tap);
