@@ -33,6 +33,7 @@ A running list of ideas for the game. ✅ = built, 🔨 = in progress, 💡 = id
 ## Friends and social
 - 💡 **Push notifications** when a friend asks for help or sends a solution (needs the store apps).
 - 💡 **Team vs team** challenges.
+- ✅ Challenge difficulty slider (tiers from tools/difficulty.js). 💡 Use the tiers in stories too (pick puzzles by `diff`), and a "difficulty" badge on level cards.
 - ✅ Help requests with solution replay, friends leaderboard, share links for any level.
 - ✅ Invite friends to a challenge from the app (pop-up on their home screen).
 - 💡 Show who invited you on the challenge card; remind friends who haven't joined yet.

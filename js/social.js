@@ -48,12 +48,23 @@ const Social = (() => {
   const persist = () => { try { localStorage.setItem(SAVE, JSON.stringify(store)); } catch (e) {} };
   const remember = code => { store.known = [code, ...store.known.filter(c => c !== code)].slice(0, 30); persist(); };
 
+  // Difficulty (tools/difficulty.js rates every level 1–5). "Mixed" (0, and every challenge made before this
+  // existed) uses the challenge pool as before; a tier draws from all three pools, so even Master has enough.
+  const DIFF_NAMES = ['Mixed', 'Easy', 'Medium', 'Hard', 'Expert', 'Master'];
+  const DIFF_NOTE = ['Starts easy and gets harder.', 'Gentle boards, a few moves each.', 'A little thinking needed.', 'Real puzzles.', 'Tight boards with several special blocks.', 'The hardest boards in the game.'];
+  let allLevels = null;
+  const poolOf = ch => ch.diff ? (allLevels = allLevels || CHALLENGE_LEVELS.concat(typeof DAILY_LEVELS !== 'undefined' ? DAILY_LEVELS : [], LEVELS)) : CHALLENGE_LEVELS;
+  const chLevel = (ch, id) => poolOf(ch)[id];
+
   // Everyone in a challenge gets the same levels, in the same order, from its seed.
   function seqOf(ch) {
     let a = ch.seed >>> 0;
     const rnd = () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
-    const ids = [...CHALLENGE_LEVELS.keys()];
+    const pool = poolOf(ch);
+    const ids = [...pool.keys()].filter(i => !ch.diff || pool[i].diff === ch.diff);
     for (let i = ids.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [ids[i], ids[j]] = [ids[j], ids[i]]; }
+    // One tier: a gentle ramp by par.
+    if (ch.diff) return (ch.levels ? ids.slice(0, ch.levels) : ids).sort((x, y) => pool[x].par - pool[y].par || x - y);
     // The pool is ordered easy → hard, so sorting by index ramps the difficulty up.
     if (ch.levels) return ids.slice(0, ch.levels).sort((x, y) => x - y);
     const out = [];
@@ -71,7 +82,7 @@ const Social = (() => {
   function scoreRuns(ch, runs) {
     const seq = seqOf(ch);
     let stars = 0, moves = 0;
-    for (const [p, m] of Object.entries(runs)) { stars += starsFor(m, CHALLENGE_LEVELS[seq[p]].par); moves += m; }
+    for (const [p, m] of Object.entries(runs)) { stars += starsFor(m, chLevel(ch, seq[p]).par); moves += m; }
     return { stars, moves, solved: Object.keys(runs).length };
   }
   const title = ch => `${ch.byName}’s challenge`;
@@ -80,6 +91,7 @@ const Social = (() => {
       ch.levels ? `${ch.levels} levels` : 'Endless levels',
       ch.playMin ? `${ch.playMin} min each` : 'No time limit each',
       `${ch.players === 1 ? 'Solo' : `${ch.players} players`}`,
+      ...(ch.diff ? [DIFF_NAMES[ch.diff]] : []),
     ];
   }
 
@@ -139,6 +151,9 @@ const Social = (() => {
     });
     const n = +$('np').value;
     $('np-val').textContent = n === 1 ? '1 (solo)' : n;
+    const d = +$('nd').value;
+    $('nd-val').textContent = DIFF_NAMES[d];
+    $('nd-note').textContent = DIFF_NOTE[d];
     const pm = pick('playMin'), lv = pick('levels'), st = pick('startIn');
     $('new-ch-sum').textContent = `${st ? `Starts in ${fmtMin(st)}` : 'Starts now'} and stays open ${fmtMin(win)}. `
       + (pm ? `Everyone gets ${pm} minutes from when they tap Start. ` : 'Play as long as it’s open. ')
@@ -151,10 +166,12 @@ const Social = (() => {
     formSync();
   }));
   $('np').addEventListener('input', formSync);
+  $('nd').addEventListener('input', formSync);
   $('ch-new').addEventListener('click', () => needName(() => {
     const o = on();
     // Default: one spot per teammate.
     $('np').value = o.team ? Math.max(2, Math.min(20, o.team.members)) : 4;
+    $('nd').value = 0;
     $('new-ch-err').textContent = '';
     formSync();
     $('new-ch').hidden = false;
@@ -165,7 +182,7 @@ const Social = (() => {
     $('new-ch-go').disabled = true;
     $('new-ch-err').textContent = '';
     try {
-      const ch = await on().createChallenge({ startIn: pick('startIn'), window: pick('window'), playMin: pick('playMin'), levels: pick('levels'), players: +$('np').value });
+      const ch = await on().createChallenge({ startIn: pick('startIn'), window: pick('window'), playMin: pick('playMin'), levels: pick('levels'), players: +$('np').value, diff: +$('nd').value });
       remember(ch.code);
       $('new-ch').hidden = true;
       openCh(ch.code, true);
@@ -382,7 +399,7 @@ const Social = (() => {
     const shown = ch.levels ? seq.length : Math.min(seq.length, Math.max(6, top + 5));
     g.innerHTML = '';
     for (let p = 0; p < shown; p++) {
-      const m = runs[p], s = m ? starsFor(m, CHALLENGE_LEVELS[seq[p]].par) : 0;
+      const m = runs[p], s = m ? starsFor(m, chLevel(ch, seq[p]).par) : 0;
       const b = document.createElement('button');
       b.className = 'lvl' + (playable ? '' : ' locked') + (m ? ' done' : '');
       b.innerHTML = `<b>${p + 1}</b><small>${[1, 2, 3].map(k => `<i class="${k <= s ? 'on' : ''}">★</i>`).join('')}</small>`;
@@ -441,7 +458,7 @@ const Social = (() => {
       },
     };
     $('clock').hidden = false;
-    begin(CHALLENGE_LEVELS[seq[pos]], `Challenge · ${ch.levels ? `${pos + 1}/${ch.levels}` : `#${pos + 1}`}`, '');
+    begin(chLevel(ch, seq[pos]), `Challenge · ${ch.levels ? `${pos + 1}/${ch.levels}` : `#${pos + 1}`}`, '');
     tick();
   }
   function timeUp() {

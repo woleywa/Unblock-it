@@ -9,7 +9,7 @@
 //   players/{uid}.team            the code of the player's team (optional)
 //   teams/{code}                  { name, by, members, stars, created } — stars = members' stars added up
 //   challenges/{code}             { by, byName, team, teamName, created, start, window, playMin, levels,
-//                                   players, joined, seed }             — window/playMin in minutes, 0 = no limit
+//                                   players, joined, seed, diff? }      — window/playMin in minutes, 0 = no limit; diff 1–5 (absent = mixed)
 //   saves/{uid}                   { stars, moves, friends, updated } — private: progress + friend list
 //   invites/{code_to}             { from, fromName, to, code, created }  — a friend's challenge invite
 //   gifts/{from_to_day}           { from, fromName, to, kind, day, created, seen } — a little gift for a friend
@@ -382,7 +382,7 @@ const learnSkew = (serverMs, before, after) => {
 const ms = t => (t && t.toMillis ? t.toMillis() : t);
 const chOut = (code, d) => ({ code, ...d, start: ms(d.start), created: ms(d.created) });
 
-async function createChallenge({ startIn, window: win, playMin, levels, players }) {
+async function createChallenge({ startIn, window: win, playMin, levels, players, diff }) {
   await ready;
   if (me.team) await loadMyTeam();
   const code = newCode();
@@ -391,6 +391,7 @@ async function createChallenge({ startIn, window: win, playMin, levels, players 
     created: serverTimestamp(), start: startIn ? Timestamp.fromMillis(Date.now() + skew + startIn * 60000) : serverTimestamp(),
     window: win, playMin, levels, players, joined: 0, seed: Math.floor(Math.random() * 2147483647),
   };
+  if (diff) data.diff = diff; // 1–5; absent = Mixed (the challenge pool, easy → hard)
   const t0 = Date.now();
   await setDoc(doc(db, 'challenges', code), data);
   const t1 = Date.now();

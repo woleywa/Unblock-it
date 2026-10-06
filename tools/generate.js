@@ -4,6 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 const Engine = require('../js/engine.js');
+const Difficulty = require('./difficulty.js');
 
 const CHALLENGE = process.argv[2] === 'challenge';
 // daily: a pool of hard boards for the daily puzzle (js/daily-levels.js): packed, expert and every mix.
@@ -284,6 +285,8 @@ function check(level, st) {
       .some(([r, c]) => Engine.cellsOf(s.before.pieces.find(p => p.id === s.pieceId), r, c).some(q => burning.has(q.join(',')))));
     if (!crosses) return null;
   }
+  // Every level carries its measured difficulty (tools/difficulty.js).
+  Object.assign(level, Difficulty.rate({ ...level, par: moves }, extra));
   return moves;
 }
 

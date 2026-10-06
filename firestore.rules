@@ -199,7 +199,7 @@ service cloud.firestore {
     // `players` = how many can join; `joined` counts them.
     function validChallenge(d) {
       let p = playerBefore(me());
-      return d.keys().hasOnly(['by', 'byName', 'team', 'teamName', 'created', 'start', 'window', 'playMin', 'levels', 'players', 'joined', 'seed'])
+      return d.keys().hasOnly(['by', 'byName', 'team', 'teamName', 'created', 'start', 'window', 'playMin', 'levels', 'players', 'joined', 'seed', 'diff'])
         && d.by == me() && d.byName == p.name
         && d.team == teamOf(p)
         && (d.team == null ? d.teamName == null : d.teamName == teamBefore(d.team).name)
@@ -209,7 +209,8 @@ service cloud.firestore {
         && d.playMin is int && d.playMin >= 0 && d.playMin <= d.window
         && d.levels is int && d.levels >= 0 && d.levels <= 100
         && d.players is int && d.players >= 1 && d.players <= 20
-        && d.joined == 0 && d.seed is int;
+        && d.joined == 0 && d.seed is int
+        && (!('diff' in d) || (d.diff is int && d.diff >= 1 && d.diff <= 5));
     }
     function isOpen(x, graceSec) {
       return request.time >= x.start && request.time < x.start + duration.value(x.window * 60 + graceSec, 's');

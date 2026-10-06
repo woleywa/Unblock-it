@@ -33,3 +33,4 @@ fs.writeFileSync(online, js.split(CDN).join('../vendor/firebase/'));
 fs.writeFileSync(path.join(out, 'version.json'), JSON.stringify({ build: BUILD, minNative: MIN_NATIVE_BUILD }) + '\n');
 console.log(`www/ ready (game build ${BUILD})`);
 require('./check-i18n.js');
+require('./check-difficulty.js');

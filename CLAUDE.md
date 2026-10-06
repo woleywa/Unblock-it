@@ -18,8 +18,10 @@ gstatic imports), the hosting job fails and the site silently stops updating —
 deploys the website through the `hosting` job in apps.yml — the repo secret FIREBASE_SERVICE_ACCOUNT is set and
 verified (2026-10-06); check the run's "Deploy to Firebase Hosting" step, "No Firebase key yet" means the secret is gone.
 Firestore rules still need a service-account key (ask the user) — the `invites` rules were published 2026-10-06.
+**The challenge `diff` rule (firestore.rules, added 2026-10-06 after that publish) is NOT published yet** — until it is,
+creating a challenge with a difficulty other than Mixed fails with permission-denied (Mixed still works).
 
-## Status and open items (last session: 2026-10-05)
+## Status and open items (last updated: 2026-10-06)
 Done recently: levels 121–150 (6 new stages), story "Treasure for Anton" (Wolfgang & Mike series), German
 version (menus + all stories), challenge invites to friends with a home-screen pop-up, iPhone PWA layout fixes.
 Open — check with the user before assuming any of these are done:
@@ -206,6 +208,18 @@ Open — check with the user before assuming any of these are done:
 - Links: `#join=CODE` (team), `#c=CODE` (challenge), `#f=UID` (friend), `?level=N` or `#level=N` (opens campaign level N
   for anyone, even if locked — the "Ask a friend to solve this" button under the board). On iPhone a link opens Safari, which is a different
   account from the home-screen app — so codes can be typed in too.
+- **Difficulty** (see DIFFICULTY.md — per-tier counts, every campaign stage, every story puzzle): every level in
+  all three pools has `diff` (tier 1–5: Easy, Medium, Hard, Expert, Master) and `dscore`, measured by the solver
+  (tools/difficulty.js: room-making moves + mechanics + par + blocks, fixed thresholds). tools/generate.js rates
+  new levels as it makes them; after any other change to a pool run `node tools/rate.js` (~1 min; also rewrites
+  DIFFICULTY.md); build:web warns about unrated levels. To pick a level by difficulty in code:
+  `LEVELS`/`DAILY_LEVELS`/`CHALLENGE_LEVELS` entries → `.diff`. Stories still pick puzzles by index (`pool: 'hard'` =
+  DAILY_LEVELS) — DIFFICULTY.md lists the tier of each one, so choosing "a Hard one" for a new chapter is a lookup.
+- Challenge difficulty: the New challenge form has a Difficulty slider (0 = Mixed … 5 = Master) → `challenges/{code}.diff`
+  (absent = Mixed = the old behaviour, unchanged: CHALLENGE_LEVELS in index order ramp). With a tier, social.js
+  `seqOf` draws from CHALLENGE_LEVELS + DAILY_LEVELS + LEVELS filtered by `diff` (so even Master has ~35), shuffled by the
+  seed, then ordered by par. The pool order is fixed (append new campaign levels last) but adding levels to a tier
+  mid-challenge changes that challenge's list — avoid shipping new levels while a challenge is live.
 - Challenge invites (`invites/{code_to}` { from, fromName, to, code, created }, like gifts): the challenge's ⤴ /
   📨 Invite opens a friend picker (social.js `invitePlayers`; no friends → the share link). The friend's home
   (helpBox → `checkInvites`, every 45 s at most, also on online-ready/online-user) pops up an ask() card
