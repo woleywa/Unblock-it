@@ -147,6 +147,7 @@ function begin(lv, title, hint) {
   $('hint').textContent = hint || '';
   $('win').hidden = true;
   $('clock').hidden = !chPlay;
+  $('ch-live').hidden = true; $('ch-live').innerHTML = '';
   // (the daily puzzle sets these back to its own)
   $('next').textContent = 'Next level'; $('to-ch').textContent = 'Back to challenge';
   lvClock();

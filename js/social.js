@@ -446,6 +446,7 @@ const Social = (() => {
             cur.rows = await on().entries(code);
             const i = cur.rows.findIndex(r => r.mine);
             if (i >= 0 && $('win-rank')) $('win-rank').textContent = `#${i + 1} of ${cur.rows.length}`;
+            live();
           } catch (e) { console.warn(e); }
         }
       },
@@ -453,7 +454,49 @@ const Social = (() => {
     $('clock').hidden = false;
     begin(chLevel(ch, seq[pos]), `Challenge · ${ch.levels ? `${pos + 1}/${ch.levels}` : `#${pos + 1}`}`, '');
     tick();
+    live(); livePoll(code);
   }
+
+  // ── Live scores while playing: in the free space between the clock and the board ──
+  // As many rows as fit (you always included); one line if only a little room; nothing if none, so the
+  // board never shrinks. Your own score is local (it changes the moment you win); the others refresh every 15 s.
+  const ROW = 25;
+  function liveRows() {
+    if (!cur) return [];
+    const mine = scoreRuns(cur.ch, (cur.entry && cur.entry.runs) || {});
+    const rows = cur.rows.filter(r => !r.mine).map(r => ({ name: r.name, stars: r.stars, solved: r.solved, moves: r.moves }));
+    if (cur.entry) rows.push({ name: on().name, ...mine, mine: true });
+    return rows.sort((a, b) => b.stars - a.stars || a.moves - b.moves);
+  }
+  function live() {
+    const box = $('ch-live');
+    if (!chPlay || !chPlay.code || !cur || $('game').hidden) { box.hidden = true; return; }
+    box.hidden = true; box.innerHTML = '';
+    const wrap = $('board-wrap'), board = $('board');
+    const free = wrap.clientHeight - board.offsetHeight - 40;
+    const rows = liveRows(), me = rows.findIndex(r => r.mine);
+    if (free < 26 || rows.length < 2 || me < 0) return;
+    const fit = Math.min(5, Math.floor((free - 10) / ROW));
+    if (fit < 2) {
+      const lead = rows[0];
+      box.innerHTML = `<div class="cl-line">#${me + 1} of ${rows.length} · ★ ${rows[me].stars}${me ? ` · ${esc(lead.name)} leads with ★ ${lead.stars}` : ' · you lead!'}</div>`;
+    } else {
+      let show = rows.slice(0, fit);
+      if (me >= fit) show = rows.slice(0, fit - 1).concat(rows[me]);
+      box.innerHTML = show.map(r => { const i = rows.indexOf(r); return `<div class="cl-row${r.mine ? ' mine' : ''}"><span class="pos">${medal(i)}</span><span class="who">${esc(r.mine ? 'You' : r.name)}</span><span class="st">★ ${r.stars}</span><span class="mv">${r.solved} lvl</span></div>`; }).join('');
+    }
+    box.hidden = false;
+  }
+  let liveTimer = null;
+  function livePoll(code) {
+    clearInterval(liveTimer);
+    liveTimer = setInterval(async () => {
+      if (!cur || cur.ch.code !== code || !chPlay || chPlay.code !== code || $('game').hidden) { clearInterval(liveTimer); return; }
+      if (document.hidden) return;
+      try { cur.rows = await on().entries(code); live(); } catch (e) { console.warn('live', e); }
+    }, 15000);
+  }
+  addEventListener('resize', () => { if (!$('game').hidden) live(); });
   function timeUp() {
     const tot = scoreRuns(cur.ch, cur.entry.runs);
     $('win').hidden = true;

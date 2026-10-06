@@ -131,7 +131,7 @@ Object.assign(DE, {
   'Use 2–20 characters (emoji welcome), no /': 'Nimm 2–20 Zeichen (Emojis erlaubt), kein /', 'You’re not in a team': 'Du bist in keinem Team', 'No team with that code': 'Kein Team mit diesem Code', 'That team is full (20 players)': 'Das Team ist voll (20 Spieler)',
   // Friends & help
   'Friends need an internet connection.': 'Freunde brauchen eine Internetverbindung.', 'Pick a nickname to add friends': 'Wähl einen Spitznamen, um Freunde hinzuzufügen', 'Add': 'Hinzufügen',
-  '📨 Send my friend link': '📨 Meinen Freundes-Link schicken', 'Friends helped': 'Freunden geholfen', 'you': 'du', 'Nickname': 'Spitzname', 'Friend’s nickname': 'Spitzname des Freundes',
+  '📨 Send my friend link': '📨 Meinen Freundes-Link schicken', 'Friends helped': 'Freunden geholfen', 'you': 'du', 'You': 'Du', 'Nickname': 'Spitzname', 'Friend’s nickname': 'Spitzname des Freundes',
   'Add friends by nickname, or send them your link — then you can race each other here.': 'Füg Freunde über ihren Spitznamen hinzu oder schick ihnen deinen Link – dann könnt ihr hier gegeneinander antreten.',
   'Loading friends…': 'Lade Freunde…', 'No friends yet — add them on Leaderboard → Friends, or share a link.': 'Noch keine Freunde – füg sie unter Bestenliste → Freunde hinzu oder teile einen Link.',
   'Pick at least one friend': 'Wähl mindestens einen Freund', 'Nothing here right now.': 'Gerade ist hier nichts.', 'Remove this help request? Any solutions in it go too.': 'Diese Hilfe-Anfrage entfernen? Die Lösungen darin verschwinden auch.',
@@ -216,6 +216,8 @@ DE_RX.push(
   [/^⚡ (.+) invited you to a challenge!$/, '⚡ $1 hat dich zu einem Wettkampf eingeladen!'],
   [/^(\d+ levels|Endless levels) · (\d+ min each|No time limit each) · (Solo|\d+ players)( · (?:Easy|Medium|Hard|Expert|Master))?$/, (m, a, b, d, e) => `${T(a)} · ${T(b)} · ${T(d)}${e ? ' · ' + T(e.slice(3)) : ''}`],
   [/^(\d+) lvl · (\d+) mv$/, '$1 Lvl · $2 Z.'],
+  [/^(\d+) lvl$/, '$1 Lvl'], [/^#(\d+) of (\d+) · ★ (\d+) · you lead!$/, '#$1 von $2 · ★ $3 · du führst!'],
+  [/^#(\d+) of (\d+) · ★ (\d+) · (.+) leads with ★ (\d+)$/, '#$1 von $2 · ★ $3 · $4 führt mit ★ $5'],
   [/^★ (\d+) · (\d+) levels?$/, '★ $1 · $2 Level'],
   [/^#(\d+) of (\d+)$/, '#$1 von $2'],
   [/^You collected ★ (\d+) from (\d+) levels?\.$/, 'Du hast ★ $1 aus $2 Level gesammelt.'],
