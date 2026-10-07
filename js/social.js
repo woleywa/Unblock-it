@@ -424,7 +424,7 @@ const Social = (() => {
     const { ch, seq } = cur;
     const code = ch.code;
     chPlay = {
-      code, pos,
+      code, pos, best: ((cur.entry && cur.entry.runs) || {})[pos],
       again: () => play(pos),
       back: () => { chPlay = null; $('win').hidden = true; hub(); show('ch'); reloadScores(); },
       next: () => {
