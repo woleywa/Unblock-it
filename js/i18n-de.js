@@ -162,6 +162,8 @@ Object.assign(DE, {
 });
 DE_RX.push(
   [/^Level (\d+)$/, 'Level $1'],
+  [/^🏆 New record! \(was (\d+)\)$/, '🏆 Neuer Rekord! (vorher $1)'],
+  [/^🏆 Your record: (\d+) moves?$/, (m, n) => `🏆 Dein Rekord: ${n} ${n === '1' ? 'Zug' : 'Züge'}`],
   [/^(\d+) moves? · par (\d+)$/, (m, a, b) => `${a} ${a === '1' ? 'Zug' : 'Züge'} · Par ${b}`],
   [/^(\d+) moves?$/, (m, a) => `${a} ${a === '1' ? 'Zug' : 'Züge'}`],
   [/^(\d+) moves — perfect!$/, '$1 Züge – perfekt!'],

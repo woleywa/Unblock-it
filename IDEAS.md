@@ -14,6 +14,7 @@ A running list of ideas for the game. ✅ = built, 🔨 = in progress, 💡 = id
 - ✅ Walls, ice, frozen doors, layered blocks, fire & water.
 
 ## Learning the game
+- 💡 **Tighter par** — a stronger (non-greedy) solver to find shorter solutions; would lower some pars (and stars), so decide how to treat existing records.
 - ✅ **"New!" pop-up for every new feature** — the first time a level uses something new (ice, fire, beaver…),
   a short card shows a looping mini-animation of how it behaves, with an "OK, got it" button (and ▶ Show me).
 

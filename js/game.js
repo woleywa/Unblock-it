@@ -145,6 +145,14 @@ function begin(lv, title, hint) {
   moves = 0; history = []; busy = false; sol = []; watching = false; usedUndo = false; startedAt = 0; combo = 0; lastExit = 0;
   $('level-name').textContent = title;
   $('hint').textContent = hint || '';
+  // Your record on this board, if you've solved it before (campaign: progress; a challenge passes chPlay.best).
+  const best = answer ? 0 : chPlay ? chPlay.best : progress.moves[idx];
+  if (best) {
+    const r = document.createElement('span'); r.className = 'rec';
+    r.textContent = `🏆 Your record: ${best} move${best === 1 ? '' : 's'}`;
+    if (hint) { const br = document.createElement('br'); br.className = 'recbr'; $('hint').append(br); }
+    $('hint').append(r);
+  }
   $('win').hidden = true;
   $('clock').hidden = !chPlay;
   $('ch-live').hidden = true; $('ch-live').innerHTML = '';
@@ -173,7 +181,8 @@ function start(i, opts = {}) {
     again.className = 'intro-again';
     again.textContent = '▶ Show me';
     again.onclick = () => Intro.show(key, true);
-    $('hint').append(' ', again);
+    const rec = $('hint').querySelector('.recbr');
+    $('hint').insertBefore(again, rec); $('hint').insertBefore(document.createTextNode(' '), again);
     Intro.show(key);
   }
 }
@@ -675,6 +684,10 @@ function win() {
   $('next').className = close ? 'ghost' : 'big';
   $('replay').textContent = close ? `↻ Try for ${s + 1} stars` : 'Play again';
   $('next').style.order = close ? 1 : ''; $('to-ch').style.order = close ? 2 : '';
+  // Against your own record on this board (campaign, or a challenge level you've solved before).
+  const prev = answer || watching ? 0 : chPlay ? chPlay.best : progress.moves[idx];
+  $('win-rec').hidden = !prev;
+  if (prev) $('win-rec').textContent = moves < prev ? `🏆 New record! (was ${prev})` : `🏆 Your record: ${prev} move${prev === 1 ? '' : 's'}`;
   $('win').hidden = false;
   $('win-help').innerHTML = '';
   Art.confetti();

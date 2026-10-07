@@ -229,6 +229,11 @@ Open — check with the user before assuming any of these are done:
   runner-up when you lead), in the free space of #board-wrap (never shrinks the board); one summary line if there's
   little room, nothing if none. Own score from local runs; others via `entries()` every 15 s (`livePoll`). Settings →
   🏁 Scores while playing (localStorage `unblock_live`). begin() hides it for every other mode.
+- Your record: the hint pill shows "🏆 Your record: N moves" when you replay a solved level (campaign `progress.moves`,
+  challenge `chPlay.best` = entry.runs[pos]); the win card's `#win-rec` says "🏆 New record! (was N)" or your record.
+- **Par is not the minimum**: Engine.solve is greedy (exit whatever can leave, else the shortest unblock), so on big
+  boards players often beat par by a lot (the user did level 128 in 26 vs par 33). Lowering par later would take stars
+  away from players (stars are recomputed from par) — ask the user first.
 - Pull down to refresh (game.js): menu screens reload the page; a single challenge (#ch) re-fetches in place via
   `Social.refresh()` (a reload would land on home). Never on the board or in a story.
 - Challenge invites (`invites/{code_to}` { from, fromName, to, code, created }, like gifts): the challenge's ⤴ /
