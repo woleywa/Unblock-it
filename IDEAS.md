@@ -19,6 +19,7 @@ A running list of ideas for the game. ✅ = built, 🔨 = in progress, 💡 = id
   a short card shows a looping mini-animation of how it behaves, with an "OK, got it" button (and ▶ Show me).
 
 ## Ways to play
+- ✅ **Events tab** — 🎃 Halloween (story, 20 levels, unlockable styles). 💡 Next: Christmas / winter event, Easter egg hunt; a leaderboard per event.
 - ✅ **Daily puzzle** — the same level for everyone each day, a 🔥 streak, and a shareable result
   ("Happy Blocks #12 ⭐⭐⭐ 18 moves").
 - 💡 **Level editor** — build a board, the solver checks it can be solved and sets par, share it with friends.

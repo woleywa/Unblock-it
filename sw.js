@@ -1,8 +1,8 @@
 // Offline support. The page itself (and any unversioned file) comes from the network first, so an
 // update shows up straight away — the cache is only the fallback when offline. Files with ?v=N in
 // their name never change, so they (and fonts/the Firebase SDK) come from the cache first.
-const CACHE = 'unblock-it-v88';
-const FILES = ['./', 'index.html', 'style.css?v=88', 'js/i18n.js?v=88', 'js/i18n-de.js?v=88', 'js/i18n-story-de.js?v=88', 'js/native.js?v=88', 'js/engine.js?v=88', 'js/levels.js?v=88', 'js/audio.js?v=88', 'js/music.js?v=88', 'js/art.js?v=88', 'js/challenge-levels.js?v=88', 'js/intro.js?v=88', 'js/game.js?v=88', 'js/daily-levels.js?v=88', 'js/extras.js?v=88', 'js/story.js?v=88', 'js/social.js?v=88', 'js/online.js?v=88',
+const CACHE = 'unblock-it-v89';
+const FILES = ['./', 'index.html', 'style.css?v=89', 'js/i18n.js?v=89', 'js/i18n-de.js?v=89', 'js/i18n-story-de.js?v=89', 'js/native.js?v=89', 'js/engine.js?v=89', 'js/levels.js?v=89', 'js/audio.js?v=89', 'js/music.js?v=89', 'js/art.js?v=89', 'js/challenge-levels.js?v=89', 'js/intro.js?v=89', 'js/game.js?v=89', 'js/daily-levels.js?v=89', 'js/extras.js?v=89', 'js/story.js?v=89', 'js/social.js?v=89', 'js/halloween-levels.js?v=89', 'js/events.js?v=89', 'js/online.js?v=89',
   'manifest.webmanifest', 'icons/icon-180.png', 'icons/icon-192.png', 'icons/icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener('activate', e => {

@@ -17,6 +17,17 @@ const Music = (() => {
             C4 E4 G4 E4 C4 E4 G4 E4 | A3 C4 E4 C4 A3 C4 E4 C4 | F3 A3 C4 A3 G3 B3 D4 B3 | C4 E4 G4 C5 G4 E4 C4 .`,
       drums: 'k h s h k k s h', // per bar: k kick, s snare, h hi-hat
     },
+    // Halloween (Events tab, Halloween levels and story): A minor, a creepy chromatic turn, still cute.
+    spooky: {
+      bpm: 112, vol: 0.5,
+      lead: `A4 . C5 . E5 - D#5 E5 | F5 - E5 . D5 . C5 . | D5 . F5 . A5 - G#5 A5 | E5 - - . B4 C5 D5 E5 |
+             A5 . E5 . C5 . A4 . | F5 - E5 D5 C5 - B4 . | D5 F5 A5 F5 E5 G#5 B5 G#5 | A5 - - . E5 . A4 .`,
+      bass: `A2 . A3 . A2 . A3 . | F2 . F3 . F2 . F3 . | D2 . D3 . D2 . D3 . | E2 . E3 . E2 . E3 . |
+             A2 . A3 . A2 . A3 . | F2 . F3 . F2 . F3 . | D2 . D3 . E2 . E3 . | A2 . E2 . A2 . . .`,
+      arp: `A3 C4 E4 C4 A3 C4 E4 C4 | F3 A3 C4 A3 F3 A3 C4 A3 | D3 F3 A3 F3 D3 F3 A3 F3 | E3 G#3 B3 G#3 E3 G#3 B3 G#3 |
+            A3 C4 E4 C4 A3 C4 E4 C4 | F3 A3 C4 A3 F3 A3 C4 A3 | D3 F3 A3 F3 E3 G#3 B3 G#3 | A3 C4 E4 A4 E4 C4 A3 .`,
+      drums: 'k h s h k h s h',
+    },
     puzzle: {
       bpm: 92, vol: 0.4,
       lead: `D5 - - F5 A5 - G5 F5 | F5 - - D5 Bb4 - C5 D5 | C5 - - A4 F5 - E5 C5 | E5 - - - G5 - - . |
@@ -117,7 +128,13 @@ const Music = (() => {
     if (!cur || cur.name !== name) start(name);
   }
   // Which tune goes with which screen.
-  const screen = id => play(id === 'game' || id === 'story' ? 'puzzle' : 'menu');
+  // Which tune goes with which screen. The Events tab sets a theme that carries into its levels and story.
+  let th = null;
+  const screen = id => {
+    if (id === 'events') th = 'spooky';
+    else if (id !== 'game' && id !== 'story') th = null;
+    play(id === 'events' ? 'spooky' : id === 'game' || id === 'story' ? th || 'puzzle' : 'menu');
+  };
   document.addEventListener('visibilitychange', () => (document.hidden ? stop(0.1) : play(want)));
   // Browsers only start sound after a tap: the first one (anywhere) starts the music.
   addEventListener('pointerdown', () => { if (on && want && (!cur || (a && a.state !== 'running'))) { Sound.unlock(); if (!cur) play(want); } }, { capture: true, passive: true });
@@ -126,6 +143,7 @@ const Music = (() => {
     get on() { return on; },
     toggle() { on = !on; try { localStorage.setItem('unblock_music', on ? 'on' : 'off'); } catch (e) {} play(want); return on; },
     play, screen, stop,
+    theme(name) { th = name; },
     // For tests: render `secs` of a song into an OfflineAudioContext.
     render(ac, name, secs) { const s = SONGS[name], out = bus(ac); out.gain.value = s.vol; const st = 60 / s.bpm / 2; for (let i = 0, t = 0; t < secs; i++, t += st) scheduleStep(ac, out, s, i % s.steps, t); },
   };

@@ -21,7 +21,7 @@ Firestore rules still need a service-account key (ask the user) — the `invites
 **The challenge `diff` rule (firestore.rules, added 2026-10-06 after that publish) is NOT published yet** — until it is,
 creating a challenge with a difficulty other than Mixed fails with permission-denied (Mixed still works).
 
-## Status and open items (last updated: 2026-10-06)
+## Status and open items (last updated: 2026-10-10)
 Done recently: levels 121–150 (6 new stages), story "Treasure for Anton" (Wolfgang & Mike series), German
 version (menus + all stories), challenge invites to friends with a home-screen pop-up, iPhone PWA layout fixes.
 Open — check with the user before assuming any of these are done:
@@ -234,6 +234,20 @@ Open — check with the user before assuming any of these are done:
 - **Par is not the minimum**: Engine.solve is greedy (exit whatever can leave, else the shortest unblock), so on big
   boards players often beat par by a lot (the user did level 128 in 26 vs par 33). Lowering par later would take stars
   away from players (stars are recomputed from par) — ask the user first.
+- **Events tab** (🎃, third bottom tab; js/events.js `Events`): time-limited specials. Halloween 2026: hero card with
+  days left (until 8 Nov, still playable after), Mörfi's Halloween story (Story chapter id 7, series `halloween`, also
+  listed in Stories; back/end go to Events), 20 levels `HALLOWEEN_LEVELS` (js/halloween-levels.js from
+  `node tools/generate.js halloween`: autumn palette via a stage `palette`, 4 stages Pumpkin patch / Trick or treat /
+  Haunted house / Witching hour, rated like every pool), each unlocked by solving the one before; played through chPlay
+  `{ event }`. Progress in Extras `meta.ev` ({ halloween: { s, m }, got: { rewardId: day } }, merged across devices).
+  Rewards (Extras REWARDS with `ev: 'halloween'`): Pumpkin skin at 5 solved, Little bat at 10, Halloween night sky at
+  15, Witch hat for the story (`{ award: 'skin', n: 'witch' }`) — shown with the chest card ("Use it") and usable in
+  every level via Settings (locked ones show 🔒🎃 and how to get them). Levels with `theme: 'halloween'` wear the
+  pumpkin (unless you picked a Halloween skin) and the night sky (`html.ev-halloween`) — Extras.theme(lv) from begin().
+  Art skins: `pumpkin` (ribs, stem, jack-o'-lantern face), `witch` (hat), `bat` (wings + fangs). Music: `spooky` tune in
+  Events and its levels/story (Music.theme). Story bits: props witchhat/pumpkinsuit/batwings/bucket, ART.ghost,
+  scenes BG4.spooky/hollow, step `dark: true` (lights out). A new event = a block like HW in events.js + its levels,
+  story chapter and REWARDS entries.
 - Pull down to refresh (game.js): menu screens reload the page; a single challenge (#ch) re-fetches in place via
   `Social.refresh()` (a reload would land on home). Never on the board or in a story.
 - Challenge invites (`invites/{code_to}` { from, fromName, to, code, created }, like gifts): the challenge's ⤴ /

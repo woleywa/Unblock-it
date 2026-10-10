@@ -120,6 +120,13 @@ const Extras = (() => {
     for (const k of Object.keys(meta.ach)) if (!(m.ach || {})[k]) mine = true;
     for (const [k, v] of Object.entries(m.count || {})) if (v > (meta.count[k] || 0)) { meta.count[k] = v; changed = true; }
     if (m.story && m.story.ch1 === 'done' && (meta.story || {}).ch1 !== 'done') { meta.story = { ...(meta.story || {}), ch1: 'done' }; changed = true; }
+    for (const [ev, d] of Object.entries(m.ev || {})) {
+      if (ev === 'got') { for (const [k, v] of Object.entries(d || {})) if (!(meta.ev.got || {})[k]) { meta.ev.got = { ...(meta.ev.got || {}), [k]: v }; changed = true; } continue; }
+      const mineEv = evData(ev);
+      for (const [i, st] of Object.entries((d && d.s) || {})) if (st > (mineEv.s[i] || 0)) { mineEv.s[i] = st; changed = true; }
+      for (const [i, mv] of Object.entries((d && d.m) || {})) if (!(mineEv.m[i] <= mv)) { mineEv.m[i] = mv; changed = true; }
+    }
+    for (const k of Object.keys(meta.ev.got || {})) if (!((m.ev || {}).got || {})[k]) mine = true;
     if ((m.freezes || 0) > meta.freezes) { meta.freezes = m.freezes; changed = true; }
     if ((m.biscuits || 0) > meta.biscuits) { meta.biscuits = m.biscuits; changed = true; }
     if (m.snitch && (m.snitch.sp || 0) > ((meta.snitch || {}).sp || 0)) { meta.snitch = m.snitch; changed = true; } else if (meta.snitch && (!m.snitch || meta.snitch.sp > m.snitch.sp)) mine = true;
@@ -142,11 +149,36 @@ const Extras = (() => {
     { id: 'sparkle', kind: 'skin', name: 'Sparkles' },
     { id: 'forest', kind: 'sky', name: 'Forest sky', sw: 'linear-gradient(180deg,#5fd18a,#1e6b45 55%,#081d12)' },
   ];
+  // Event rewards (🎃 Halloween in the Events tab): won there, then usable everywhere like the chest styles.
+  REWARDS.push(
+    { id: 'pumpkin', kind: 'skin', name: 'Pumpkin', ev: 'halloween', need: 5, how: 'Solve 5 Halloween levels in Events to unlock this.' },
+    { id: 'bat', kind: 'skin', name: 'Little bat', ev: 'halloween', need: 10, how: 'Solve 10 Halloween levels in Events to unlock this.' },
+    { id: 'halloween', kind: 'sky', name: 'Halloween night', ev: 'halloween', need: 15, how: 'Solve 15 Halloween levels in Events to unlock this.', sw: 'radial-gradient(circle at 72% 26%,#fff6d6 0 14%,#ffd27a 16%,transparent 24%),linear-gradient(180deg,#5a2a7a,#24103e 55%,#0b0414)' },
+    { id: 'witch', kind: 'skin', name: 'Witch hat', ev: 'halloween', story: true, how: 'Finish Mörfi’s Halloween story in Events to unlock this.' },
+  );
+  const HALLOWEEN_SKINS = ['pumpkin', 'witch', 'bat'];
   meta.chests = meta.chests || 0;               // how many chests have been opened
   meta.style = meta.style || { skin: '', sky: '' };
   const stars = () => Object.values(progress.stars).reduce((a, b) => a + b, 0);
   const waiting = () => Math.max(0, AT.filter(n => stars() >= n).length - meta.chests);
-  const owned = id => REWARDS.findIndex(r => r.id === id) < meta.chests;
+  meta.ev = meta.ev || {};                      // events: { got: { rewardId: day }, halloween: { s: {i: stars}, m: {i: moves} } }
+  const owned = id => { const r = REWARDS.find(x => x.id === id); return !!r && (r.ev ? !!(meta.ev.got || {})[id] : REWARDS.indexOf(r) < meta.chests); };
+  const evData = name => (meta.ev[name] = meta.ev[name] || { s: {}, m: {} });
+  // Unlocks an event reward (once) and returns its picture.
+  function unlock(id) {
+    const r = REWARDS.find(x => x.id === id);
+    if (!r) return '';
+    meta.ev.got = meta.ev.got || {};
+    if (!meta.ev.got[id]) { meta.ev.got[id] = today(); persist(); }
+    return `<div class="reward">${preview(r, 96)}</div>`;
+  }
+  // The look of a level: Halloween levels wear the pumpkin unless you already picked a Halloween style;
+  // every other level gets your own style back. Also the night sky behind Halloween levels.
+  function theme(lv) {
+    const hw = !!lv && lv.theme === 'halloween', mine = meta.style.skin || '';
+    window.SKIN = hw && !HALLOWEEN_SKINS.includes(mine) ? 'pumpkin' : mine;
+    document.documentElement.classList.toggle('ev-halloween', hw || (lv === 'events'));
+  }
 
   function applyStyle() {
     window.SKIN = meta.style.skin || '';
@@ -197,13 +229,14 @@ const Extras = (() => {
       const on = (meta.style[kind] || '') === (r ? r.id : '');
       if (!r) return `<button class="opt ${on ? 'on' : ''}" data-k="${kind}" data-id="">${kind === 'sky' ? '<div class="sw" style="background:linear-gradient(180deg,#3b2a8f,#22185a 55%,#120c2e)"></div>' : preview({ id: '', kind: 'skin' }, 44)}</button>`;
       const i = REWARDS.indexOf(r), got = owned(r.id);
-      return `<button class="opt ${on ? 'on' : ''} ${got ? '' : 'locked'}" data-k="${kind}" data-id="${got ? r.id : ''}" data-lock="${got ? '' : AT[i]}" title="${r.name}">${
-        kind === 'sky' ? `<div class="sw" style="background:${r.sw}"></div>` : preview(r, 44)}${got ? '' : `<b style="position:absolute">🔒${AT[i]}</b>`}</button>`;
+      return `<button class="opt ${on ? 'on' : ''} ${got ? '' : 'locked'}" data-k="${kind}" data-id="${got ? r.id : ''}" data-lock="${got || r.ev ? '' : AT[i]}" data-how="${got || !r.ev ? '' : r.id}" title="${r.name}">${
+        kind === 'sky' ? `<div class="sw" style="background:${r.sw}"></div>` : preview(r, 44)}${got ? '' : `<b style="position:absolute">🔒${r.ev ? '🎃' : AT[i]}</b>`}</button>`;
     };
     box.innerHTML = `<h3>🎨 Block style</h3><div class="row">${opt(null, 'skin')}${REWARDS.filter(r => r.kind === 'skin').map(r => opt(r, 'skin')).join('')}</div>`
       + `<h3>🌌 Sky</h3><div class="row">${opt(null, 'sky')}${REWARDS.filter(r => r.kind === 'sky').map(r => opt(r, 'sky')).join('')}</div>`;
     box.querySelectorAll('.opt').forEach(b => b.onclick = () => {
       if (b.dataset.lock) { ask(`Collect ${b.dataset.lock} ★ to unlock this — it comes in a star chest.`, { cancel: false }); return; }
+      if (b.dataset.how) { ask(REWARDS.find(r => r.id === b.dataset.how).how, { cancel: false }); return; }
       meta.style[b.dataset.k] = b.dataset.id; persist(); applyStyle(); stylePicker();
     });
   }
@@ -368,7 +401,7 @@ const Extras = (() => {
   // A shared result links to ?daily: open today's puzzle.
   if (new URLSearchParams(location.search).has('daily')) setTimeout(play, 300);
 
-  return { play, homeButton, merge, meta: () => meta, today, stylePicker, event, onWin, medals, check, save: persist, giftPicker };
+  return { play, homeButton, merge, meta: () => meta, today, stylePicker, event, onWin, medals, check, save: persist, giftPicker, unlock, owned, theme, evData, rewards: ev => REWARDS.filter(r => r.ev === ev), preview, applyStyle };
 })();
 window.Extras = Extras;
 Extras.homeButton();

@@ -6,7 +6,7 @@ const path = require('path');
 const Engine = require('../js/engine.js');
 const D = require('./difficulty.js');
 const root = path.join(__dirname, '..');
-const POOLS = [['LEVELS', 'levels.js'], ['CHALLENGE_LEVELS', 'challenge-levels.js'], ['DAILY_LEVELS', 'daily-levels.js']];
+const POOLS = [['LEVELS', 'levels.js'], ['CHALLENGE_LEVELS', 'challenge-levels.js'], ['DAILY_LEVELS', 'daily-levels.js'], ['HALLOWEEN_LEVELS', 'halloween-levels.js']];
 const load = f => require(path.join(root, 'js', f));
 const CHECK = process.argv.includes('--check');
 
@@ -31,7 +31,7 @@ for (const [name, file] of POOLS) {
 
 // ── DIFFICULTY.md ──
 const count = ls => D.NAMES.map((_, t) => ls.filter(l => l.diff === t + 1).length);
-const all = Object.values(pools).flat();
+const all = [pools.LEVELS, pools.CHALLENGE_LEVELS, pools.DAILY_LEVELS].flat(); // the pools challenges draw from
 let md = `# Level difficulty
 
 Every level has \`diff\` (tier 1–5) and \`dscore\` (the number behind it), measured by the solver — see \`tools/difficulty.js\`.
@@ -48,7 +48,7 @@ New levels are rated by \`tools/generate.js\` as they are made. After changing a
 
 | Pool | ${D.NAMES.join(' | ')} | Total |
 |---|${D.NAMES.map(() => '---').join('|')}|---|
-${[['Campaign (LEVELS)', pools.LEVELS], ['Challenge pool (CHALLENGE_LEVELS)', pools.CHALLENGE_LEVELS], ['Daily pool (DAILY_LEVELS)', pools.DAILY_LEVELS], ['**All**', all]].map(([n, ls]) => `| ${n} | ${count(ls).join(' | ')} | ${ls.length} |`).join('\n')}
+${[['Campaign (LEVELS)', pools.LEVELS], ['Challenge pool (CHALLENGE_LEVELS)', pools.CHALLENGE_LEVELS], ['Daily pool (DAILY_LEVELS)', pools.DAILY_LEVELS], ['**All three** (challenge tiers)', all], ['Halloween event (HALLOWEEN_LEVELS)', pools.HALLOWEEN_LEVELS]].map(([n, ls]) => `| ${n} | ${count(ls).join(' | ')} | ${ls.length} |`).join('\n')}
 
 ## Campaign, stage by stage (tier of each of the five levels)
 
@@ -64,8 +64,9 @@ const story = fs.readFileSync(path.join(root, 'js', 'story.js'), 'utf8');
 md += `\n## Story puzzles (pool index → tier)\n\n`;
 for (const m of story.matchAll(/const (CH\d) = \[([\s\S]*?)\n  \];/g)) {
   const rows = [...m[2].matchAll(/puzzle: (\d+), pool: '(\w+)'[^}]*?title: '([^']*)'/g)].map(p => {
-    const l = (p[2] === 'hard' ? pools.DAILY_LEVELS : pools.CHALLENGE_LEVELS)[+p[1]];
-    return `${p[3]} (${p[2] === 'hard' ? 'daily' : 'challenge'} #${p[1]}: ${l ? D.NAMES[l.diff - 1] : '?'})`;
+    const pool = p[2] === 'hard' ? 'daily' : p[2] === 'halloween' ? 'halloween' : 'challenge';
+    const l = (pool === 'daily' ? pools.DAILY_LEVELS : pool === 'halloween' ? pools.HALLOWEEN_LEVELS : pools.CHALLENGE_LEVELS)[+p[1]];
+    return `${p[3]} (${pool} #${p[1]}: ${l ? D.NAMES[l.diff - 1] : '?'})`;
   });
   md += `- **${m[1]}**: ${rows.join('; ')}\n`;
 }

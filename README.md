@@ -8,6 +8,8 @@ A sliding-block colour puzzle. Drag every block out through the door of its colo
 - **Story mode**: Mörfi's ISA missions, Bear & Kloenchen's bike tour and Wolfgang & Mike's "Treasure for Anton",
   with puzzles along the way
 - **English and German** (Settings; starts in the phone's language)
+- **Events** tab: 🎃 Halloween — Mörfi's Halloween story, 20 spooky levels, and pumpkin / bat / witch-hat block styles
+  plus a Halloween night sky to unlock (usable in every level)
 - Every level was generated and checked by the built-in solver; its move count is the par (★★★)
 - Undo, restart, saved progress and stars, sound effects (synthesized, no audio files)
 - Accounts (email + password, optional — everyone starts as a guest), friends, nickname leaderboard, **teams** (up to 20 players; everyone's stars add up on the team leaderboard)

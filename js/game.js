@@ -56,10 +56,11 @@ const firstOpen = () => { const i = LEVELS.findIndex((_, k) => !starsOf(k)); ret
 
 // ── Screens ──────────────────────────────────────────────────
 function show(id) {
-  ['home', 'levels', 'ranks', 'game', 'chs', 'ch', 'team', 'story', 'storyhome'].forEach(s => $(s).hidden = s !== id);
+  ['home', 'levels', 'ranks', 'game', 'chs', 'ch', 'team', 'story', 'storyhome', 'events'].forEach(s => $(s).hidden = s !== id);
   // The tab bar (Puzzles / Story) on the two home screens.
-  $('tabs').hidden = id !== 'home' && id !== 'storyhome';
-  $('tab-puzzles').classList.toggle('on', id === 'home'); $('tab-story').classList.toggle('on', id === 'storyhome');
+  $('tabs').hidden = id !== 'home' && id !== 'storyhome' && id !== 'events';
+  $('tab-puzzles').classList.toggle('on', id === 'home'); $('tab-story').classList.toggle('on', id === 'storyhome'); $('tab-events').classList.toggle('on', id === 'events');
+  if (typeof Events !== 'undefined') Events.screen(id);
   updBanner();
   if (typeof Music !== 'undefined') Music.screen(id);
   // Leaving the board (e.g. an invite link opened mid-game) closes its cards and challenge play.
@@ -141,6 +142,7 @@ function begin(lv, title, hint) {
   document.querySelectorAll('#game .scene-bg').forEach(e => e.remove());
   $('game').classList.remove('scened', 'scene-grass', 'scene-leaf', 'scene-village', 'scene-meadow');
   level = clone(lv);
+  if (typeof Extras !== 'undefined') Extras.theme(lv); // Halloween levels wear the pumpkin and the night sky
   st = { pieces: clone(level.pieces), gates: clone(level.gates) };
   moves = 0; history = []; busy = false; sol = []; watching = false; usedUndo = false; startedAt = 0; combo = 0; lastExit = 0;
   $('level-name').textContent = title;

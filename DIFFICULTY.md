@@ -21,7 +21,8 @@ New levels are rated by `tools/generate.js` as they are made. After changing a p
 | Campaign (LEVELS) | 19 | 40 | 28 | 44 | 19 | 150 |
 | Challenge pool (CHALLENGE_LEVELS) | 55 | 30 | 23 | 12 | 0 | 120 |
 | Daily pool (DAILY_LEVELS) | 0 | 4 | 26 | 42 | 16 | 88 |
-| **All** | 74 | 74 | 77 | 98 | 35 | 358 |
+| **All three** (challenge tiers) | 74 | 74 | 77 | 98 | 35 | 358 |
+| Halloween event (HALLOWEEN_LEVELS) | 3 | 6 | 6 | 4 | 1 | 20 |
 
 ## Campaign, stage by stage (tier of each of the five levels)
 
@@ -66,3 +67,4 @@ New levels are rated by `tools/generate.js` as they are made. After changing a p
 - **CH5**: The secret lift (daily #0: Expert); Search the headquarters (daily #6: Hard); Follow the crumbs (daily #16: Hard); Chase Snacko (daily #17: Hard); Refill the vault (daily #75: Expert)
 - **CH4**: Up the rocky hill (daily #33: Hard); Find a gap in the clouds (daily #4: Expert); Chase the lights (daily #57: Hard); Home in the dark (daily #37: Hard); Pack the souvenirs (daily #40: Hard)
 - **CH6**: Tidy the balcony table (daily #10: Expert); Under the chestnut tree (daily #22: Hard); Catch the feather (daily #46: Expert); Across the park (daily #60: Expert); Pack the treasure box (daily #81: Master)
+- **CH7**: Through the pumpkin patch (halloween #0: Easy); Chase the ghost (halloween #5: Hard); Into the hollow tree (halloween #10: Expert); Light the pumpkins (halloween #15: Expert)

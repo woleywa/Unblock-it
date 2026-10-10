@@ -1065,6 +1065,101 @@ const Story = (() => {
     { say: 'mike', text: 'He was jogging. Berliners love jogging. ✌️', act: 'wave' },
     { end: 6 },
   ];
+  // ── Halloween (event): Mörfi, Puddy and Lilca go trick-or-treating; a "ghost" steals the sweets ──
+  const jack = (x, y, k = 1, lit = true) => `<g class="jack${lit ? ' lit' : ''}" transform="translate(${x} ${y}) scale(${k})">
+      <ellipse cx="0" cy="0" rx="22" ry="17" fill="#e8721c"/><ellipse cx="-9" cy="0" rx="9" ry="16" fill="#f08a2e"/><ellipse cx="9" cy="0" rx="9" ry="16" fill="#f08a2e"/><ellipse cx="0" cy="0" rx="7" ry="17" fill="#ff9a3a"/>
+      <path d="M-2,-16 q-2,-8 4,-10 l2,3 q-4,2 -2,7 z" fill="#4f7a2e"/>
+      <path class="glow" d="M-12,-4 l5,-7 l5,7 z M2,-4 l5,-7 l5,7 z M-12,5 q12,9 24,0 l-4,5 l-4,-3 l-4,3 l-4,-3 l-4,3 z" fill="${lit ? '#ffe27a' : '#3a1a08'}"/></g>`;
+  Object.assign(PROPS, {
+    witchhat: `<g class="prop" transform="rotate(-10 60 22)"><ellipse cx="60" cy="24" rx="44" ry="8" fill="#2a1840"/><path d="M38,23 L64,-8 Q70,-12 80,-4 L70,-2 L82,23 Z" fill="#3a2258"/><path d="M39,18 H81" stroke="#ff9a2e" stroke-width="6"/><rect x="56" y="14" width="8" height="8" rx="1.5" fill="#ffd54a"/></g>`,
+    pumpkinsuit: `<g class="prop"><ellipse cx="60" cy="128" rx="35" ry="33" fill="#e8721c"/><ellipse cx="46" cy="128" rx="13" ry="31" fill="#f08a2e"/><ellipse cx="74" cy="128" rx="13" ry="31" fill="#f08a2e"/><ellipse cx="60" cy="128" rx="10" ry="33" fill="#ff9a3a"/>
+      <path d="M48,124 l5,-7 l5,7 z M62,124 l5,-7 l5,7 z M46,134 q14,10 28,0 l-5,6 l-4,-4 l-5,4 l-5,-4 l-4,4 z" fill="#4a2208"/><path d="M50,96 q10,6 20,0 q-4,-6 -10,-6 q-6,0 -10,6 z" fill="#4f8a2e"/></g>`,
+    batwings: `<g class="prop">${[1, -1].map(k => `<path transform="translate(60 0) scale(${k} 1) translate(-60 0)" d="M34,104 C22,86 6,80 -4,86 Q2,96 0,106 Q8,102 12,110 Q18,104 24,112 Q28,106 34,112 Z" fill="#3b2459" stroke="#1d1030" stroke-width="2" stroke-linejoin="round"/>`).join('')}</g>`,
+    bucket: `<g class="prop"><path d="M84,112 q10,-16 20,0" fill="none" stroke="#3a2a20" stroke-width="2.5"/><ellipse cx="94" cy="124" rx="13" ry="12" fill="#e8721c"/><path d="M87,121 l3,-4 l3,4 z M95,121 l3,-4 l3,4 z M87,127 q7,5 14,0" fill="#4a2208" stroke="#4a2208" stroke-width="1"/><circle cx="90" cy="112" r="3" fill="#ff4f8b"/><circle cx="97" cy="111" r="3" fill="#3fd0ff"/></g>`,
+  });
+  Object.assign(ART, {
+    // A sheet ghost (it's Pica underneath — the tail peeks out at the end).
+    ghost: () => `<g class="ghost-bob"><path d="M22,150 L22,64 Q22,22 60,22 Q98,22 98,64 L98,150 Q90,140 82,150 Q74,160 66,150 Q60,142 54,150 Q46,160 38,150 Q30,140 22,150 Z" fill="#f4f1ff" stroke="#c9c2e8" stroke-width="2"/>
+      <g class="eyes" style="transform-origin:60px 64px"><ellipse cx="47" cy="64" rx="7" ry="10" fill="${INK}"/><ellipse cx="73" cy="64" rx="7" ry="10" fill="${INK}"/></g>
+      <ellipse cx="60" cy="88" rx="7" ry="9" fill="${INK}"/><ellipse cx="30" cy="96" rx="10" ry="5" fill="#ece8fb" transform="rotate(-30 30 96)"/><ellipse cx="90" cy="96" rx="10" ry="5" fill="#ece8fb" transform="rotate(30 90 96)"/></g>`,
+  });
+  Object.assign(NAMES, { ghost: 'The ghost' });
+  Object.assign(SIZE, { ghost: 0.95 });
+  Object.assign(BG4, {
+    // The mushroom village on Halloween night: moon, bats, glowing jack-o'-lanterns everywhere.
+    spooky: () => `
+      <defs><linearGradient id="skh" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#140826"/><stop offset="0.55" stop-color="#3a1650"/><stop offset="0.8" stop-color="#7a2f5a"/></linearGradient>
+        <radialGradient id="moonh"><stop offset="0.55" stop-color="#fff6d6"/><stop offset="0.75" stop-color="#ffd27a"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/></radialGradient></defs>
+      <rect width="400" height="700" fill="url(#skh)"/>
+      ${[[40, 60], [120, 140], [210, 50], [350, 230], [70, 250], [260, 180], [180, 300], [330, 70]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.4" fill="#fff" opacity="0.8"/>`).join('')}
+      <circle cx="300" cy="140" r="70" fill="url(#moonh)"/><circle cx="300" cy="140" r="38" fill="#fff6d6"/><circle cx="288" cy="130" r="6" fill="#efe2b8"/><circle cx="312" cy="152" r="4" fill="#efe2b8"/>
+      ${[[90, 160, 0], [150, 120, 1], [240, 210, 2]].map(([x, y, i]) => `<g class="bat" style="--i:${i}"><path d="M${x},${y} q-8,-8 -18,-4 q4,3 3,8 q4,-2 7,2 q3,-4 8,-6 q5,2 8,6 q3,-4 7,-2 q-1,-5 3,-8 q-10,-4 -18,4 z" fill="#120822"/></g>`).join('')}
+      <path d="M0,480 Q60,420 130,450 Q200,400 270,440 Q340,410 400,450 V700 H0 Z" fill="#2a1240"/>
+      ${mushroomHouse(75, 575, 1.05, '#7a2a8a')}${mushroomHouse(320, 560, 0.8, '#e8721c')}${mushroomHouse(205, 530, 0.55, '#4a2a6a')}
+      <rect y="570" width="400" height="130" fill="#1f3a26"/>${grass(575, '#2f5a36', 44)}
+      ${jack(30, 640, 1.1)}${jack(150, 605, 0.8)}${jack(265, 615, 0.9)}${jack(375, 650, 1.2)}`,
+    // Inside the old hollow tree: wooden walls, a lantern, and a mountain of stolen sweets.
+    hollow: () => `
+      <defs><radialGradient id="holl" cx="0.5" cy="0.55" r="0.7"><stop offset="0" stop-color="#7a4a2a"/><stop offset="0.7" stop-color="#4a2a16"/><stop offset="1" stop-color="#22120a"/></radialGradient></defs>
+      <rect width="400" height="700" fill="url(#holl)"/>
+      ${[120, 190, 260, 330].map((r, i) => `<ellipse cx="200" cy="360" rx="${r}" ry="${r * 1.4}" fill="none" stroke="#5a3418" stroke-width="3" opacity="${0.5 - i * 0.08}"/>`).join('')}
+      <path d="M150,0 Q200,90 250,0 Z" fill="#1a0b2e"/><circle cx="215" cy="30" r="14" fill="#fff6d6"/>
+      <g class="jack lit"><rect x="56" y="300" width="26" height="34" rx="5" fill="#2a2a30"/><rect x="61" y="306" width="16" height="22" rx="3" fill="#ffe27a" class="glow"/></g>
+      <path d="M0,600 Q200,560 400,600 V700 H0 Z" fill="#3a2010"/>
+      ${Array.from({ length: 40 }, (_, i) => { const x = 130 + (i * 37) % 150, y = 585 - (i % 7) * 9 - Math.floor(i / 7) * 4, c = ['#ff4f8b', '#3fd0ff', '#ffd54a', '#2fcf6f', '#a45cff', '#ff7417'][i % 6]; return `<g transform="rotate(${(i * 47) % 360} ${x} ${y})"><path d="M${x - 9},${y} l-5,-4 v8 z M${x + 9},${y} l5,-4 v8 z" fill="${c}"/><ellipse cx="${x}" cy="${y}" rx="9" ry="6" fill="${c}"/><path d="M${x - 4},${y - 2} q4,-3 8,0" stroke="#fff" stroke-width="1.5" fill="none" opacity="0.7"/></g>`; }).join('')}`,
+  });
+  const HW = { morfi: { x: 20, props: ['witchhat', 'bucket'] }, puddy: { x: 50, props: ['pumpkinsuit'] }, lilca: { x: 79, props: ['batwings'] } };
+  const CH7 = [
+    { bg: 'spooky' },
+    { narr: 'It was Halloween night in the mushroom village. Every door had a pumpkin on the step, and every pumpkin was glowing.' },
+    { show: HW, enter: 'puddy' },
+    { say: 'puddy', text: 'Trick or treat! I’m the scariest pumpkin in the whole village!', act: 'jump' },
+    { say: 'lilca', text: 'You’re the only pumpkin who keeps eating his own sweets, Puddy.' },
+    { say: 'puddy', text: 'That’s not eating. That’s quality control.' },
+    { say: 'morfi', text: 'Agents, listen. Tonight’s mission: collect as many treats as we can.', act: 'salute' },
+    { say: 'lilca', text: 'That’s not a mission, Mörfi. That’s just Halloween.' },
+    { say: 'morfi', text: 'A Super Mega Snitch is never just trick-or-treating.' },
+    { puzzle: 0, pool: 'halloween', scene: 'spooky', title: 'Through the pumpkin patch', hint: 'Clear a path through the pumpkins to the first door!' },
+    { bg: 'spooky', show: HW },
+    { narr: 'They knocked on every door in the village. Their buckets got heavier and heavier.' },
+    { say: 'puddy', text: 'Forty-two sweets! New record!', act: 'jump' },
+    { dark: true, shake: true, narr: 'Then — all at once — every pumpkin went out.' },
+    { say: 'lilca', text: 'M-Mörfi? Why is it so dark?', act: 'gasp' },
+    { show: { ghost: { x: 66, y: 6 } }, enter: 'ghost', shake: true },
+    { say: 'ghost', text: 'Whoooooo…' },
+    { narr: 'Something white floated between the mushrooms. It went “whoooo” — and it grabbed Puddy’s bucket.' },
+    { say: 'puddy', text: 'MY SWEETS!', act: 'scream' },
+    { walk: { ghost: -20 }, t: 1400 },
+    { say: 'morfi', text: 'Agents! After that ghost!', act: 'point' },
+    { puzzle: 5, pool: 'halloween', scene: 'spooky', title: 'Chase the ghost', hint: 'Quick — clear the way before the ghost gets away!' },
+    { bg: 'spooky', dark: true, show: { morfi: { x: 24, props: ['witchhat', 'bucket'] }, lilca: { x: 52, props: ['batwings'] }, puddy: { x: 78, props: ['pumpkinsuit'] } } },
+    { narr: 'A trail of dropped sweets led out of the village, all the way to the old hollow tree.' },
+    { say: 'lilca', text: 'Ghosts don’t drop sweets. Ghosts don’t even eat sweets.' },
+    { say: 'morfi', text: 'Exactly. So this is no ghost. This is a suspect.' },
+    { say: 'puddy', text: 'A suspect with MY sweets.' },
+    { puzzle: 10, pool: 'halloween', scene: 'spooky', title: 'Into the hollow tree', hint: 'Unlock the way into the old hollow tree!' },
+    { bg: 'hollow', show: { morfi: { x: 20, props: ['witchhat', 'bucket'] }, lilca: { x: 42, props: ['batwings'] }, puddy: { x: 62, props: ['pumpkinsuit'] }, ghost: { x: 84, y: 2 } } },
+    { narr: 'Inside the tree, the ghost sat on a mountain of sweets — unwrapping them one by one.' },
+    { say: 'morfi', text: 'Hands up, ghost! Super Mega Snitch Mörfi, ISA!', act: 'salute' },
+    { say: 'ghost', text: 'Whooo… oh no.' },
+    { show: { ghost: { x: 140 }, magpie: { x: 84 } }, enter: 'magpie', narr: 'Lilca pulled the sheet. Underneath was… Pica the magpie!' },
+    { say: 'magpie', text: 'The wrappers! They’re so shiny! I only wanted the wrappers, I promise!' },
+    { say: 'puddy', text: 'And the sweets inside the wrappers?' },
+    { say: 'magpie', text: '…Those too. A little.' },
+    { say: 'morfi', text: 'Pica, on Halloween you don’t take sweets. You ask for them. Trick or treat!' },
+    { say: 'magpie', text: 'Trick or treat? That’s it? You just… ask?' },
+    { say: 'lilca', text: 'And as your trick, you help us light every pumpkin in the village again.' },
+    { puzzle: 15, pool: 'halloween', scene: 'spooky', title: 'Light the pumpkins', hint: 'Get every pumpkin glowing again before midnight!' },
+    { bg: 'spooky', show: { morfi: { x: 18, props: ['witchhat', 'bucket'] }, puddy: { x: 40, props: ['pumpkinsuit'] }, lilca: { x: 62, props: ['batwings'] }, magpie: { x: 84 } } },
+    { narr: 'At midnight, every pumpkin in the village was glowing again — and Pica had a bucket of her own.' },
+    { award: 'points', n: 100, key: 'ch7' },
+    { award: 'skin', n: 'witch' },
+    { narr: 'Mörfi’s witch hat is now a block style — find it in Settings!' },
+    { say: 'magpie', text: 'Can I keep the shiny wrappers?' },
+    { say: 'puddy', text: 'You can have ALL the wrappers. I’ll keep the inside.' },
+    { say: 'morfi', text: 'Case closed. Happy Halloween, agents! 🎃', act: 'salute' },
+    { end: 7 },
+  ];
   // The stories, in the order they appear on the Story screen. To reorder, move a line: chapter numbers
   // follow this order, and progress is kept by id (so moving never loses anyone's place).
   const CHAPTERS = [
@@ -1074,13 +1169,16 @@ const Story = (() => {
     { id: 4, series: 'morfi', title: 'Mörfi and the Northern Lights', steps: CH4, icon: '🌌' },
     { id: 2, series: 'bear', title: 'The Bike Tour with Kloenchen', steps: CH2, icon: '🚲' },
     { id: 6, series: 'friends', title: 'Treasure for Anton', steps: CH6, icon: '🌰' },
+    { id: 7, series: 'halloween', title: 'Mörfi and the Halloween Ghost', steps: CH7, icon: '🎃' },
   ];
   CHAPTERS.forEach(c => {
     const n = CHAPTERS.filter(x => x.series === c.series).indexOf(c) + 1;
-    c.num = c.series === 'morfi' ? `Chapter ${n}` : `Story ${n}`;
-    c.short = c.series === 'morfi' ? `Mörfi · Chapter ${n}` : c.series === 'friends' ? 'Wolfgang & Mike' : 'Bear & Kloenchen';
+    c.num = c.series === 'morfi' ? `Chapter ${n}` : c.series === 'halloween' ? 'Halloween' : `Story ${n}`;
+    c.short = c.series === 'morfi' ? `Mörfi · Chapter ${n}` : c.series === 'halloween' ? '🎃 Halloween' : c.series === 'friends' ? 'Wolfgang & Mike' : 'Bear & Kloenchen';
   });
 
+  // Mörfi's stories (and her Halloween one) are ISA missions: they give Snitch points.
+  const isa = c => c.series === 'morfi' || c.series === 'halloween';
   // ── Snitch points: Mörfi's stories earn them; the Snitch level grows (Commander is level 10) ──
   const SNITCH_AT = [0, 50, 120, 220, 350, 520, 750, 1000, 1300, 1700];
   const snitch = () => { const m = Extras.meta(); return (m.snitch = m.snitch || { sp: 0, got: {} }); };
@@ -1178,7 +1276,10 @@ const Story = (() => {
       stage().querySelectorAll('.st-card').forEach(e => e.remove());
       if (s.card) { const c = document.createElement('div'); c.className = 'st-card'; c.innerHTML = T(s.card); stage().appendChild(c); }
       if (s.aurora != null) stage().classList.toggle('lights', !!s.aurora);
+      if (s.bg) stage().classList.remove('dark');
+      if (s.dark != null && !s.bg) stage().classList.toggle('dark', !!s.dark);
       if (s.bg) { clearChars(); stage().classList.remove('lights'); setBg(s.bg); front(s.front); stage().classList.toggle('low', !!s.low); $('st-say').hidden = true; if (s.aurora) stage().classList.add('lights'); }
+      if (s.bg && s.dark) stage().classList.add('dark');
       if (s.show) for (const [k, o] of Object.entries(s.show)) { charEl(k, o); if (o.x > 100) chars[k].remove(), delete chars[k]; }
       if (s.props) for (const [k, p] of Object.entries(s.props)) if (chars[k]) charEl(k, { props: p });
       if (s.enter && chars[s.enter]) { chars[s.enter].classList.add('pop-in'); }
@@ -1210,7 +1311,7 @@ const Story = (() => {
       if (s.award) { await award(s.award, s.n, s.key); }
       if (s.eat) { await eat(); }
       if (s.puzzle != null) { saved()['ch' + ch.id] = at; persistStory(); return puzzle(s); }
-      if (s.end && ch.series === 'morfi' && ch.bonus) addSP(ch.bonus, 'end' + ch.id);
+      if (s.end && isa(ch) && ch.bonus) addSP(ch.bonus, 'end' + ch.id);
       if (s.end) { saved()['ch' + ch.id] = 'done'; persistStory(); Extras.event('story' + s.end); return finish(); }
       if (s.say) {
         if (s.act) act(s.who || s.say, s.act);
@@ -1237,7 +1338,10 @@ const Story = (() => {
     return new Promise(done => {
       const e = document.createElement('div');
       e.className = 'st-award';
-      if (kind === 'points') {
+      if (kind === 'skin') {
+        e.innerHTML = `${Extras.unlock(arguments[1])}<b>New block style!</b>`;
+        e.classList.add('big'); setTimeout(() => { e.classList.add('eaten'); setTimeout(() => e.remove(), 900); }, 3200);
+      } else if (kind === 'points') {
         const r = addSP(arguments[1] || 0, arguments[2] || 'x');
         e.innerHTML = `<div class="sn-plus">+${arguments[1]} SP</div><b>Snitch points!</b><div class="sn-wrap">${snitchBar(r.before)}</div>${r.up ? `<div class="sn-up">⬆️ Snitch level ${snitchLevel(r.after)}!</div>` : ''}`;
         setTimeout(() => { const w = e.querySelector('.sn-wrap'); if (w) w.innerHTML = snitchBar(r.after); }, 700);
@@ -1264,15 +1368,15 @@ const Story = (() => {
 
   // A puzzle in the middle of the story: the normal board, then back to the story.
   function puzzle(s) {
-    begin(s.pool === 'hard' && typeof DAILY_LEVELS !== 'undefined' ? DAILY_LEVELS[s.puzzle] : CHALLENGE_LEVELS[s.puzzle], `📖 ${T(s.title)}`, T(s.hint));
+    begin(s.pool === 'halloween' ? HALLOWEEN_LEVELS[s.puzzle] : s.pool === 'hard' && typeof DAILY_LEVELS !== 'undefined' ? DAILY_LEVELS[s.puzzle] : CHALLENGE_LEVELS[s.puzzle], `📖 ${T(s.title)}`, T(s.hint));
     chPlay = {
       story: true,
       again: () => puzzle(s),
-      back: () => { chPlay = null; $('win').hidden = true; storyHome(); },
+      back: () => { chPlay = null; $('win').hidden = true; ch.series === 'halloween' && typeof Events !== 'undefined' ? Events.open() : storyHome(); },
       next: () => { chPlay = null; $('win').hidden = true; at++; openStage(); run(); },
       won: (m, stars) => {
         $('win-text').textContent = 'Mission step complete! 🕵️';
-        if (ch.series === 'morfi') { const r = addSP(stars * 10, `p${ch.id}_${at}`); $('win-text').textContent = r.add ? `Mission step complete! 🕵️ +${r.add} Snitch points` : 'Mission step complete! 🕵️'; }
+        if (isa(ch)) { const r = addSP(stars * 10, `p${ch.id}_${at}`); $('win-text').textContent = r.add ? `Mission step complete! 🕵️ +${r.add} Snitch points` : 'Mission step complete! 🕵️'; }
         $('win-best').innerHTML = '';
         $('next').hidden = false; $('to-ch').hidden = false;
         $('next').className = 'big'; $('replay').className = 'ghost'; $('replay').textContent = 'Play again';
@@ -1292,7 +1396,8 @@ const Story = (() => {
   }
 
   function finish() {
-    bubble(null, ch.series === 'friends' ? 'The end — top secret mission complete. Anton’s treasure made it home. 🌰🪶🐻' : ch.series === 'bear' ? 'The end — Bear and Kloenchen will be back with another bike tour soon. 🚲🔔' : `The end of ${ch.num} — Super Mega Snitch Mörfi will return. 🍄`);
+    $('st-end-home').textContent = ch.series === 'halloween' ? '🎃 Back to Halloween' : 'Back to the stories';
+    bubble(null, ch.series === 'halloween' ? 'The end — Happy Halloween! 🎃 More spooky levels are waiting in Events.' : ch.series === 'friends' ? 'The end — top secret mission complete. Anton’s treasure made it home. 🌰🪶🐻' : ch.series === 'bear' ? 'The end — Bear and Kloenchen will be back with another bike tour soon. 🚲🔔' : `The end of ${ch.num} — Super Mega Snitch Mörfi will return. 🍄`);
     waiting = false;
     $('st-tap').hidden = true;
     $('st-end').hidden = false;
@@ -1305,6 +1410,7 @@ const Story = (() => {
   }
   function start(fromStart, id = 1) {
     ch = CHAPTERS.find(c => c.id === id) || CHAPTERS[0];
+    if (typeof Music !== 'undefined') Music.theme(ch.series === 'halloween' ? 'spooky' : null);
     document.querySelector('.st-title').textContent = '📖 ' + ch.short;
     const s = saved()['ch' + ch.id];
     // Resume at the saved puzzle (only if that step still is a puzzle — the story may have changed).
@@ -1350,7 +1456,9 @@ const Story = (() => {
       + `<div class="sh-series"><div class="sh-emoji">🐻🚲</div><div><b>Bear &amp; Kloenchen</b><small>Bike tours and little adventures</small></div></div>`
       + CHAPTERS.filter(c => c.series === 'bear').map(card).join('')
       + `<div class="sh-series"><div class="sh-emoji">🍻🌳</div><div><b>Wolfgang &amp; Mike</b><small>Berlin afternoons and secret missions</small></div></div>`
-      + CHAPTERS.filter(c => c.series === 'friends').map(card).join('');
+      + CHAPTERS.filter(c => c.series === 'friends').map(card).join('')
+      + `<div class="sh-series"><div class="sh-emoji">🎃🦇</div><div><b>Halloween</b><small>Mörfi, Puddy and Lilca on a spooky night</small></div></div>`
+      + CHAPTERS.filter(c => c.series === 'halloween').map(card).join('');
     document.querySelectorAll('.sh-play').forEach(b => b.onclick = () => { Sound.unlock(); start(!!b.dataset.done, +b.dataset.id); });
     document.querySelectorAll('.sh-restart').forEach(b => b.onclick = () => start(true, +b.dataset.id));
     document.querySelectorAll('.sh-share').forEach(b => b.onclick = () => shareChapter(+b.dataset.id));
@@ -1387,8 +1495,10 @@ const Story = (() => {
     }
     run();
   });
-  $('st-back').addEventListener('click', () => { clearInterval(typing); storyHome(); });
-  $('st-end-home').addEventListener('click', () => storyHome());
+  // The Halloween story lives in Events: back goes there.
+  const leave = () => (ch && ch.series === 'halloween' && typeof Events !== 'undefined' ? Events.open() : storyHome());
+  $('st-back').addEventListener('click', () => { clearInterval(typing); leave(); });
+  $('st-end-home').addEventListener('click', () => leave());
   $('tab-story').addEventListener('click', () => { Sound.unlock(); storyHome(); });
   $('tab-puzzles').addEventListener('click', () => home());
 

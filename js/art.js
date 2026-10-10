@@ -114,6 +114,16 @@ const Art = (() => {
     </g>`;
   }
 
+  // A carved jack-o'-lantern face that glows (the pumpkin style): triangle eyes, a zig-zag grin.
+  function jackFace(cx, cy, s) {
+    const e = s * 0.15, ey = cy - s * 0.05, t = s * 0.075, glow = '#ffe27a', ink = '#3a1a08';
+    const eye = x => `<path d="M${x - t},${ey + t * 0.7} L${x},${ey - t * 0.8} L${x + t},${ey + t * 0.7} Z" fill="${glow}" stroke="${ink}" stroke-width="${s * 0.025}" stroke-linejoin="round"/>`;
+    const my = cy + s * 0.11, w = s * 0.19;
+    return `<g class="face"><g class="eyes" style="transform-origin:${cx}px ${ey}px">${eye(cx - e)}${eye(cx + e)}</g>
+      <path class="smile" d="M${cx - w},${my - s * 0.02} Q${cx},${my + s * 0.12} ${cx + w},${my - s * 0.02} L${cx + w * 0.55},${my + s * 0.03} L${cx + w * 0.3},${my - s * 0.005} L${cx},${my + s * 0.05} L${cx - w * 0.3},${my - s * 0.005} L${cx - w * 0.55},${my + s * 0.03} Z" fill="${glow}" stroke="${ink}" stroke-width="${s * 0.025}" stroke-linejoin="round"/>
+      <ellipse class="oh" cx="${cx}" cy="${my + s * 0.02}" rx="${s * 0.05}" ry="${s * 0.06}" fill="${glow}" stroke="${ink}" stroke-width="${s * 0.02}"/></g>`;
+  }
+
   // The whole block as one SVG: shadow, side, face gradient, gloss, core, ice, face.
   // The face is lifted by half the block's thickness so face + side sit inside its own cells, with a
   // gap to the neighbours on every side (nothing hangs over the block below).
@@ -145,6 +155,23 @@ const Art = (() => {
         s += `<path d="M${x - cs * 0.13},${y + cs * 0.1} L${x},${y - cs * 0.14} L${x + cs * 0.13},${y + cs * 0.1} Z" fill="${d}" stroke="${side}" stroke-width="${cs * 0.03}" stroke-linejoin="round"/><path d="M${x - cs * 0.06},${y + cs * 0.06} L${x},${y - cs * 0.05} L${x + cs * 0.06},${y + cs * 0.06} Z" fill="#ff9ec4"/>`;
       }
     }
+    if (skin === 'pumpkin' || skin === 'witch' || skin === 'bat') {
+      // Halloween: something sitting on the top edge above the face.
+      const [, ec] = heart(offs, !p.shape), col = Math.round(ec - 0.001);
+      const top = Math.min(...offs.filter(q => q[1] === col || !p.shape).map(q => q[0]));
+      const x = (ec + 0.5) * cs, y = top * cs + cs * 0.06;
+      if (skin === 'pumpkin') s += `<path d="M${x - cs * 0.05},${y + cs * 0.06} Q${x - cs * 0.07},${y - cs * 0.1} ${x + cs * 0.02},${y - cs * 0.17} L${x + cs * 0.07},${y - cs * 0.12} Q${x + cs * 0.02},${y - cs * 0.06} ${x + cs * 0.05},${y + cs * 0.06} Z" fill="#4f8a2e" stroke="#2f5a1a" stroke-width="${cs * 0.02}"/>`
+        + `<path d="M${x + cs * 0.03},${y - cs * 0.08} q${cs * 0.16},${-cs * 0.08} ${cs * 0.2},${cs * 0.03}" fill="none" stroke="#5fae3a" stroke-width="${cs * 0.03}" stroke-linecap="round"/>`;
+      if (skin === 'witch') s += `<g transform="rotate(-8 ${x} ${y}) translate(${x} ${y}) scale(1.4) translate(${-x} ${-y})"><path d="M${x - cs * 0.3},${y + cs * 0.04} Q${x},${y - cs * 0.06} ${x + cs * 0.3},${y + cs * 0.04} Q${x},${y + cs * 0.1} ${x - cs * 0.3},${y + cs * 0.04} Z" fill="#2a1840"/>`
+        + `<path d="M${x - cs * 0.16},${y + cs * 0.02} L${x + cs * 0.04},${y - cs * 0.42} Q${x + cs * 0.08},${y - cs * 0.46} ${x + cs * 0.17},${y - cs * 0.38} L${x + cs * 0.06},${y - cs * 0.33} L${x + cs * 0.16},${y + cs * 0.02} Z" fill="#3a2258"/>`
+        + `<path d="M${x - cs * 0.15},${y - cs * 0.02} L${x + cs * 0.15},${y - cs * 0.02}" stroke="#ff9a2e" stroke-width="${cs * 0.06}"/><rect x="${x - cs * 0.03}" y="${y - cs * 0.06}" width="${cs * 0.06}" height="${cs * 0.07}" rx="${cs * 0.01}" fill="#ffd54a"/></g>`;
+      if (skin === 'bat') for (const k of [-1, 1]) {
+        // A bat wing on each side of the top edge: three scallops along the bottom.
+        const wx = x + k * cs * 0.2, wy = y + cs * 0.04, q = k * cs;
+        s += `<path d="M${wx},${wy} C${wx + q * 0.08},${wy - cs * 0.24} ${wx + q * 0.26},${wy - cs * 0.34} ${wx + q * 0.44},${wy - cs * 0.3} Q${wx + q * 0.4},${wy - cs * 0.17} ${wx + q * 0.42},${wy - cs * 0.06} Q${wx + q * 0.33},${wy - cs * 0.1} ${wx + q * 0.27},${wy - cs * 0.02} Q${wx + q * 0.2},${wy - cs * 0.08} ${wx + q * 0.12},${wy + cs * 0.01} Q${wx + q * 0.06},${wy - cs * 0.03} ${wx},${wy} Z" fill="#4a2d6e" stroke="#21123a" stroke-width="${cs * 0.022}" stroke-linejoin="round"/>`
+          + `<path d="M${wx + q * 0.05},${wy - cs * 0.03} L${wx + q * 0.36},${wy - cs * 0.26}" stroke="#7a5aa8" stroke-width="${cs * 0.018}" stroke-linecap="round" opacity="0.8"/>`;
+      }
+    }
     s += `<path d="${shape}" transform="translate(0 ${depth})" fill="${side}"/>`;
     s += `<path class="hit" d="${shape}" fill="url(#face-${faceFill})"/>`;
     s += `<g clip-path="url(#${uid})" pointer-events="none">`;
@@ -158,6 +185,10 @@ const Art = (() => {
         for (const k of [0.55, 0.8]) s += `<path d="M${x},${y + cs * k} q${cs * 0.125},${-cs * 0.08} ${cs * 0.25},0 t${cs * 0.25},0 t${cs * 0.25},0 t${cs * 0.25},0" fill="none" stroke="#fff" stroke-width="${cs * 0.035}" opacity="0.35" stroke-linecap="round"/>`;
         s += `<circle cx="${x + cs * 0.78}" cy="${y + cs * 0.3}" r="${cs * 0.05}" fill="none" stroke="#fff" stroke-width="${cs * 0.02}" opacity="0.6"/><circle cx="${x + cs * 0.2}" cy="${y + cs * 0.42}" r="${cs * 0.03}" fill="#fff" opacity="0.5"/>`;
       }
+    }
+    if (skin === 'pumpkin') for (const [r, c] of offs) for (const fx of [0.3, 0.7]) {
+      const x = (c + fx) * cs, y = r * cs, bow = (fx < 0.5 ? -1 : 1) * cs * 0.1;
+      s += `<path d="M${x},${y + cs * 0.06} Q${x + bow},${y + cs * 0.5} ${x},${y + cs * 0.94}" fill="none" stroke="${d}" stroke-width="${cs * 0.05}" opacity="0.45" stroke-linecap="round"/>`;
     }
     if (skin === 'candy') for (let k = -H; k < W + H; k += cs * 0.34) s += `<path d="M${k},${H} L${k + H},0" stroke="#fff" stroke-width="${cs * 0.11}" opacity="0.28"/>`;
     if (skin === 'sparkle') for (const [r, c] of offs) for (const [fx, fy, k] of [[0.72, 0.28, 0.07], [0.22, 0.7, 0.05], [0.8, 0.78, 0.04]]) {
@@ -174,7 +205,11 @@ const Art = (() => {
       s += `<path d="${core}" fill="url(#core-${p.inner})" stroke="rgba(255,255,255,0.55)" stroke-width="${cs * 0.03}" pointer-events="none"/>`;
     }
     const [hr, hc] = heart(offs, !p.shape);
-    if (faceOn && !p.inner && !frozen) s += face((hc + 0.5) * cs, (hr + 0.5) * cs, cs);
+    if (faceOn && !p.inner && !frozen) s += skin === 'pumpkin' ? jackFace((hc + 0.5) * cs, (hr + 0.5) * cs, cs) : face((hc + 0.5) * cs, (hr + 0.5) * cs, cs);
+    if (faceOn && !p.inner && !frozen && skin === 'bat') {
+      const x = (hc + 0.5) * cs, y = (hr + 0.5) * cs + cs * 0.13;
+      s += `<g pointer-events="none">${[-1, 1].map(k => `<path d="M${x + k * cs * 0.035 - cs * 0.022},${y} L${x + k * cs * 0.035},${y + cs * 0.07} L${x + k * cs * 0.035 + cs * 0.022},${y} Z" fill="#fff" stroke="#c9c2d8" stroke-width="${cs * 0.008}"/>`).join('')}</g>`;
+    }
     if (faceOn && skin === 'shades') {
       // Cool sunglasses over the eyes.
       const x = (hc + 0.5) * cs, y = (hr + 0.5) * cs - cs * 0.05, e = cs * 0.15;
